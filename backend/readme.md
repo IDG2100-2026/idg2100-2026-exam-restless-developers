@@ -1,1 +1,0 @@
-We have used Joakim's db.config.js
