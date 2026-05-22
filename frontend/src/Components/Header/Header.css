@@ -1,0 +1,152 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+  background: #ffffff;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.logo-placeholder {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #facc15;
+  color: #1f2937;
+  font-size: 0.75rem;
+}
+
+.header-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.header-nav,
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-nav a {
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.header-nav a:hover {
+  color: #b45309;
+}
+
+.header-button,
+.mobile-menu-button {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: #f9fafb;
+  color: #1f2937;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.header-button:hover,
+.mobile-menu-button:hover {
+  background: #f3f4f6;
+}
+
+.header-button.primary {
+  background: #facc15;
+  border-color: #facc15;
+  font-weight: 700;
+}
+
+.header-button.logout {
+  background: #fee2e2;
+  border-color: #fecaca;
+}
+
+.header-greeting {
+  font-weight: 600;
+}
+
+.settings-container {
+  position: relative;
+}
+
+.mobile-menu-button {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .site-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+  .header-menu {
+    display: none;
+    grid-column: 1 / -1;
+    width: 100%;
+    padding-top: 1rem;
+  }
+
+  .header-menu.open {
+    display: block;
+  }
+
+  .header-nav,
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .header-nav a,
+  .header-button {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .settings-container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-logo span {
+    font-size: 0.95rem;
+  }
+
+  .logo-placeholder {
+    width: 36px;
+    height: 36px;
+    font-size: 0.7rem;
+  }
+}
