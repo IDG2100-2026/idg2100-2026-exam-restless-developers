@@ -1,0 +1,135 @@
+.home-container {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 3rem;
+  background: var(--bg);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.home-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.home-intro {
+  flex: 1;
+  min-width: 320px;
+  max-width: 650px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.home-header {
+  color: var(--text-heading);
+  margin: 0;
+  font-size: 3rem;
+}
+
+.home-paragraph {
+  color: var(--text);
+  margin: 0;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.home-dice-image {
+  width: 100%;
+  max-width: 430px;
+  height: auto;
+  display: block;
+  margin-top: 1rem;
+  margin-left: 0;
+  
+}
+
+.home-button-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 30rem;
+}
+
+.home-createMatch-button,
+.home-visit-button {
+  background: var(--accent);
+  color: #111111;
+  border-radius: 10px;
+  border: none;
+  min-width: 160px;
+  padding: 0.9rem 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: var(--button-shadow);
+}
+
+.home-createMatch-button:hover,
+.home-visit-button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 1100px) {
+  .home-container {
+    padding: 2rem 1.5rem 2.5rem;
+  }
+
+  .home-top {
+    gap: 2rem;
+  }
+
+  .home-button-row {
+    margin-left: 1.5rem;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .home-container {
+    padding: 2rem 1.5rem 2.5rem;
+  }
+
+  .home-top {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .home-header {
+    font-size: 2.2rem;
+  }
+
+  .home-top {
+    flex-direction: column;
+  }
+
+  .home-intro {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .home-dice-image {
+    max-width: 320px;
+  }
+
+  .home-button-row {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.75rem;
+  }
+
+  .home-createMatch-button,
+  .home-visit-button {
+    width: auto;
+    min-width: 140px;
+  }
+}

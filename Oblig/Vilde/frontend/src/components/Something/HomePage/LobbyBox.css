@@ -1,0 +1,63 @@
+.lobby-box {
+  border-radius: 20px;
+  background-color: var(--lobby-box-bg);
+  color: white;
+  border: 10px solid #e0e08e;
+  padding: 1rem;
+  width: 100%;
+  max-width: 360px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.lobbybox-header {
+  color: white;
+  margin-top: 0;
+}
+
+.lobby-game {
+  padding: 0.75rem;
+  margin-bottom: 10px;
+  background-color: var(--lobby-inner-card-bg);
+  border-radius: 10px;
+  word-break: break-word;
+}
+
+.lobby-game p {
+  margin: 3px 0;
+}
+
+.player-info {
+  margin-top: 5px;
+}
+
+.player-name {
+  font-weight: bold;
+}
+
+.player-elo {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.lobby-joinButton {
+  background-color: #e0e08e;
+  border-radius: 10px;
+  border-style: none;
+  font-weight: bold;
+  width: 100%;
+  max-width: 140px;
+  padding: 0.7rem 1rem;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .lobby-box {
+    max-width: 100%;
+  }
+
+  .lobby-joinButton {
+    max-width: 100%;
+  }
+}
