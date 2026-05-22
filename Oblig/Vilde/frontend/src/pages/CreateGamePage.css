@@ -1,0 +1,147 @@
+.create-game-page {
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem 1.5rem;
+  background: var(--bg);
+  box-sizing: border-box;
+}
+
+.create-game-shell {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.create-game-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.create-game-dice-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.create-game-dice {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.create-game-page h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.create-game-subtitle {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.create-game-form {
+  width: 100%;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.create-game-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.create-game-form input,
+.create-game-form select {
+  width: 100%;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  font-size: 1rem;
+  background: var(--input-bg);
+  color: var(--text);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.create-game-form input:focus,
+.create-game-form select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.create-game-form input:disabled,
+.create-game-form select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-game-error {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  background: #fdeaea;
+  color: #b42318;
+  font-weight: 500;
+}
+
+.create-game-button,
+.login-button {
+  margin-top: 0.5rem;
+  padding: 0.95rem 1.2rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--text-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.create-game-button:hover,
+.login-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .create-game-page {
+    padding: 2rem 1rem;
+  }
+
+  .create-game-shell {
+    max-width: 100%;
+  }
+
+  .create-game-form {
+    padding: 1.25rem;
+  }
+
+  .create-game-page h1 {
+    font-size: 1.6rem;
+  }
+
+  .create-game-dice {
+    width: 46px;
+    height: 46px;
+  }
+}

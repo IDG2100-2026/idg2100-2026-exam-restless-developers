@@ -1,0 +1,212 @@
+@baseUrl = http://localhost:3000/api/v1
+
+### Test server 
+GET http://localhost:3000/api/test
+
+
+### Users - get all users
+GET {{baseUrl}}/users 
+
+### Users - get by id 
+GET {{baseUrl}}/users/USER_ID_HERE
+
+### Users - create
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+    "username": "testuser", 
+    "email" : "test@example.com",
+    "password" : "passwordSomething",
+    "age" : 30
+}
+
+### Users - update 
+PUT {{baseUrl}}/users/USER_ID_HERE
+Content-Type: application/json
+
+{
+    "age" : 20
+}
+
+### Users delete - admin only 
+DELETE {{baseUrl}}/users/USER_ID_HERE
+role: admin 
+
+### Users - login 
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "email": "vlsivert@ntnu.no", 
+    "password": "somethingPassword"
+}
+
+
+#### User - ban user, for admin 
+PUT {{baseUrl}}/users/USER_ID_HERE/ban
+role: admin
+
+### Leaderboard - default (wins) 
+GET {{baseUrl}}/users/leaderboard
+
+### Leaderboard - sort by win percentage 
+GET {{baseUrl}}/users/leaderboard?sortBy=winPercentage
+
+### Leaderboard - sort by matches played 
+GET {{baseUrl}}/users/leaderboard?sortBy=matchesPlayed
+
+### Platform activity 
+GET {{baseUrl}}/users/activity 
+
+### Matches - get all
+GET {{baseUrl}}/matches
+
+### Matches - get by id
+GET {{baseUrl}}/matches/MATCH_ID_HERE
+
+### Matches - create
+POST {{baseUrl}}/matches
+Content-Type: application/json
+
+{
+    "players": ["USER1_ID", "USER2_ID"],
+    "categoryId": "CATEGORY_ID", 
+    "isAnonymous": false
+}
+
+### Matches - add round 
+PUT {{baseUrl}}/matches/MATCH_ID_HERE/round
+Content-Type: application/json 
+
+{
+    "roundNumber": 1,
+    "rolls": [
+        {
+            "dice": ["7", "8", "A", "K","Q", "J"], 
+            "holds": [false, true, false, false, true]
+        }
+    ], 
+    "result": "player1"
+}
+
+### Matches - finish
+PUT {{baseUrl}}/matches/MATCH_ID_HERE/finish
+Content-Type: application/json
+
+{
+    "winnerId": "USER_ID"
+}
+
+### Matches - delete 
+DELETE {{baseUrl}}/matches/MATCH_ID_HERE
+
+### Categories - get all 
+GET {{baseUrl}}/categories 
+
+### Categories - get by id
+GET {{baseUrl}}/categories/CATEGORY_ID_HERE
+
+### Categories - create
+POST {{baseUrl}}/categories
+Content-Type: application/json 
+
+{
+    "rounds": 5, 
+    "straightsAllowed": true, 
+    "timePerRound": 10
+}
+
+### Categories - delete
+DELETE {{baseUrl}}/categories/CATEGORY_ID_HERE
+
+### Comments - get all
+GET {{baseUrl}}/comments
+
+### Comments - get comment for specific match
+GET {{baseUrl}}/comments?match=MATCH_ID_HERE
+
+### Comments - get comments for a specific tournament
+GET {{baseUrl}}/comments?tournament=TOURNAMENT_ID_HERE
+
+### Comments - create for match
+POST {{baseUrl}}/comments
+Content-Type: application/json 
+
+{
+    "author": "USER_ID", 
+    "text": "Great match!",
+    "type": "match", 
+    "match": "MATCH_ID"
+}
+
+### Comments - create for tournament 
+POST {{baseUrl}}/comments
+Content-Type: application/json 
+
+{
+    "author": "USER_ID", 
+    "text": "Excited for this tournament", 
+    "type": "tournament", 
+    "tournament": "TOURNAMENT_ID"
+}
+
+### Comments - delete, only for admin
+DELETE {{baseUrl}}/comments/COMMENT_ID_HERE
+role: admin 
+
+### Tournaments - get all
+GET {{baseUrl}}/tournaments 
+
+### Tournaments - get by id 
+GET {{baseUrl}}/tournaments/TOURNAMENT_ID_HERE
+
+### Tournament - create, admin only 
+POST {{baseUrl}}/tournaments
+Content-Type: application/json
+role: admin
+
+{
+    "name": "Spring Championship", 
+    "description": "Big tournament", 
+    "categoryId": "CATEGORY_ID", 
+    "startTime": "2026-05-01T12:00:00Z", 
+    "trophy": {
+        "title": "Golden Dice", 
+        "image": "http://example.com/trophy.png"
+    }
+}
+
+### Tournaments - join 
+POST {{baseUrl}}/tournaments/TOURNAMENT_ID_HERE/join 
+Content-Type: application/json
+
+{
+    "userId": "USER_ID"
+}
+
+### Tournament - start, admin only 
+POST {{baseUrl}}/tournaments/TOURNAMENT_ID_HERE/start
+role: admin 
+
+### Tournament - advance, admin only 
+POST {{baseUrl}}/tournaments/TOURNAMENT_ID_HERE/advance
+role: admin 
+
+### Create invite
+POST {{baseUrl}}/invites
+Content-Type: application/json
+
+{
+    "fromUser": "USER_ID", 
+    "toUser": "USER_ID", 
+    "categoryId": "CATEGORY_ID"
+}
+
+### Accept invite 
+PUT {{baseUrl}}/invites/INVITE_ID/respond
+Content-Type: application/json
+{
+    "status": "accepted"
+}
+
