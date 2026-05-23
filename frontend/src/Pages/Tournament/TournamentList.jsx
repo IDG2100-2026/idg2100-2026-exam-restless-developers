@@ -21,18 +21,7 @@ function TournamentList() {
 
         const data = await response.json();
 
-        const testData = [...data, ...data, ...data, ...data].map(
-          (tournament, index) => ({
-            ...tournament,
-            _id: `${tournament._id}-${index}`,
-            title: `${tournament.title} #${index + 1}`,
-          })
-        );
-
-        setTournaments(testData);
-
-        // Når du er ferdig med testing, bruk denne i stedet:
-        // setTournaments(data);
+        setTournaments(data);
       } catch (error) {
         setError(error.message);
       }

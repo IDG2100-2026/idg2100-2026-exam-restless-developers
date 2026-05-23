@@ -12,8 +12,7 @@
   background:
     radial-gradient(circle at top right, rgba(255, 255, 255, 0.14), transparent 35%),
     linear-gradient(135deg, #064e3b, #022c22);
-
-border: 1px solid #047857;
+  border: 1px solid #047857;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
 }
 
@@ -207,8 +206,8 @@ border: 1px solid #047857;
   gap: 0.8rem;
   padding: 0.9rem;
   border-radius: 16px;
-    background: linear-gradient(135deg, #064e3b, #022c22);
-    border: 1px solid #047857;
+  background: linear-gradient(135deg, #064e3b, #022c22);
+  border: 1px solid #047857;
   color: #fafafa;
 }
 
