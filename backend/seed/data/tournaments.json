@@ -1,0 +1,77 @@
+[
+  {
+    "title": "Spring Dice Open",
+    "description": "Beginner-friendly tournament for Spanish Poker Dice players.",
+    "status": "upcoming",
+    "startDate": "2026-05-30T18:00:00.000Z",
+    "gameVariant": {
+      "straightsAllowed": true,
+      "rounds": 5,
+      "timeControl": 30,
+      "maxPlayersPerGame": 2
+    },
+    "tournamentRounds": 4,
+    "buyIn": 10,
+    "maxPlayers": 16,
+    "players": [],
+    "rules": "Random-pairing tournament. Most points after all rounds wins.",
+    "minElo": 0,
+    "maxElo": 3000,
+    "trophy": {
+      "title": "Golden Dice Trophy",
+      "description": "Awarded to the winner of the Spring Dice Open.",
+      "imageUrl": "/images/trophies/golden-dice.png"
+    },
+    "standings": []
+  },
+  {
+    "title": "Weekend Blitz Championship",
+    "description": "Fast-paced blitz tournament for experienced players.",
+    "status": "ongoing",
+    "startDate": "2026-05-24T16:00:00.000Z",
+    "gameVariant": {
+      "straightsAllowed": false,
+      "rounds": 3,
+      "timeControl": 10,
+      "maxPlayersPerGame": 3
+    },
+    "tournamentRounds": 5,
+    "buyIn": 50,
+    "maxPlayers": 32,
+    "players": [],
+    "rules": "High-risk blitz tournament with short timers.",
+    "minElo": 1200,
+    "maxElo": 3000,
+    "trophy": {
+      "title": "Blitz Champion Trophy",
+      "description": "Awarded to the Weekend Blitz winner.",
+      "imageUrl": "/images/trophies/blitz-trophy.png"
+    },
+    "standings": []
+  },
+  {
+    "title": "Classic Dice Masters",
+    "description": "Long-form classical tournament with strategic gameplay.",
+    "status": "finished",
+    "startDate": "2026-04-10T14:00:00.000Z",
+    "gameVariant": {
+      "straightsAllowed": true,
+      "rounds": 7,
+      "timeControl": 90,
+      "maxPlayersPerGame": 5
+    },
+    "tournamentRounds": 6,
+    "buyIn": 10,
+    "maxPlayers": 64,
+    "players": [],
+    "rules": "Classical format tournament with long time controls.",
+    "minElo": 800,
+    "maxElo": 3000,
+    "trophy": {
+      "title": "Masters Trophy",
+      "description": "Awarded to the Classic Dice Masters champion.",
+      "imageUrl": "/images/trophies/masters-trophy.png"
+    },
+    "standings": []
+  }
+]
