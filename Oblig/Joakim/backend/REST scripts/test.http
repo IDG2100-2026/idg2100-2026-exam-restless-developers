@@ -1,0 +1,10 @@
+POST http://localhost:6767/api/poker/users
+Content-Type: application/json
+
+{
+  "uid": 101,
+  "username": "testbruker",
+  "pwd": "Passord1234567789!!..",
+  "email": "test@test.com",
+  "dob": 2001
+}
