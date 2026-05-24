@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import { connectDB } from "./config/db.config.js";
 import tournamentRoutes from "./routes/tournaments.routes.js";
+import usersRoutes from "./routes/users.routes.js";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/v1/users", usersRoutes);
 app.use("/tournaments", tournamentRoutes);
 
 const PORT = process.env.BACKEND_PORT || 6767;

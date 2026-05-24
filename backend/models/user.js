@@ -118,3 +118,5 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.comparePWD = async function (candidatePWD) {
   return await hashPWD.comparePWD(candidatePWD, this.pwd);
 };
+
+export default mongoose.model("User", userSchema);
