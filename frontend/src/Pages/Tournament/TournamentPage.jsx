@@ -7,7 +7,8 @@ function TournamentPage() {
 
   const [tournament, setTournament] = useState(null);
   const [error, setError] = useState("");
-  const [joinMessage, setJoinMessage] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchTournament() {
@@ -38,8 +39,12 @@ function TournamentPage() {
     });
   }
 
+  function getCurrentUserId() {
+    return localStorage.getItem("currentUserId");
+  }
+
   function isCurrentUserJoined() {
-    const currentUserId = localStorage.getItem("currentUserId");
+    const currentUserId = getCurrentUserId();
 
     if (!currentUserId || !tournament?.players) {
       return false;
@@ -56,12 +61,13 @@ function TournamentPage() {
 
   async function handleJoinTournament() {
     try {
-      setJoinMessage("");
+      setActionMessage("");
+      setIsSubmitting(true);
 
-      const currentUserId = localStorage.getItem("currentUserId");
+      const currentUserId = getCurrentUserId();
 
       if (!currentUserId) {
-        setJoinMessage("You must be logged in to join a tournament.");
+        setActionMessage("You must be logged in to join a tournament.");
         return;
       }
 
@@ -85,10 +91,106 @@ function TournamentPage() {
       }
 
       setTournament(data);
-      setJoinMessage("You joined the tournament!");
+      setActionMessage("You joined the tournament!");
     } catch (error) {
-      setJoinMessage(error.message);
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
+  }
+
+  async function handleLeaveTournament() {
+    try {
+      setActionMessage("");
+      setIsSubmitting(true);
+
+      const currentUserId = getCurrentUserId();
+
+      if (!currentUserId) {
+        setActionMessage("You must be logged in to leave a tournament.");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/tournaments/${id}/players`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: currentUserId,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not leave tournament");
+      }
+
+      setTournament(data);
+      setActionMessage("You left the tournament.");
+    } catch (error) {
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function renderTournamentAction() {
+    const currentUserJoined = isCurrentUserJoined();
+
+    if (tournament.status === "upcoming" && !currentUserJoined) {
+      return (
+        <button
+          className="primary-action-button"
+          onClick={handleJoinTournament}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Joining..." : "Join tournament"}
+        </button>
+      );
+    }
+
+    if (tournament.status === "upcoming" && currentUserJoined) {
+      return (
+        <button
+          className="secondary-action-button"
+          onClick={handleLeaveTournament}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Leaving..." : "Leave tournament"}
+        </button>
+      );
+    }
+
+    if (tournament.status === "ongoing" && currentUserJoined) {
+      return (
+        <button
+          className="secondary-action-button"
+          onClick={handleLeaveTournament}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Leaving..." : "Leave tournament"}
+        </button>
+      );
+    }
+
+    if (tournament.status === "ongoing") {
+      return (
+        <button className="primary-action-button">
+          Spectate tournament
+        </button>
+      );
+    }
+
+    return (
+      <button className="disabled-action-button" disabled>
+        Tournament finished
+      </button>
+    );
   }
 
   if (error) {
@@ -98,8 +200,6 @@ function TournamentPage() {
   if (!tournament) {
     return <p className="tournament-page-loading">Loading tournament...</p>;
   }
-
-  const currentUserJoined = isCurrentUserJoined();
 
   return (
     <main className="single-tournament-page">
@@ -121,34 +221,9 @@ function TournamentPage() {
         <div className="hero-actions">
           <p>{formatDate(tournament.startDate)}</p>
 
-          {tournament.status === "upcoming" && !currentUserJoined && (
-            <button
-              className="primary-action-button"
-              onClick={handleJoinTournament}
-            >
-              Join tournament
-            </button>
-          )}
+          {renderTournamentAction()}
 
-          {tournament.status === "upcoming" && currentUserJoined && (
-            <button className="disabled-action-button" disabled>
-              Already joined
-            </button>
-          )}
-
-          {tournament.status === "ongoing" && (
-            <button className="primary-action-button">
-              Spectate tournament
-            </button>
-          )}
-
-          {tournament.status === "finished" && (
-            <button className="disabled-action-button" disabled>
-              Tournament finished
-            </button>
-          )}
-
-          {joinMessage && <p className="join-message">{joinMessage}</p>}
+          {actionMessage && <p className="join-message">{actionMessage}</p>}
         </div>
       </section>
 
@@ -204,6 +279,18 @@ function TournamentPage() {
                 ? "Allowed"
                 : "Not allowed"}
             </p>
+          </section>
+
+          {tournament.status === "ongoing" && (
+            <section className="detail-card">
+              <h2>Standings</h2>
+              <p>Standings will be shown here when tournament rounds are active.</p>
+            </section>
+          )}
+
+          <section className="detail-card">
+            <h2>Comments</h2>
+            <p>Comments will be added here.</p>
           </section>
         </div>
 
