@@ -1,0 +1,53 @@
+.registration {
+	max-width: 520px;
+	margin: 1rem auto;
+	padding: 1rem;
+	border: 1px solid #cfcfcf;
+	border-radius: 6px;
+	background: #f8f8f8;
+	font-family: Arial, sans-serif;
+}
+
+.registration form {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.registration label {
+	display: grid;
+	gap: 0.3rem;
+	font-weight: 600;
+}
+
+.registration input[type="text"],
+.registration input[type="password"],
+.registration input[type="email"],
+.registration input[type="number"] {
+	padding: 0.5rem;
+	border: 1px solid #bdbdbd;
+	border-radius: 5px;
+	font-family: inherit;
+}
+
+.checkboxRow {
+	display: flex !important;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 500 !important;
+}
+
+.registration button {
+	padding: 0.55rem 0.85rem;
+	border: 1px solid #1d4f8a;
+	border-radius: 5px;
+	background: #2b6bcc;
+	color: #fff;
+	cursor: pointer;
+}
+
+@media (max-width: 520px) {
+	.registration {
+		margin: 0.75rem;
+		padding: 0.85rem;
+	}
+}

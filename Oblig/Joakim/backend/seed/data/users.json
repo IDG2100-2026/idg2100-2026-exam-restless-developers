@@ -1,0 +1,5 @@
+[
+  { "username": "ola", "elo": 1200, "wins": 5, "losses": 2 },
+  { "username": "kari", "elo": 950, "wins": 3, "losses": 4 },
+  { "username": "per", "elo": 1300, "wins": 7, "losses": 1 }
+]

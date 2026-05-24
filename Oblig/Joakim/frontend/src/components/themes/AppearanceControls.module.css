@@ -1,0 +1,161 @@
+.appearance {
+  position: relative;
+  width: 100%;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid #bdbdbd;
+  background: #ffffff;
+  color: #2b2b2b;
+  border-radius: 5px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.toggle:hover {
+  border-color: #8aa7c8;
+  background: #eef4fb;
+}
+
+.toggleOpen {
+  border-color: #1d4f8a;
+  background: #e6effa;
+}
+
+.toggleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 4px;
+  background: #d9e5f5;
+  border: 1px solid #a9bfd8;
+}
+
+.toggleOrb {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #1d4f8a;
+}
+
+.toggleText {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.toggleArrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.toggleOpen .toggleArrow {
+  transform: rotate(180deg);
+}
+
+.panel {
+  position: static;
+  z-index: 10;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  background: #fcfcfc;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.group {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.groupLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4d4d4d;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  border: 1px solid #bdbdbd;
+  background: #fff;
+  color: #2b2b2b;
+  border-radius: 5px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.chipActive {
+  background: #e6effa;
+  border-color: #1d4f8a;
+  color: #1d4f8a;
+}
+
+.colorGrid {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.colorSwatch {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 5px;
+  border: 1px solid #b8b8b8;
+  cursor: pointer;
+}
+
+.colorSwatchActive {
+  border-color: #1d4f8a;
+  outline: 1px solid #1d4f8a;
+}
+
+.slider {
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .appearance {
+    width: auto;
+    min-width: 230px;
+  }
+
+  .toggle {
+    width: auto;
+    min-width: 140px;
+  }
+
+  .panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    width: 18rem;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+@media (max-width: 520px) {
+  .buttonRow,
+  .colorGrid {
+    gap: 0.35rem;
+  }
+
+  .chip {
+    flex: 1 1 auto;
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "idg2100-2026-oblig2-cluelessdev25",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "IDG2100-2026-oblig2",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch --env-file=.env server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node ./seed/db.seed.js --env-file=.env"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IDG2100-2026/idg2100-2026-oblig2-CluelessDev25.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IDG2100-2026/idg2100-2026-oblig2-CluelessDev25/issues"
+  },
+  "homepage": "https://github.com/IDG2100-2026/idg2100-2026-oblig2-CluelessDev25#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.1",
+    "mongodb": "^7.1.0",
+    "mongoose": "^9.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0"
+  }
+}
