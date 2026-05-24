@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import Tournament from "../models/tournament.js";
 
 export async function getAllTournaments(req, res) {
@@ -21,12 +20,6 @@ export async function getAllTournaments(req, res) {
 export async function getTournamentById(req, res) {
   try {
     const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Invalid tournament id",
-      });
-    }
 
     const tournament = await Tournament.findById(id)
       .populate("players", "username elo")
@@ -52,18 +45,6 @@ export async function joinTournament(req, res) {
   try {
     const { id } = req.params;
     const { userId } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Invalid tournament id",
-      });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({
-        message: "Invalid user id",
-      });
-    }
 
     const tournament = await Tournament.findById(id);
 
@@ -109,6 +90,49 @@ export async function joinTournament(req, res) {
 
     res.status(500).json({
       message: "Failed to join tournament",
+    });
+  }
+}
+
+export async function leaveTournament(req, res) {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    const tournament = await Tournament.findById(id);
+
+    if (!tournament) {
+      return res.status(404).json({
+        message: "Tournament not found",
+      });
+    }
+
+    const alreadyJoined = tournament.players.some(
+      (playerId) => playerId.toString() === userId
+    );
+
+    if (!alreadyJoined) {
+      return res.status(400).json({
+        message: "You have not joined this tournament",
+      });
+    }
+
+    tournament.players = tournament.players.filter(
+      (playerId) => playerId.toString() !== userId
+    );
+
+    await tournament.save();
+
+    const updatedTournament = await Tournament.findById(id)
+      .populate("players", "username elo")
+      .populate("author", "username");
+
+    res.status(200).json(updatedTournament);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to leave tournament",
     });
   }
 }

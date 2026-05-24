@@ -4,13 +4,36 @@ import {
   getAllTournaments,
   getTournamentById,
   joinTournament,
+  leaveTournament,
 } from "../controllers/tournament.controller.js";
 
-const router = express.Router();
-    
-router.get("/", getAllTournaments);
-router.get("/:id", getTournamentById);
-router.post("/:id/players", joinTournament);
+import {
+  validateTournamentId,
+  validateJoinTournament,
+} from "../validators/tournament.validator.js";
 
+const router = express.Router();
+
+router.get("/", getAllTournaments);
+
+router.get(
+  "/:id",
+  validateTournamentId,
+  getTournamentById
+);
+
+router.post(
+  "/:id/players",
+  validateTournamentId,
+  validateJoinTournament,
+  joinTournament
+);
+
+router.delete(
+  "/:id/players",
+  validateTournamentId,
+  validateJoinTournament,
+  leaveTournament
+);
 
 export default router;
