@@ -1,5 +1,12 @@
+import TournamentOverview from "../../Components/Tournament/tournamentOverview.jsx";
+
 function Homepage() {
-  return <h1>Homepage</h1>;
+  return(
+    <>
+    
+    <TournamentOverview/>
+    </>
+  );
 }
 
 export default Homepage;

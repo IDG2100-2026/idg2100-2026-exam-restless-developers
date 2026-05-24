@@ -1,131 +1,177 @@
 import mongoose from "mongoose";
 
-const {Schema} = mongoose;
+import {
+  TOURNAMENT_STATUSES,
+  GAME_ROUNDS,
+  TIME_CONTROLS,
+  PLAYERS_PER_GAME,
+  BUY_INS,
+} from "../constants/tournament.constants.js";
+
+const { Schema } = mongoose;
 
 const tournamentSchema = new Schema(
-    {
-        title: {
-            type: String, 
-            required: true, 
-            trim: true, 
-            minlength: 3, 
-            maxlength: 80, 
-        },
-        description: {
-            type: String, 
-            required: true, 
-            trim: true, 
-            maxlength: 2000,
-        }, 
-        status: {
-            type: String, 
-            enum: ["upcoming", "ongoing", "finished", "cancelled"],
-            default: "upcoming", 
-            required: true, 
-        }, 
-        startDate: {
-            type: Date, 
-            required: true,
-        },
-        gameVariant: {
-            straightsAllowed: {
-                type: Boolean, 
-                required: true,
-            },
-            rounds: {
-                type: Number, 
-                enum: [3, 5, 7],
-                required: true,
-            },
-            timeControl: {
-                type: Number, 
-                enum: [10, 30, 90],
-                required: true,
-            },
-            maxPlayersPerGame: {
-                type: Number,
-                enum: [2, 3, 5],
-                required: true,
-            },
-        },
-        tournamentRounds: {
-            type: Number, 
-            required: true,
-            min: 1,
-            max: 10,
-        },
-        buyIn: {
-            type: Number,
-            enum: [1, 10, 50],
-            required: true,
-        },
-        maxPlayers: {
-            type: Number,
-            required: true,
-            min: 2,
-            max: 64,
-        },
-        players: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "User",
-            },
-        ],
-        author: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-            reuired: false,
-        },
-        trophy: {
-            title: {
-                type: String,
-                default: "Tournament Trophy",
-            },
-            description: {
-                type: String, 
-                default: "",
-            },
-            imageUrl: {
-                type: String,
-                default: "",
-            },
-        },
-        rules: {
-            type: String,
-            required: true,
-            trim: true,
-            maxlength: 1500,
-        },
-        minElo: {
-            type: Number, 
-            default: 0,
-        },
-        maxElo: {
-            type: Number,
-            default: 3000,
-        },
-        standings: [
-            {
-                player: {
-                    type: Schema.Types.ObjectId,
-                    ref: "User",
-                },
-                points: {
-                    type: Number,
-                    default: 0,
-                },
-                wins: {
-                    type: Number,
-                    default: 0,
-                },
-                losses: {
-                    type: Number,
-                    default: 0,
-                },
-            },
-        ],
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 80,
     },
-    {timestamps: true}
+
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 10,
+      maxlength: 2000,
+    },
+
+    status: {
+      type: String,
+      enum: TOURNAMENT_STATUSES,
+      default: "upcoming",
+      required: true,
+    },
+
+    startDate: {
+      type: Date,
+      required: true,
+    },
+
+    gameVariant: {
+      straightsAllowed: {
+        type: Boolean,
+        required: true,
+      },
+
+      rounds: {
+        type: Number,
+        enum: GAME_ROUNDS,
+        required: true,
+      },
+
+      timeControl: {
+        type: Number,
+        enum: TIME_CONTROLS,
+        required: true,
+      },
+
+      maxPlayersPerGame: {
+        type: Number,
+        enum: PLAYERS_PER_GAME,
+        required: true,
+      },
+    },
+
+    tournamentRounds: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 10,
+    },
+
+    buyIn: {
+      type: Number,
+      enum: BUY_INS,
+      required: true,
+    },
+
+    maxPlayers: {
+      type: Number,
+      required: true,
+      min: 2,
+      max: 64,
+    },
+
+    players: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    trophy: {
+      title: {
+        type: String,
+        trim: true,
+        default: "Tournament Trophy",
+        maxlength: 80,
+      },
+
+      description: {
+        type: String,
+        trim: true,
+        default: "",
+        maxlength: 500,
+      },
+
+      imageUrl: {
+        type: String,
+        trim: true,
+        default: "",
+        maxlength: 500,
+      },
+    },
+
+    rules: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 10,
+      maxlength: 1500,
+    },
+
+    minElo: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 3000,
+    },
+
+    maxElo: {
+      type: Number,
+      default: 3000,
+      min: 0,
+      max: 3000,
+    },
+
+    standings: [
+      {
+        player: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+
+        points: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+
+        wins: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+
+        losses: {
+          type: Number,
+          default: 0,
+          min: 0,
+        },
+      },
+    ],
+  },
+  { timestamps: true }
 );
 
 export default mongoose.model("Tournament", tournamentSchema);

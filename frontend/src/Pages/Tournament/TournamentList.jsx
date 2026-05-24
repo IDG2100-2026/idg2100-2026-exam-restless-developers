@@ -6,6 +6,9 @@ function TournamentList() {
   const [tournaments, setTournaments] = useState([]);
   const [error, setError] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+
   const [visibleOngoing, setVisibleOngoing] = useState(3);
   const [visibleUpcoming, setVisibleUpcoming] = useState(3);
   const [visiblePast, setVisiblePast] = useState(3);
@@ -20,19 +23,7 @@ function TournamentList() {
         }
 
         const data = await response.json();
-
-        const testData = [...data, ...data, ...data, ...data].map(
-          (tournament, index) => ({
-            ...tournament,
-            _id: `${tournament._id}-${index}`,
-            title: `${tournament.title} #${index + 1}`,
-          })
-        );
-
-        setTournaments(testData);
-
-        // Når du er ferdig med testing, bruk denne i stedet:
-        // setTournaments(data);
+        setTournaments(data);
       } catch (error) {
         setError(error.message);
       }
@@ -41,15 +32,41 @@ function TournamentList() {
     fetchTournaments();
   }, []);
 
-  const ongoingTournaments = tournaments.filter(
+  function getFilteredAndSortedTournaments() {
+    let filteredTournaments = tournaments;
+
+    if (searchTerm.trim().length >= 3) {
+      filteredTournaments = filteredTournaments.filter((tournament) =>
+        tournament.title
+          ?.toLowerCase()
+          .includes(searchTerm.trim().toLowerCase())
+      );
+    }
+
+    return [...filteredTournaments].sort((a, b) => {
+      if (sortBy === "title") {
+        return a.title.localeCompare(b.title);
+      }
+
+      if (sortBy === "players") {
+        return (b.players?.length || 0) - (a.players?.length || 0);
+      }
+
+      return new Date(a.startDate) - new Date(b.startDate);
+    });
+  }
+
+  const filteredAndSortedTournaments = getFilteredAndSortedTournaments();
+
+  const ongoingTournaments = filteredAndSortedTournaments.filter(
     (tournament) => tournament.status === "ongoing"
   );
 
-  const upcomingTournaments = tournaments.filter(
+  const upcomingTournaments = filteredAndSortedTournaments.filter(
     (tournament) => tournament.status === "upcoming"
   );
 
-  const pastTournaments = tournaments.filter(
+  const pastTournaments = filteredAndSortedTournaments.filter(
     (tournament) => tournament.status === "finished"
   );
 
@@ -209,13 +226,34 @@ function TournamentList() {
     <main className="tournament-page">
       <section className="tournament-hero">
         <span className="hero-kicker">Spanish Poker Dice Arena</span>
-
-        <h1>Tournament Arena</h1>
-
         <p>
           Join upcoming tournaments, spectate live battles, or explore previous
           winners and trophies.
         </p>
+      </section>
+
+      <section className="tournament-controls">
+        <label>
+          Search tournaments
+          <input
+            type="text"
+            placeholder="Type at least 3 characters..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </label>
+
+        <label>
+          Sort by
+          <select
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value)}
+          >
+            <option value="date">Date</option>
+            <option value="title">Title</option>
+            <option value="players">Number of players</option>
+          </select>
+        </label>
       </section>
 
       {error && <p className="tournament-error">{error}</p>}
@@ -226,7 +264,7 @@ function TournamentList() {
         tournaments={ongoingTournaments}
         visibleCount={visibleOngoing}
         setVisibleCount={setVisibleOngoing}
-        emptyMessage="No live tournaments right now."
+        emptyMessage="No live tournaments found."
       />
 
       <TournamentSection
@@ -235,7 +273,7 @@ function TournamentList() {
         tournaments={upcomingTournaments}
         visibleCount={visibleUpcoming}
         setVisibleCount={setVisibleUpcoming}
-        emptyMessage="No upcoming tournaments available."
+        emptyMessage="No upcoming tournaments found."
       />
 
       <TournamentSection
@@ -244,7 +282,7 @@ function TournamentList() {
         tournaments={pastTournaments}
         visibleCount={visiblePast}
         setVisibleCount={setVisiblePast}
-        emptyMessage="No past tournaments yet."
+        emptyMessage="No past tournaments found."
       />
     </main>
   );
