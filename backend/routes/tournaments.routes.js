@@ -10,7 +10,7 @@ import {
 import {
   validateTournamentId,
   validateJoinTournament,
-} from "../validators/tournament.validator.js";
+} from "../validator/tournament.validator.js";
 
 const router = express.Router();
 

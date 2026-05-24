@@ -1,8 +1,7 @@
 
 import { matchedData } from 'express-validator';
-import userServices from "../services/user.services";
-import usrData from "../seed/data/users.json"; // SWAP TO DATABASE IN FUTURE
-import User from "../models/user.js";
+import userServices from "../services/user.services.js";
+import usrData from "../seed/data/users.json" with { type: "json" }; // SWAP TO DATABASE IN FUTUREimport User from "../models/user.js";
 import { checkPWD } from "../utils/hash.js";
 
 export async function getAllusers(req, res) {
