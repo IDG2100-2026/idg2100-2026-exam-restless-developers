@@ -94,6 +94,8 @@ export async function joinTournament(req, res) {
   }
 }
 
+
+
 export async function leaveTournament(req, res) {
   try {
     const { id } = req.params;
@@ -133,6 +135,58 @@ export async function leaveTournament(req, res) {
 
     res.status(500).json({
       message: "Failed to leave tournament",
+    });
+  }
+}
+
+
+
+export async function createTournament(req, res) {
+  try {
+    const {
+      title,
+      description,
+      startDate,
+      gameVariant,
+      tournamentRounds,
+      buyIn,
+      maxPlayers,
+      trophy,
+      rules,
+      minElo,
+      maxElo,
+    } = req.body;
+
+    const tournament = await Tournament.create({
+      title,
+      description,
+      startDate,
+      gameVariant,
+      tournamentRounds,
+      buyIn,
+      maxPlayers,
+      trophy,
+      rules,
+      minElo,
+      maxElo,
+      players: [],
+      standings: [],
+      status: "upcoming",
+
+      // midlertidig:
+      author: req.body.author,
+    });
+
+    const populatedTournament = await Tournament.findById(tournament._id)
+      .populate("players", "username elo")
+      .populate("author", "username");
+
+    res.status(201).json(populatedTournament);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to create tournament",
     });
   }
 }

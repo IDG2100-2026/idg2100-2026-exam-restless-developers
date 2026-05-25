@@ -13,7 +13,7 @@ function TournamentPage() {
   useEffect(() => {
     async function fetchTournament() {
       try {
-        const response = await fetch(`http://localhost:6767/tournaments/${id}`);
+        const response = await fetch(`http://localhost:6767/api/v1/tournaments/${id}`);
 
         if (!response.ok) {
           throw new Error("Could not fetch tournament");
@@ -72,7 +72,7 @@ function TournamentPage() {
       }
 
       const response = await fetch(
-        `http://localhost:6767/tournaments/${id}/players`,
+        `http://localhost:6767/api/v1/tournaments/${id}/players`,
         {
           method: "POST",
           headers: {
@@ -112,7 +112,7 @@ function TournamentPage() {
       }
 
       const response = await fetch(
-        `http://localhost:6767/tournaments/${id}/players`,
+        `http://localhost:6767/api/v1/tournaments/${id}/players`,
         {
           method: "DELETE",
           headers: {
@@ -296,9 +296,9 @@ function TournamentPage() {
 
         <aside className="tournament-sidebar">
           <section className="trophy-card">
-            {tournament.trophy?.image ? (
+            {tournament.trophy?.imageUrl ? (
               <img
-                src={tournament.trophy.image}
+                src={tournament.trophy.imageUrl}
                 alt={tournament.trophy?.title || "Tournament trophy"}
               />
             ) : (

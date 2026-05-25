@@ -14,6 +14,7 @@ import Terms from "./Pages/Terms/Terms.jsx";
 import TournamentList from "./Pages/Tournament/TournamentList.jsx";
 import TournamentPage from "./Pages/Tournament/TournamentPage.jsx";
 import Profile from "./Pages/User/Profile.jsx";
+import CreateTournament from "./Pages/Tournament/CreateTournament.jsx";
 
 function App() {
   return (
@@ -31,8 +32,9 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/tournaments" element={<TournamentList />} />
-          <Route path="/tournament/:id" element={<TournamentPage />} />
+          <Route path="/tournaments/:id" element={<TournamentPage />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/create-tournament" element={<CreateTournament />} />
         </Routes>
       </main>
 

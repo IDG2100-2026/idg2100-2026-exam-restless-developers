@@ -16,7 +16,7 @@ function TournamentList() {
   useEffect(() => {
     async function fetchTournaments() {
       try {
-        const response = await fetch("http://localhost:6767/tournaments");
+        const response = await fetch("http://localhost:6767/api/v1/tournaments");
 
         if (!response.ok) {
           throw new Error("Could not fetch tournaments");
@@ -95,7 +95,7 @@ function TournamentList() {
   function renderTournamentCard(tournament) {
     return (
       <Link
-        to={`/tournament/${tournament._id}`}
+        to={`/tournaments/${tournament._id}`}
         className="tournament-card"
         key={tournament._id}
       >
@@ -144,9 +144,9 @@ function TournamentList() {
         </div>
 
         <div className="trophy-box">
-          {tournament.trophy?.image ? (
+          {tournament.trophy?.imageUrl ? (
             <img
-              src={tournament.trophy.image}
+              src={tournament.trophy.imageUrl}
               alt={tournament.trophy?.title || "Tournament trophy"}
               className="trophy-image"
             />
@@ -226,6 +226,16 @@ function TournamentList() {
     <main className="tournament-page">
       <section className="tournament-hero">
         <span className="hero-kicker">Spanish Poker Dice Arena</span>
+
+          <div className="hero-actions">
+            <Link
+              to="/create-tournament"
+              className="create-tournament-button"
+            >
+              Create Tournament
+            </Link>
+          </div>
+
         <p>
           Join upcoming tournaments, spectate live battles, or explore previous
           winners and trophies.
