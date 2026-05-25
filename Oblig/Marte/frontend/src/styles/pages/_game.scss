@@ -1,0 +1,139 @@
+@use '../variables' as *;
+
+.game-page {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: $space-xl;
+  align-items: start;
+
+  @media (max-width: $bp-mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game-info {
+  margin-bottom: $space-md;
+}
+
+.game-variant-label {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.game-board-area {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg;
+}
+
+.game-players {
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+  justify-content: center;
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-xs;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-lg;
+  padding: $space-md $space-lg;
+}
+
+.player-name { font-weight: 600; }
+
+.player-elo {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.vs {
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.dice-board {
+  background: var(--board-color, #1e1e1e);
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waiting-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-md;
+  color: rgba(255,255,255,0.7);
+
+  p { color: rgba(255,255,255,0.7); }
+}
+
+.waiting-hint {
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+
+.waiting-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: rgba(255,255,255,0.8);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dice-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-lg;
+}
+
+.dice-row {
+  display: flex;
+  gap: $space-md;
+}
+
+.die {
+  width: 60px;
+  height: 60px;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+
+  &--placeholder {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.3);
+  }
+}
+
+.game-sidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-lg;
+  padding: $space-lg * 0.85;
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+}

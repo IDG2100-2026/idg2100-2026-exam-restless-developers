@@ -1,0 +1,257 @@
+@use 'variables' as *;
+
+// Buttons
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: $radius-md;
+  padding: 0.75rem $space-lg;
+  font-size: $font-size-base;
+  cursor: pointer;
+  display: inline-block;
+
+  &:hover { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &.btn-small { padding: 0.35rem 0.9rem; font-size: 0.875rem; }
+}
+
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  color: var(--color-text);
+  font-size: 0.875rem;
+
+  &:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0;
+  text-align: left;
+}
+
+// Forms
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg * 0.85;
+
+  &-group {
+    display: flex;
+    flex-direction: column;
+    gap: $space-xs;
+
+    &--checkbox {
+      flex-direction: row;
+      align-items: center;
+      gap: $space-sm;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+
+    input[type='text'],
+    input[type='email'],
+    input[type='password'],
+    input[type='date'] {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: $radius-md;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: $font-size-base;
+
+      &:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 1px;
+      }
+    }
+  }
+
+  &-footer {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  &-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+}
+
+.label-hint {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+// Game & tournament cards
+.game-list,
+.tournament-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+}
+
+.game-card,
+.tournament-card {
+  a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem $space-md;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: $radius-md;
+    gap: $space-md;
+
+    &:hover { border-color: var(--color-accent); }
+  }
+}
+
+.game-variant,
+.tournament-title {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.game-players,
+.tournament-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+// Status badges
+.status-badge {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: $radius-full;
+  text-transform: uppercase;
+}
+
+.status-upcoming { background: #e0f2fe; color: #0369a1; }
+.status-ongoing  { background: #dcfce7; color: $color-success; }
+.status-finished { background: #f3f4f6; color: #6b7280; }
+
+.result-badge {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: $radius-full;
+}
+
+.result-win  { background: #dcfce7; color: $color-success; }
+.result-loss { background: #fee2e2; color: $color-error; }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-md;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.joined-badge {
+  font-size: 0.875rem;
+  color: $color-success;
+  font-weight: 600;
+}
+
+// Comments
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.comment {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  padding: 0.6rem 0.75rem;
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: $space-xs;
+  }
+
+  &-author {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  &-date {
+    font-size: $font-size-sm;
+    color: var(--color-text-muted);
+  }
+
+  &-text {
+    font-size: 0.9rem;
+    color: var(--color-text);
+  }
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-md;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  resize: vertical;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+}
+
+// Greeting
+.greeting {
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+
+  &-user {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+  }
+}
+
+.avatar-icon--img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}

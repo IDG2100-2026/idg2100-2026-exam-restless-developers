@@ -1,0 +1,84 @@
+### Base URL
+@baseUrl = http://localhost:3000/api
+
+### Register a new user
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "email": "test@pokerdice.com",
+    "password": "test123",
+    "age": 21
+}
+
+### Login
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "username": "Nicolai",
+    "password": "nico123"
+}
+
+### Get a user by ID
+GET {{baseUrl}}/users/69d01c439e9aaf1f3c2f8e6b
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+### Update email
+PATCH {{baseUrl}}/users/69d01c439e9aaf1f3c2f8e6b
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "email": "newemail@pokerdice.com"
+}
+
+### Update password
+PATCH {{baseUrl}}/users/69d01c439e9aaf1f3c2f8e6b
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "password": "newpassword123"
+}
+
+### Update bio
+PATCH {{baseUrl}}/users/69d01c439e9aaf1f3c2f8e6b
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "aboutMe": "I love Spanish Poker Dice!"
+}
+
+### Update appearance preferences
+PATCH {{baseUrl}}/users/69d01c439e9aaf1f3c2f8e6b
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "preferences": {
+        "theme": "dark",
+        "boardColor": "#1e1e1e",
+        "sound": true,
+        "lobbySize": 5
+    }
+}
+
+### Get all users - admin only
+GET {{baseUrl}}/users
+x-user-role: admin
+
+### Search users - admin only
+GET {{baseUrl}}/users?search=Nicolai
+x-user-role: admin
+
+### Ban a user - admin only
+PATCH {{baseUrl}}/users/69d01c439e9aaf1f3c2f8e6b/ban
+x-user-role: admin

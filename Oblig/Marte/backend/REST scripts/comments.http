@@ -1,0 +1,54 @@
+### Base URL
+@baseUrl = http://localhost:3000/api
+
+### Add a comment to a game (registered user)
+POST {{baseUrl}}/comments
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "content": "What a great game!",
+    "gameId": "69d01c439e9aaf1f3c2f8e70"
+}
+
+### Add a comment to a game (anonymous - no auth headers required)
+POST {{baseUrl}}/comments
+Content-Type: application/json
+
+{
+    "content": "Nice game!",
+    "gameId": "69d01c439e9aaf1f3c2f8e70"
+}
+
+### Add a comment to a tournament (registered user)
+POST {{baseUrl}}/comments
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "content": "Can't wait for this tournament!",
+    "tournamentId": "69d01c439e9aaf1f3c2f8e75"
+}
+
+### Add a comment to a tournament (anonymous - no auth headers required)
+POST {{baseUrl}}/comments
+Content-Type: application/json
+
+{
+    "content": "Looks fun!",
+    "tournamentId": "69d01c439e9aaf1f3c2f8e75"
+}
+
+### Get all comments - admin only
+GET {{baseUrl}}/comments
+x-user-role: admin
+
+### Delete a comment - admin only
+DELETE {{baseUrl}}/comments/69d0559e2d1bddcf39e3ec48
+x-user-role: admin
+
+### Search comments - admin only
+GET {{baseUrl}}/comments?search=rematch
+x-user-role: admin

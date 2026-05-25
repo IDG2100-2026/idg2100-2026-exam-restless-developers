@@ -1,0 +1,16 @@
+// Variables must come first
+@use 'variables';
+
+// Base & layout
+@use 'base';
+@use 'layout';
+@use 'components';
+@use 'customizer';
+
+// Pages
+@use 'pages/home';
+@use 'pages/game';
+@use 'pages/tournaments';
+@use 'pages/profile';
+@use 'pages/create-game';
+@use 'pages/content';

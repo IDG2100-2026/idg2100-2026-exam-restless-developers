@@ -1,0 +1,17 @@
+### Base URL
+@baseUrl = http://localhost:3000/api
+
+### Get leaderboard sorted by wins (default)
+GET {{baseUrl}}/leaderboard
+
+### Get leaderboard sorted by win percentage
+GET {{baseUrl}}/leaderboard?sortBy=winPercentage
+
+### Get leaderboard sorted by total matches
+GET {{baseUrl}}/leaderboard?sortBy=totalMatches
+
+### Get leaderboard sorted by ELO rating
+GET {{baseUrl}}/leaderboard?sortBy=eloRating
+
+### Get leaderboard with pagination
+GET {{baseUrl}}/leaderboard?sortBy=wins&page=1&limit=3

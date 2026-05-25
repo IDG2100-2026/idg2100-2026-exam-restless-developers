@@ -1,0 +1,78 @@
+### Base URL
+@baseUrl = http://localhost:3000/api
+
+### Get all games
+GET {{baseUrl}}/games
+
+### Get waiting games only (lobby)
+GET {{baseUrl}}/games?status=waiting
+
+### Get finished games only
+GET {{baseUrl}}/games?status=finished
+
+### Get games with pagination
+GET {{baseUrl}}/games?status=waiting&page=1&limit=10
+
+### Get platform activity
+GET {{baseUrl}}/games/activity
+
+### Get a game by ID 
+GET {{baseUrl}}/games/69d01c439e9aaf1f3c2f8e72
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6c
+
+### Create a new game (registered user)
+POST {{baseUrl}}/games
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6c
+
+{
+    "rounds": 5,
+    "straightsAllowed": true,
+    "timePerRound": 10,
+    "isAnonymous": false
+}
+
+### Create a new game (anonymous - no auth headers required, always isAnonymous)
+POST {{baseUrl}}/games
+Content-Type: application/json
+
+{
+    "rounds": 3,
+    "straightsAllowed": false,
+    "timePerRound": 10,
+    "isAnonymous": true
+}
+
+### Join a game
+POST {{baseUrl}}/games/69d051f9d9414c0323d246dc/join
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6d
+
+### Save game result 
+PATCH {{baseUrl}}/games/69d051f9d9414c0323d246dc/result
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6c
+
+{
+    "winnerId": "69d01c439e9aaf1f3c2f8e6c",
+    "rolls": [[1,2,3,4,5], [2,2,3,4,6]],
+    "holds": [[true,true,true,true,true], [false,false,true,false,false]],
+    "finalHands": ["straight", "pair"]
+}
+
+### Save tournament game result
+PATCH {{baseUrl}}/games/69d11f13597bcf5f7848c489/result
+Content-Type: application/json
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+{
+    "winnerId": "69d01c439e9aaf1f3c2f8e6b",
+    "rolls": [[1,2,3,4,5], [2,2,3,4,6]],
+    "holds": [[true,true,true,true,true], [false,false,true,false,false]],
+    "finalHands": ["straight", "pair"]
+}

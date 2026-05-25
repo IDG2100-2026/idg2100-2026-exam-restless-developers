@@ -1,0 +1,50 @@
+### Base URL
+@baseUrl = http://localhost:3000/api
+
+### Get all tournaments
+GET {{baseUrl}}/tournaments
+
+### Get all upcoming tournaments
+GET {{baseUrl}}/tournaments?status=upcoming
+
+### Get a tournament by ID
+GET {{baseUrl}}/tournaments/69d01c439e9aaf1f3c2f8e75
+
+### Create a tournament - admin only
+POST {{baseUrl}}/tournaments
+Content-Type: application/json
+x-user-role: admin
+x-user-id: 69d01c439e9aaf1f3c2f8e6a
+
+{
+    "title": "Summer Cup 2026",
+    "description": "The summer poker dice championship.",
+    "rounds": 3,
+    "straightsAllowed": false,
+    "timePerRound": 5,
+    "startDate": "2026-07-01",
+    "minPlayers": 2,
+    "maxPlayers": 8,
+    "breakBetweenRounds": 10,
+    "trophyTitle": "Summer Cup Trophy"
+}
+
+### Join a tournament
+POST {{baseUrl}}/tournaments/69d11e81597bcf5f7848c481/join
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6b
+
+### Join a tournament as Marte
+POST {{baseUrl}}/tournaments/69d11e81597bcf5f7848c481/join
+x-user-role: user
+x-user-id: 69d01c439e9aaf1f3c2f8e6c
+
+### Start a tournament - admin only
+POST {{baseUrl}}/tournaments/69d11e81597bcf5f7848c481/start
+x-user-role: admin
+x-user-id: 69d01c439e9aaf1f3c2f8e6a
+
+### Advance to next round - admin only
+POST {{baseUrl}}/tournaments/69d11e81597bcf5f7848c481/nextround
+x-user-role: admin
+x-user-id: 69d01c439e9aaf1f3c2f8e6a
