@@ -9,7 +9,7 @@ function TournamentOverview() {
   useEffect(() => {
     async function fetchTournaments() {
       try {
-        const response = await fetch("http://localhost:6767/tournaments");
+        const response = await fetch("http://localhost:6767/api/v1/tournaments");
 
         if (!response.ok) {
           throw new Error("Could not fetch tournaments");
@@ -57,7 +57,7 @@ function TournamentOverview() {
         <div className="tournament-overview-list">
           {tournaments.map((tournament) => (
             <Link
-              to={`/tournament/${tournament._id}`}
+              to={`/tournaments/${tournament._id}`}
               className="tournament-overview-item"
               key={tournament._id}
             >

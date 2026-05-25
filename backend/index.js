@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/users", usersRoutes);
-app.use("/tournaments", tournamentRoutes);
+app.use("/api/v1/tournaments", tournamentRoutes);
 
 const PORT = process.env.BACKEND_PORT || 6767;
 
