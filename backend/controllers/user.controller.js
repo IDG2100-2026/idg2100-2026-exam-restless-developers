@@ -71,7 +71,7 @@ export async function loginUser(req, res) {
       });
     }
 
-    const token = generateToken(user);
+    const token = generateToken(user, req.ip);
 
     res.json({
       message: "Login successful",
