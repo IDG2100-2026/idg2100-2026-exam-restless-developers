@@ -34,7 +34,7 @@ function App() {
           <Route path="/tournaments" element={<TournamentList />} />
           <Route path="/tournaments/:id" element={<TournamentPage />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/create-tournament" element={<CreateTournament />} />
+          <Route path="/admin/tournaments/create" element={<CreateTournament />} />
         </Routes>
       </main>
 

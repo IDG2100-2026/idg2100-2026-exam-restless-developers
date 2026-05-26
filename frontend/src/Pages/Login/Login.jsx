@@ -34,6 +34,7 @@ function Login() {
 
       localStorage.setItem("currentUserId", idToStore);
       localStorage.setItem("currentUsername", user.username);
+      localStorage.setItem("isAdmin", "true"); //TEMPORARY WHILE DEVELOPING
 
       navigate("/profile");
     } catch (err) {
