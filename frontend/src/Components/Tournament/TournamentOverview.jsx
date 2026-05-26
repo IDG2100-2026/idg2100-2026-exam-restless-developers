@@ -42,7 +42,10 @@ function TournamentOverview() {
   return (
     <section className="tournament-overview">
       <div className="tournament-overview-header">
-        <h2>Upcoming Tournaments</h2>
+        <div>
+          <span className="tournament-overview-kicker">Tournaments</span>
+          <h2>Upcoming tournaments</h2>
+        </div>
 
         <Link to="/tournaments" className="view-all-tournaments">
           View all
@@ -61,15 +64,15 @@ function TournamentOverview() {
               className="tournament-overview-item"
               key={tournament._id}
             >
-              <div>
+              <div className="tournament-overview-main">
                 <h3>{tournament.title}</h3>
                 <p>{formatDate(tournament.startDate)}</p>
               </div>
 
               <div className="overview-tournament-meta">
-                <span>
+                <strong>
                   {tournament.players?.length || 0}/{tournament.maxPlayers}
-                </span>
+                </strong>
                 <span>players</span>
               </div>
             </Link>
