@@ -13,7 +13,9 @@ function TournamentPage() {
   useEffect(() => {
     async function fetchTournament() {
       try {
-        const response = await fetch(`http://localhost:6767/api/v1/tournaments/${id}`);
+        const response = await fetch(
+          `http://localhost:6767/api/v1/tournaments/${id}`
+        );
 
         if (!response.ok) {
           throw new Error("Could not fetch tournament");
@@ -52,10 +54,10 @@ function TournamentPage() {
 
     return tournament.players.some((player) => {
       if (typeof player === "string") {
-        return player === currentUserId;
+        return player.toString() === currentUserId.toString();
       }
 
-      return player._id === currentUserId;
+      return player._id?.toString() === currentUserId.toString();
     });
   }
 
@@ -64,9 +66,9 @@ function TournamentPage() {
       setActionMessage("");
       setIsSubmitting(true);
 
-      const currentUserId = getCurrentUserId();
+      const token = localStorage.getItem("token");
 
-      if (!currentUserId) {
+      if (!token) {
         setActionMessage("You must be logged in to join a tournament.");
         return;
       }
@@ -77,10 +79,8 @@ function TournamentPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            userId: currentUserId,
-          }),
         }
       );
 
@@ -104,9 +104,9 @@ function TournamentPage() {
       setActionMessage("");
       setIsSubmitting(true);
 
-      const currentUserId = getCurrentUserId();
+      const token = localStorage.getItem("token");
 
-      if (!currentUserId) {
+      if (!token) {
         setActionMessage("You must be logged in to leave a tournament.");
         return;
       }
@@ -117,10 +117,8 @@ function TournamentPage() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            userId: currentUserId,
-          }),
         }
       );
 
@@ -179,11 +177,7 @@ function TournamentPage() {
     }
 
     if (tournament.status === "ongoing") {
-      return (
-        <button className="primary-action-button">
-          Spectate tournament
-        </button>
-      );
+      return <button className="primary-action-button">Spectate tournament</button>;
     }
 
     return (
@@ -284,7 +278,9 @@ function TournamentPage() {
           {tournament.status === "ongoing" && (
             <section className="detail-card">
               <h2>Standings</h2>
-              <p>Standings will be shown here when tournament rounds are active.</p>
+              <p>
+                Standings will be shown here when tournament rounds are active.
+              </p>
             </section>
           )}
 

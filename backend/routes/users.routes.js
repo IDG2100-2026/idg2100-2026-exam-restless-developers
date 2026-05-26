@@ -1,5 +1,14 @@
 import express from "express";
-import userController from "../controllers/user.controller.js";
+
+import {
+  getAllusers,
+  getUser,
+  createUser,
+  loginUser,
+  updateUser,
+  deleteUser,
+  verifyUserEmail,
+} from "../controllers/user.controller.js";
 
 import {
   validateUserId,
@@ -9,29 +18,18 @@ import {
 
 const router = express.Router();
 
-router.get("/", userController.getAllusers);
+router.get("/", getAllusers);
 
-router.get(
-  "/:uid",
-  validateUserId(),
-  userController.getUser
-);
+router.get("/:uid", validateUserId(), getUser);
 
-router.post(
-  "/",
-  validateCreateUser(),
-  userController.createUser
-);
+router.post("/", validateCreateUser(), createUser);
 
-router.post(
-  "/login",
-  validateLoginUser(),
-  userController.loginUser
-);
+router.post("/login", validateLoginUser(), loginUser);
 
-router.post("/verify", userController.verifyUserEmail);
+router.post("/verify", verifyUserEmail);
 
-router.put("/:uid", userController.updateUser);
-router.delete("/:uid", userController.deleteUser);
+router.put("/:uid", updateUser);
+
+router.delete("/:uid", deleteUser);
 
 export default router;

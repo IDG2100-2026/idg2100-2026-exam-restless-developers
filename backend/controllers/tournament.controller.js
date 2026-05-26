@@ -1,3 +1,4 @@
+
 import Tournament from "../models/tournament.js";
 
 export async function getAllTournaments(req, res) {
@@ -44,7 +45,7 @@ export async function getTournamentById(req, res) {
 export async function joinTournament(req, res) {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
@@ -76,7 +77,7 @@ export async function joinTournament(req, res) {
       });
     }
 
-    tournament.players.push(userId);
+    tournament.players.push(req.user._id);
 
     await tournament.save();
 
@@ -94,12 +95,10 @@ export async function joinTournament(req, res) {
   }
 }
 
-
-
 export async function leaveTournament(req, res) {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
@@ -139,8 +138,6 @@ export async function leaveTournament(req, res) {
   }
 }
 
-
-
 export async function createTournament(req, res) {
   try {
     const {
@@ -172,8 +169,6 @@ export async function createTournament(req, res) {
       players: [],
       standings: [],
       status: "upcoming",
-
-      // midlertidig:
       author: req.user._id,
     });
 

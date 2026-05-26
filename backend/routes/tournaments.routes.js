@@ -11,7 +11,6 @@ import {
 
 import {
   validateTournamentId,
-  validateJoinTournament,
   validateCreateTournament,
 } from "../validator/tournament.validator.js";
 
@@ -34,15 +33,15 @@ router.get(
 
 router.post(
   "/:id/players",
+  requireAuth,
   validateTournamentId,
-  validateJoinTournament,
   joinTournament
 );
 
 router.delete(
   "/:id/players",
+  requireAuth,
   validateTournamentId,
-  validateJoinTournament,
   leaveTournament
 );
 
