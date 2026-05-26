@@ -227,15 +227,6 @@ function TournamentList() {
       <section className="tournament-hero">
         <span className="hero-kicker">Spanish Poker Dice Arena</span>
 
-          <div className="hero-actions">
-            <Link
-              to="/create-tournament"
-              className="create-tournament-button"
-            >
-              Create Tournament
-            </Link>
-          </div>
-
         <p>
           Join upcoming tournaments, spectate live battles, or explore previous
           winners and trophies.
