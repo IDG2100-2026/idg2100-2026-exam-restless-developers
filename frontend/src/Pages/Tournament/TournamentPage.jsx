@@ -69,7 +69,7 @@ function TournamentPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setActionMessage("You must be logged in to join a tournament.");
+        window.location.href = "/401";
         return;
       }
 
@@ -85,6 +85,11 @@ function TournamentPage() {
       );
 
       const data = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(data.message || "Could not join tournament");
@@ -107,7 +112,7 @@ function TournamentPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setActionMessage("You must be logged in to leave a tournament.");
+        window.location.href = "/401";
         return;
       }
 
@@ -123,6 +128,11 @@ function TournamentPage() {
       );
 
       const data = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(data.message || "Could not leave tournament");
