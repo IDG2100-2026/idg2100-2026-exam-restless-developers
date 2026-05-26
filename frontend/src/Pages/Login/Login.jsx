@@ -23,6 +23,9 @@ function Login() {
       });
 
       const user = res.data.user;
+
+      localStorage.setItem("token", res.data.token);
+      
       const idToStore = user._id || user.uid || user.id;
       localStorage.setItem("currentUserId", idToStore);
       localStorage.setItem("currentUsername", user.username);

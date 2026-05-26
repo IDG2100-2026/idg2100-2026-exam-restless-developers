@@ -95,7 +95,7 @@ const tournamentSchema = new Schema(
     author: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: false,
+      required: true,
     },
 
     trophy: {

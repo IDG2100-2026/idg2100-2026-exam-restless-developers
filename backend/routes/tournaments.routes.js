@@ -1,4 +1,5 @@
 import express from "express";
+import { requireAuth } from "../middleware/auth.middleware.js";
 
 import {
   getAllTournaments,
@@ -20,6 +21,7 @@ router.get("/", getAllTournaments);
 
 router.post(
   "/",
+  requireAuth,
   validateCreateTournament,
   createTournament
 );
