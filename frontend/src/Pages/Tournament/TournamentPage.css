@@ -1,8 +1,9 @@
 .single-tournament-page {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.5rem 2rem 3rem;
+  padding: 1.25rem 2rem 3rem;
   color: #2c2a28;
+  text-align: left;
 }
 
 /* ---------------- BACK LINK ---------------- */
@@ -11,15 +12,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-
-  margin-bottom: 1.25rem;
-
+  margin-bottom: 1rem;
   color: #6b5d4d;
   text-decoration: none;
-
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
-
   transition: 0.2s ease;
 }
 
@@ -30,41 +27,33 @@
 /* ---------------- HERO ---------------- */
 
 .single-tournament-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: center;
+  gap: 1.5rem;
 
-  padding: 1.5rem;
+  padding: 1.4rem;
+  margin-bottom: 1.5rem;
 
-  border-radius: 22px;
-
+  border-radius: 20px;
   background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.65), transparent 35%),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.7), transparent 35%),
     linear-gradient(135deg, #f7f4ee, #eee7dc);
-
   border: 1px solid #ddd6c8;
-
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
-
-  margin-bottom: 2rem;
 }
 
 .single-tournament-hero h1 {
-  margin: 0.8rem 0 0.65rem;
-
-  font-size: 2rem;
+  margin: 0.65rem 0 0.45rem;
+  font-size: 1.8rem;
   line-height: 1.1;
-
   color: #2c2a28;
 }
 
 .single-tournament-hero p {
   margin: 0;
-
-  max-width: 700px;
-
-  line-height: 1.7;
+  max-width: 680px;
+  line-height: 1.55;
   color: #5f5a52;
 }
 
@@ -74,16 +63,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   width: fit-content;
-
   border-radius: 999px;
-
-  padding: 0.32rem 0.75rem;
-
-  font-size: 0.72rem;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.7rem;
   font-weight: 800;
-
   text-transform: capitalize;
   letter-spacing: 0.03em;
 }
@@ -106,64 +90,47 @@
 /* ---------------- HERO ACTIONS ---------------- */
 
 .hero-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-
-  min-width: 260px;
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
 }
 
 .hero-actions > p {
   margin: 0;
-
-  padding: 0.8rem 1rem;
-
-  border-radius: 14px;
-
-  background: rgba(255, 255, 255, 0.45);
-
+  padding: 0.75rem 0.9rem;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.55);
   border: 1px solid #ddd6c8;
-
-  font-size: 0.9rem;
-  font-weight: 700;
-
+  font-size: 0.86rem;
+  font-weight: 800;
   color: #5f5a52;
+  text-align: center;
 }
 
 /* ---------------- COUNTDOWN ---------------- */
 
 .countdown-box {
-  padding: 0.85rem 1rem;
-
-  border-radius: 14px;
-
+  padding: 0.8rem 0.9rem;
+  border-radius: 13px;
   background: #fffdf9;
-
   border: 1px solid #ddd6c8;
-
   text-align: center;
 }
 
 .countdown-box span {
   display: block;
-
-  margin-bottom: 0.25rem;
-
-  font-size: 0.68rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.66rem;
   font-weight: 800;
-
   letter-spacing: 0.08em;
   text-transform: uppercase;
-
   color: #6b5d4d;
 }
 
 .countdown-box strong {
   display: block;
-
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.2;
-
   color: #2c2a28;
 }
 
@@ -173,17 +140,12 @@
 .secondary-action-button,
 .disabled-action-button {
   width: 100%;
-
   border: none;
-  border-radius: 14px;
-
-  padding: 0.95rem 1.2rem;
-
-  font-size: 0.92rem;
+  border-radius: 13px;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
   font-weight: 800;
-
   cursor: pointer;
-
   transition:
     transform 0.2s ease,
     background 0.2s ease,
@@ -226,17 +188,11 @@
 
 .join-message {
   margin: 0;
-
-  padding: 0.75rem 0.9rem;
-
+  padding: 0.7rem 0.85rem;
   border-radius: 12px;
-
   background: #f7f4ee;
-
   border: 1px solid #ddd6c8;
-
-  font-size: 0.85rem;
-
+  font-size: 0.84rem;
   color: #5f5a52;
 }
 
@@ -244,51 +200,46 @@
 
 .tournament-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 1.25rem;
+  align-items: start;
 }
 
 .tournament-main-content {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
 .tournament-sidebar {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
   align-self: start;
+  position: sticky;
+  top: 1rem;
 }
 
 /* ---------------- DETAIL CARDS ---------------- */
 
 .detail-card,
 .trophy-card {
-  padding: 1.2rem;
-
-  border-radius: 18px;
-
+  padding: 1rem;
+  border-radius: 17px;
   background: #fffdf9;
-
   border: 1px solid #e4ddd1;
-
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.025);
 }
 
 .detail-card h2,
 .trophy-card h2 {
-  margin: 0 0 0.9rem;
-
-  font-size: 1.05rem;
-
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
   color: #2c2a28;
 }
 
 .detail-card p,
 .trophy-card p {
   margin: 0;
-
-  line-height: 1.6;
-
+  line-height: 1.55;
   color: #5f5a52;
 }
 
@@ -296,35 +247,27 @@
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.8rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.65rem;
 }
 
 .settings-grid div {
-  padding: 0.9rem;
-
-  border-radius: 14px;
-
+  padding: 0.75rem;
+  border-radius: 13px;
   background: #f3efe7;
-
   text-align: center;
 }
 
 .settings-grid strong {
   display: block;
-
-  font-size: 1rem;
-
+  font-size: 0.95rem;
   color: #36453b;
 }
 
 .settings-grid span {
   display: block;
-
-  margin-top: 0.2rem;
-
-  font-size: 0.75rem;
-
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
   color: #6b7280;
 }
 
@@ -337,25 +280,19 @@
 .trophy-card img,
 .large-trophy-placeholder {
   width: 100%;
-  max-width: 220px;
-  height: 220px;
-
-  margin: 0 auto 1rem;
-
-  border-radius: 18px;
-
+  max-width: 180px;
+  height: 180px;
+  margin: 0 auto 0.85rem;
+  border-radius: 16px;
   object-fit: cover;
 }
 
 .large-trophy-placeholder {
   display: grid;
   place-items: center;
-
   background: #f7f4ee;
-
   border: 1px solid #e5ddd1;
-
-  font-size: 5rem;
+  font-size: 4rem;
 }
 
 /* ---------------- PLAYERS ---------------- */
@@ -364,23 +301,119 @@
   list-style: none;
   padding: 0;
   margin: 0;
-
   display: grid;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .players-list li {
-  padding: 0.75rem 0.9rem;
-
+  padding: 0.65rem 0.8rem;
   border-radius: 12px;
-
   background: #f7f4ee;
-
   border: 1px solid #e5ddd1;
-
-  font-size: 0.88rem;
-
+  font-size: 0.86rem;
   color: #2c2a28;
+}
+
+/* ---------------- ROUND / PAIRINGS ---------------- */
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.round-indicator {
+  padding: 0.42rem 0.75rem;
+  border-radius: 999px;
+  background: #ece7dd;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #3f3a34;
+  white-space: nowrap;
+}
+
+.next-round-time {
+  display: none;
+}
+
+.pairings-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pairing-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 0.75rem 0.85rem;
+  border-radius: 13px;
+  background: #f8f5ef;
+  border: 1px solid #e4dbce;
+}
+
+.pairing-players {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.pairing-players span {
+  padding: 0.38rem 0.65rem;
+  border-radius: 999px;
+  background: #fffdf9;
+  border: 1px solid #ddd2c2;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2c2a28;
+}
+
+.pairing-status {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* ---------------- STANDINGS ---------------- */
+
+.standings-table {
+  display: grid;
+  gap: 0;
+}
+
+.standings-header,
+.standings-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 80px 80px 80px;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.standings-header {
+  padding: 0 0 0.45rem;
+  border-bottom: 1px solid #e5ded1;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.standings-row {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f0ebe3;
+  font-size: 0.9rem;
+  color: #2d2a26;
+}
+
+.standings-row:last-child {
+  border-bottom: none;
 }
 
 /* ---------------- STATES ---------------- */
@@ -398,32 +431,40 @@
 
 /* ---------------- RESPONSIVE ---------------- */
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .tournament-layout {
     grid-template-columns: 1fr;
   }
 
   .tournament-sidebar {
+    position: static;
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 850px) {
   .single-tournament-hero {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .hero-actions {
     width: 100%;
-    min-width: 0;
-  }
-
-  .settings-grid {
-    grid-template-columns: 1fr;
   }
 
   .tournament-sidebar {
     grid-template-columns: 1fr;
+  }
+
+  .pairing-card {
+    grid-template-columns: 1fr;
+  }
+
+  .pairing-status {
+    white-space: normal;
   }
 }
 
@@ -433,15 +474,26 @@
   }
 
   .single-tournament-hero {
-    padding: 1.2rem;
+    padding: 1.1rem;
   }
 
   .single-tournament-hero h1 {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
   }
 
   .detail-card,
   .trophy-card {
-    padding: 1rem;
+    padding: 0.9rem;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .standings-header,
+  .standings-row {
+    grid-template-columns: 32px minmax(0, 1fr) 60px 60px 70px;
+    gap: 0.45rem;
+    font-size: 0.78rem;
   }
 }

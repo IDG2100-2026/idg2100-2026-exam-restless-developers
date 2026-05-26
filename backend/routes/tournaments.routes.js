@@ -7,6 +7,8 @@ import {
   joinTournament,
   leaveTournament,
   createTournament,
+  startTournament,
+  recordRoundResult,
 } from "../controllers/tournament.controller.js";
 
 import {
@@ -18,31 +20,16 @@ const router = express.Router();
 
 router.get("/", getAllTournaments);
 
-router.post(
-  "/",
-  requireAuth,
-  validateCreateTournament,
-  createTournament
-);
+router.post("/", requireAuth, validateCreateTournament, createTournament);
 
-router.get(
-  "/:id",
-  validateTournamentId,
-  getTournamentById
-);
+router.get("/:id", validateTournamentId, getTournamentById);
 
-router.post(
-  "/:id/players",
-  requireAuth,
-  validateTournamentId,
-  joinTournament
-);
+router.post("/:id/players", requireAuth, validateTournamentId, joinTournament);
 
-router.delete(
-  "/:id/players",
-  requireAuth,
-  validateTournamentId,
-  leaveTournament
-);
+router.delete("/:id/players", requireAuth, validateTournamentId, leaveTournament);
+
+router.post("/:id/start", requireAuth, validateTournamentId, startTournament);
+
+router.post("/:id/rounds/:roundNumber/results", requireAuth, validateTournamentId, recordRoundResult);
 
 export default router;

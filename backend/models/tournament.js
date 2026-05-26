@@ -40,6 +40,17 @@ const tournamentSchema = new Schema(
       required: true,
     },
 
+    nextRoundStart: {
+      type: Date,
+      default: null,
+    },
+
+    currentRound: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     gameVariant: {
       straightsAllowed: {
         type: Boolean,
@@ -72,6 +83,61 @@ const tournamentSchema = new Schema(
       max: 10,
     },
 
+    rounds: [
+      {
+        roundNumber: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+
+        status: {
+          type: String,
+          enum: ["pending", "active", "completed"],
+          default: "pending",
+        },
+
+        pairings: [
+          {
+            players: [
+              {
+                type: Schema.Types.ObjectId,
+                ref: "User",
+              },
+            ],
+
+            winner: {
+              type: Schema.Types.ObjectId,
+              ref: "User",
+              default: null,
+            },
+
+            pointsAwarded: {
+              type: Number,
+              default: 0,
+              min: 0,
+            },
+
+            game: {
+              type: Schema.Types.ObjectId,
+              ref: "Game",
+              default: null,
+            },
+          },
+        ],
+
+        startedAt: {
+          type: Date,
+          default: null,
+        },
+
+        completedAt: {
+          type: Date,
+          default: null,
+        },
+      },
+    ],
+
     buyIn: {
       type: Number,
       enum: BUY_INS,
@@ -96,6 +162,12 @@ const tournamentSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+
+    winner: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
 
     trophy: {
