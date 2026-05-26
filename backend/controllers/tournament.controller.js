@@ -174,7 +174,7 @@ export async function createTournament(req, res) {
       status: "upcoming",
 
       // midlertidig:
-      author: req.body.author,
+      author: req.user._id,
     });
 
     const populatedTournament = await Tournament.findById(tournament._id)

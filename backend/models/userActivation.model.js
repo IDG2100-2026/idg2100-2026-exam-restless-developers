@@ -1,0 +1,25 @@
+import mongoose from "mongoose";
+
+const userActivationSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    lowercase: true,
+    trim: true,
+  },
+
+  code: {
+    type: String,
+    required: true,
+  },
+
+  expiresAt: {
+    type: Date,
+    required: true,
+  },
+});
+
+export default mongoose.model(
+  "UserActivation",
+  userActivationSchema
+);

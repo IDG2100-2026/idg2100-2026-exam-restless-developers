@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { hashPWD } from "../utils/hash.js";
+import UserActivation from "./userActivation.model.js";
 
 import {
   MIN_AGE,
@@ -17,7 +18,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     max: [
-      Number.MAX_SAFE_INTERGER,
+      Number.MAX_SAFE_INTEGER,
       "Your ID cannot be longer than the max safe interger",
     ],
     index: true,
@@ -74,7 +75,10 @@ const userSchema = new mongoose.Schema({
         "This email is already in use for an account that has not been activated.",
     },
   },
-
+  isEmailVerified: {
+  type: Boolean,
+  default: false,
+},
   dob: {
     type: Number,
     required: true,
