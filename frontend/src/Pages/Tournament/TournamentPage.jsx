@@ -9,6 +9,7 @@ function TournamentPage() {
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
     async function fetchTournament() {
@@ -30,6 +31,40 @@ function TournamentPage() {
 
     fetchTournament();
   }, [id]);
+
+  useEffect(() => {
+    if (!tournament?.startDate) {
+      return;
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const start = new Date(tournament.startDate);
+      const difference = start - now;
+
+      if (difference <= 0) {
+        setTimeLeft("Tournament has started");
+        return;
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / (1000 * 60)) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+      } else {
+        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+      }
+    }
+
+    updateCountdown();
+
+    const intervalId = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [tournament]);
 
   function formatDate(date) {
     return new Date(date).toLocaleString("en-GB", {
@@ -137,6 +172,18 @@ function TournamentPage() {
     }
   }
 
+  function renderCountdownLabel() {
+    if (tournament.status === "upcoming") {
+      return "Starts in";
+    }
+
+    if (tournament.status === "ongoing") {
+      return "Status";
+    }
+
+    return "Ended";
+  }
+
   function renderTournamentAction() {
     const currentUserJoined = isCurrentUserJoined();
 
@@ -177,7 +224,11 @@ function TournamentPage() {
     }
 
     if (tournament.status === "ongoing") {
-      return <button className="primary-action-button">Spectate tournament</button>;
+      return (
+        <button className="primary-action-button">
+          Spectate tournament
+        </button>
+      );
     }
 
     return (
@@ -214,6 +265,11 @@ function TournamentPage() {
 
         <div className="hero-actions">
           <p>{formatDate(tournament.startDate)}</p>
+
+          <div className="countdown-box">
+            <span>{renderCountdownLabel()}</span>
+            <strong>{timeLeft}</strong>
+          </div>
 
           {renderTournamentAction()}
 

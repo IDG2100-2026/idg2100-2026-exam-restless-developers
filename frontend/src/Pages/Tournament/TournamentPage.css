@@ -1,101 +1,298 @@
 .single-tournament-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
-  color: #18181b;
+  padding: 1.5rem 2rem 3rem;
+  color: #2c2a28;
 }
 
+/* ---------------- BACK LINK ---------------- */
+
 .back-link {
-  display: inline-block;
-  margin-bottom: 1rem;
-  color: #064e3b;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  margin-bottom: 1.25rem;
+
+  color: #6b5d4d;
   text-decoration: none;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  transition: 0.2s ease;
 }
+
+.back-link:hover {
+  color: #2c2a28;
+}
+
+/* ---------------- HERO ---------------- */
 
 .single-tournament-hero {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: 2rem;
-  padding: 2.5rem;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #064e3b, #022c22);
-  color: white;
+
+  padding: 1.5rem;
+
+  border-radius: 22px;
+
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.65), transparent 35%),
+    linear-gradient(135deg, #f7f4ee, #eee7dc);
+
+  border: 1px solid #ddd6c8;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
+
+  margin-bottom: 2rem;
 }
 
 .single-tournament-hero h1 {
-  margin: 1rem 0;
-  font-size: 2.6rem;
+  margin: 0.8rem 0 0.65rem;
+
+  font-size: 2rem;
+  line-height: 1.1;
+
+  color: #2c2a28;
 }
 
 .single-tournament-hero p {
   margin: 0;
-  max-width: 650px;
-  line-height: 1.6;
-  color: #d1fae5;
+
+  max-width: 700px;
+
+  line-height: 1.7;
+  color: #5f5a52;
 }
+
+/* ---------------- STATUS BADGES ---------------- */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  border-radius: 999px;
+
+  padding: 0.32rem 0.75rem;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+}
+
+.status-badge.upcoming {
+  background: #e7efe7;
+  color: #4c6252;
+}
+
+.status-badge.ongoing {
+  background: #dfeee5;
+  color: #3f5d4c;
+}
+
+.status-badge.finished {
+  background: #ece8e1;
+  color: #6b645c;
+}
+
+/* ---------------- HERO ACTIONS ---------------- */
 
 .hero-actions {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 1rem;
-  min-width: 220px;
+  gap: 0.9rem;
+
+  min-width: 260px;
 }
 
-.primary-action-button,
-.disabled-action-button {
-  border: none;
-  border-radius: 999px;
-  padding: 0.85rem 1.4rem;
+.hero-actions > p {
+  margin: 0;
+
+  padding: 0.8rem 1rem;
+
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.45);
+
+  border: 1px solid #ddd6c8;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  color: #5f5a52;
+}
+
+/* ---------------- COUNTDOWN ---------------- */
+
+.countdown-box {
+  padding: 0.85rem 1rem;
+
+  border-radius: 14px;
+
+  background: #fffdf9;
+
+  border: 1px solid #ddd6c8;
+
+  text-align: center;
+}
+
+.countdown-box span {
+  display: block;
+
+  margin-bottom: 0.25rem;
+
+  font-size: 0.68rem;
   font-weight: 800;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #6b5d4d;
+}
+
+.countdown-box strong {
+  display: block;
+
+  font-size: 1.1rem;
+  line-height: 1.2;
+
+  color: #2c2a28;
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+.primary-action-button,
+.secondary-action-button,
+.disabled-action-button {
+  width: 100%;
+
+  border: none;
+  border-radius: 14px;
+
+  padding: 0.95rem 1.2rem;
+
+  font-size: 0.92rem;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .primary-action-button {
-  background: #ffffff;
-  color: #064e3b;
-  cursor: pointer;
+  background: #dfe7df;
+  color: #425448;
+}
+
+.primary-action-button:hover {
+  background: #d2ded2;
+  transform: translateY(-1px);
+}
+
+.secondary-action-button {
+  background: #ece8e1;
+  color: #5f5a52;
+}
+
+.secondary-action-button:hover {
+  background: #e1dbd2;
+  transform: translateY(-1px);
 }
 
 .disabled-action-button {
-  background: #d1d5db;
-  color: #4b5563;
+  background: #e7e3dc;
+  color: #90867a;
+  cursor: not-allowed;
 }
+
+.primary-action-button:disabled,
+.secondary-action-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ---------------- ACTION MESSAGE ---------------- */
+
+.join-message {
+  margin: 0;
+
+  padding: 0.75rem 0.9rem;
+
+  border-radius: 12px;
+
+  background: #f7f4ee;
+
+  border: 1px solid #ddd6c8;
+
+  font-size: 0.85rem;
+
+  color: #5f5a52;
+}
+
+/* ---------------- MAIN LAYOUT ---------------- */
 
 .tournament-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 1.5rem;
-  margin-top: 1.5rem;
 }
 
-.tournament-main-content,
+.tournament-main-content {
+  display: grid;
+  gap: 1rem;
+}
+
 .tournament-sidebar {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
+  align-self: start;
 }
+
+/* ---------------- DETAIL CARDS ---------------- */
 
 .detail-card,
 .trophy-card {
-  padding: 1.5rem;
-  border-radius: 20px;
-  background: #fffdf7;
-  border: 1px solid #d6d3d1;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  padding: 1.2rem;
+
+  border-radius: 18px;
+
+  background: #fffdf9;
+
+  border: 1px solid #e4ddd1;
+
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.025);
 }
 
 .detail-card h2,
 .trophy-card h2 {
-  margin: 0 0 1rem;
-  color: #064e3b;
+  margin: 0 0 0.9rem;
+
+  font-size: 1.05rem;
+
+  color: #2c2a28;
 }
 
 .detail-card p,
 .trophy-card p {
   margin: 0;
+
   line-height: 1.6;
-  color: #4b5563;
+
+  color: #5f5a52;
 }
+
+/* ---------------- SETTINGS GRID ---------------- */
 
 .settings-grid {
   display: grid;
@@ -104,93 +301,128 @@
 }
 
 .settings-grid div {
-  padding: 1rem;
+  padding: 0.9rem;
+
   border-radius: 14px;
-  background: #a8cfbd;
+
+  background: #f3efe7;
+
   text-align: center;
 }
 
 .settings-grid strong {
   display: block;
-  color: #064e3b;
-  font-size: 1.1rem;
+
+  font-size: 1rem;
+
+  color: #36453b;
 }
 
 .settings-grid span {
-  font-size: 0.8rem;
-  color: #374151;
+  display: block;
+
+  margin-top: 0.2rem;
+
+  font-size: 0.75rem;
+
+  color: #6b7280;
+}
+
+/* ---------------- TROPHY ---------------- */
+
+.trophy-card {
+  text-align: center;
 }
 
 .trophy-card img,
 .large-trophy-placeholder {
   width: 100%;
-  height: 180px;
-  border-radius: 16px;
+  max-width: 220px;
+  height: 220px;
+
+  margin: 0 auto 1rem;
+
+  border-radius: 18px;
+
   object-fit: cover;
-  margin-bottom: 1rem;
 }
 
 .large-trophy-placeholder {
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #064e3b, #022c22);
-  font-size: 4rem;
+
+  background: #f7f4ee;
+
+  border: 1px solid #e5ddd1;
+
+  font-size: 5rem;
 }
+
+/* ---------------- PLAYERS ---------------- */
 
 .players-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
-  padding-left: 1.2rem;
-  color: #374151;
+
+  display: grid;
+  gap: 0.5rem;
 }
 
-.status-badge {
-  width: fit-content;
-  border-radius: 999px;
-  padding: 0.3rem 0.75rem;
-  font-weight: 800;
-  text-transform: capitalize;
+.players-list li {
+  padding: 0.75rem 0.9rem;
+
+  border-radius: 12px;
+
+  background: #f7f4ee;
+
+  border: 1px solid #e5ddd1;
+
+  font-size: 0.88rem;
+
+  color: #2c2a28;
 }
 
-.status-badge.upcoming {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
+/* ---------------- STATES ---------------- */
 
-.status-badge.ongoing {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status-badge.finished {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.tournament-page-error,
-.tournament-page-loading {
+.tournament-page-loading,
+.tournament-page-error {
   padding: 2rem;
   text-align: center;
+}
+
+.tournament-page-error {
+  color: #9f1239;
   font-weight: 700;
 }
 
-.join-message {
-  margin: 0;
-  max-width: 220px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #d1fae5;
+/* ---------------- RESPONSIVE ---------------- */
+
+@media (max-width: 1000px) {
+  .tournament-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-sidebar {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 850px) {
   .single-tournament-hero {
     flex-direction: column;
   }
 
   .hero-actions {
-    align-items: flex-start;
+    width: 100%;
+    min-width: 0;
   }
 
-  .tournament-layout {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tournament-sidebar {
     grid-template-columns: 1fr;
   }
 }
@@ -201,14 +433,15 @@
   }
 
   .single-tournament-hero {
-    padding: 1.5rem;
+    padding: 1.2rem;
   }
 
   .single-tournament-hero h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
-  .settings-grid {
-    grid-template-columns: 1fr;
+  .detail-card,
+  .trophy-card {
+    padding: 1rem;
   }
 }

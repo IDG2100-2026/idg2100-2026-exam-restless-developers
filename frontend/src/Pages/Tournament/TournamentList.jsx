@@ -9,9 +9,9 @@ function TournamentList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("date");
 
-  const [visibleOngoing, setVisibleOngoing] = useState(3);
-  const [visibleUpcoming, setVisibleUpcoming] = useState(3);
-  const [visiblePast, setVisiblePast] = useState(3);
+  const [visibleOngoing, setVisibleOngoing] = useState(8);
+  const [visibleUpcoming, setVisibleUpcoming] = useState(8);
+  const [visiblePast, setVisiblePast] = useState(8);
 
   useEffect(() => {
     async function fetchTournaments() {
@@ -80,7 +80,7 @@ function TournamentList() {
     });
   }
 
-  function shortenText(text, maxLength = 90) {
+  function shortenText(text, maxLength = 85) {
     if (!text) {
       return "No description available.";
     }
@@ -93,75 +93,77 @@ function TournamentList() {
   }
 
   function renderTournamentCard(tournament) {
+    const hasTrophyImage =
+      tournament.trophy?.imageUrl &&
+      tournament.trophy.imageUrl.trim() !== "";
+
     return (
       <Link
         to={`/tournaments/${tournament._id}`}
         className="tournament-card"
         key={tournament._id}
       >
-        <div className="tournament-card-header">
+        <div className="tournament-card-status">
           <span className={`status-badge ${tournament.status}`}>
             {tournament.status}
           </span>
+        </div>
 
+        <div className="tournament-card-main">
+          <h3>{tournament.title}</h3>
+          <p>{shortenText(tournament.description)}</p>
+        </div>
+
+        <div className="tournament-card-date">
           <span>{formatDate(tournament.startDate)}</span>
         </div>
 
-        <h3>{tournament.title}</h3>
-
-        <p className="tournament-description">
-          {shortenText(tournament.description)}
-        </p>
-
-        <div className="tournament-stats">
-          <div>
-            <strong>
-              {tournament.players?.length || 0}/{tournament.maxPlayers}
-            </strong>
-            <span>Players</span>
-          </div>
-
-          <div>
-            <strong>{tournament.buyIn}</strong>
-            <span>Buy-in</span>
-          </div>
-
-          <div>
-            <strong>{tournament.tournamentRounds}</strong>
-            <span>Rounds</span>
-          </div>
+        <div className="tournament-card-stat">
+          <strong>
+            {tournament.players?.length || 0}/{tournament.maxPlayers}
+          </strong>
+          <span>Players</span>
         </div>
 
-        <div className="tournament-meta">
-          <p>
-            <strong>Rules:</strong> {tournament.rules}
-          </p>
-
-          <p>
-            <strong>Author:</strong>{" "}
-            {tournament.author?.username || "Platform"}
-          </p>
+        <div className="tournament-card-stat">
+          <strong>{tournament.buyIn}</strong>
+          <span>Buy-in</span>
         </div>
 
-        <div className="trophy-box">
-          {tournament.trophy?.imageUrl ? (
-            <img
-              src={tournament.trophy.imageUrl}
-              alt={tournament.trophy?.title || "Tournament trophy"}
-              className="trophy-image"
-            />
+        <div className="tournament-card-stat">
+          <strong>{tournament.tournamentRounds}</strong>
+          <span>Rounds</span>
+        </div>
+
+        <div className="tournament-card-trophy">
+          {hasTrophyImage ? (
+            <>
+              <img
+                src={tournament.trophy.imageUrl}
+                alt={tournament.trophy?.title || "Tournament trophy"}
+                className="trophy-image"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                  event.currentTarget.nextElementSibling.style.display = "grid";
+                }}
+              />
+
+              <div className="trophy-placeholder hidden-trophy-placeholder">
+                🏆
+              </div>
+            </>
           ) : (
             <div className="trophy-placeholder">🏆</div>
           )}
 
           <div>
             <strong>{tournament.trophy?.title || "Champion Trophy"}</strong>
-            <p>
+            <span>
               {shortenText(
                 tournament.trophy?.description || "Awarded to the winner.",
-                70
+                42
               )}
-            </p>
+            </span>
           </div>
         </div>
       </Link>
@@ -201,16 +203,16 @@ function TournamentList() {
               {visibleCount < tournaments.length && (
                 <button
                   className="load-more-button"
-                  onClick={() => setVisibleCount((prev) => prev + 3)}
+                  onClick={() => setVisibleCount((prev) => prev + 8)}
                 >
                   Load more
                 </button>
               )}
 
-              {visibleCount > 3 && (
+              {visibleCount > 8 && (
                 <button
                   className="show-less-button"
-                  onClick={() => setVisibleCount(3)}
+                  onClick={() => setVisibleCount(8)}
                 >
                   Show less
                 </button>
@@ -224,37 +226,35 @@ function TournamentList() {
 
   return (
     <main className="tournament-page">
-      <section className="tournament-hero">
-        <span className="hero-kicker">Spanish Poker Dice Arena</span>
+      <section className="tournament-toolbar">
+        <div className="toolbar-heading">
+          <span className="toolbar-kicker">Tournaments</span>
+          <h1>Spanish Poker Dice Arena</h1>
+        </div>
 
-        <p>
-          Join upcoming tournaments, spectate live battles, or explore previous
-          winners and trophies.
-        </p>
-      </section>
+        <div className="tournament-controls">
+          <label>
+            Search
+            <input
+              type="text"
+              placeholder="Search tournaments..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
+          </label>
 
-      <section className="tournament-controls">
-        <label>
-          Search tournaments
-          <input
-            type="text"
-            placeholder="Type at least 3 characters..."
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </label>
-
-        <label>
-          Sort by
-          <select
-            value={sortBy}
-            onChange={(event) => setSortBy(event.target.value)}
-          >
-            <option value="date">Date</option>
-            <option value="title">Title</option>
-            <option value="players">Number of players</option>
-          </select>
-        </label>
+          <label>
+            Sort by
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+            >
+              <option value="date">Date</option>
+              <option value="title">Title</option>
+              <option value="players">Players</option>
+            </select>
+          </label>
+        </div>
       </section>
 
       {error && <p className="tournament-error">{error}</p>}
