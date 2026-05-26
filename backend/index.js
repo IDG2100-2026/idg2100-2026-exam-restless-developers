@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db.config.js";
 import tournamentRoutes from "./routes/tournaments.routes.js";
 import usersRoutes from "./routes/users.routes.js";
+import matchRoutes from "./routes/matches.routes.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/tournaments", tournamentRoutes);
+app.use("/api/v1/matches", matchRoutes);
 
 const PORT = process.env.BACKEND_PORT || 6767;
 
