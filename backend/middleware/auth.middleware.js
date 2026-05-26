@@ -1,3 +1,4 @@
+import SecurityIncident from "../models/securityIncident.js";
 import User from "../models/user.js";
 import { verifyToken } from "../utils/jwt.js";
 
@@ -13,6 +14,21 @@ export async function requireAuth(req, res, next) {
 
     const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token);
+    const currentIp = req.ip;
+
+    if (decoded.ip && decoded.ip !== currentIp) {
+      await SecurityIncident.create({
+        type: "ip_change",
+        userId: decoded.id,
+        tokenIp: decoded.ip,
+        requestIp: currentIp,
+        userAgent: req.get("user-agent") || null,
+      });
+
+      return res.status(401).json({
+        message: "IP address changed. Please obtain a new access token.",
+      });
+    }
 
     const user = await User.findById(decoded.id).select("-pwd");
 

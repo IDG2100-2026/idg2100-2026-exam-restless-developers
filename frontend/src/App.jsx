@@ -15,6 +15,8 @@ import TournamentList from "./Pages/Tournament/TournamentList.jsx";
 import TournamentPage from "./Pages/Tournament/TournamentPage.jsx";
 import Profile from "./Pages/User/Profile.jsx";
 import CreateTournament from "./Pages/Tournament/CreateTournament.jsx";
+import Unauthorized from "./Pages/Errors/Unauthorized.jsx";
+import NotFound from "./Pages/Errors/NotFound.jsx";
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
           <Route path="/tournaments/:id" element={<TournamentPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin/tournaments/create" element={<CreateTournament />} />
+          <Route path="/401" element={<Unauthorized />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

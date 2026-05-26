@@ -2,11 +2,12 @@ import jwt from "jsonwebtoken";
 
 const { JWT_SECRET } = process.env;
 
-export function generateToken(user) {
+export function generateToken(user, ip) {
   return jwt.sign(
     {
       id: user._id,
       username: user.username,
+      ip,
     },
     JWT_SECRET,
     {
