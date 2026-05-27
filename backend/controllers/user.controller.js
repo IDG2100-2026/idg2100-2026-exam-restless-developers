@@ -1,5 +1,8 @@
 import { matchedData } from "express-validator";
-import userServices from "../services/user.services.js";
+import userServices, {
+  updateUser as updateUserService,
+  deleteUser as deleteUserService,
+} from "../services/user.services.js";
 import { generateToken } from "../utils/jwt.js";
 
 export async function getAllusers(req, res) {
@@ -26,6 +29,8 @@ export async function createUser(req, res) {
     pwd: data.password,
     email: data.email,
     dob: data.dob,
+    aboutMe: "",
+    profileImage: "",
   };
 
   const result = await userServices.createUser(newUser);
@@ -38,16 +43,17 @@ export async function updateUser(req, res) {
   const data = matchedData(req);
 
   const updatedUser = {
-    username: data.username,
-    pwd: data.password,
+    password: data.password,
     email: data.email,
+    aboutMe: data.aboutMe,
+    profileImage: data.profileImage,
     dob: data.dob,
   };
 
-  const userUpdated = await userServices.updateUser(uid, updatedUser);
+  const userUpdated = await updateUserService(uid, updatedUser);
 
   if (userUpdated) {
-    res.json({ message: "User updated successfully" });
+    res.json({ message: "User updated successfully", user: userUpdated });
   } else {
     res.status(404).json({ error: "User not found" });
   }
@@ -75,6 +81,8 @@ export async function loginUser(req, res) {
         uid: user.uid,
         username: user.username,
         email: user.email,
+        aboutMe: user.aboutMe,
+        profileImage: user.profileImage,
         elo: user.elo,
       },
     });
@@ -89,7 +97,7 @@ export async function loginUser(req, res) {
 
 export async function deleteUser(req, res) {
   const uid = req.params.uid;
-  const userDeleted = await userServices.deleteUser(uid);
+  const userDeleted = await deleteUserService(uid);
 
   if (userDeleted) {
     res.json({ message: "User deleted successfully" });

@@ -1,6 +1,19 @@
 import User from "../models/user.js";
 import { checkPWD } from "../utils/hash.js";
 
+function buildUserQuery(uid) {
+  if (/^[0-9a-fA-F]{24}$/.test(uid)) {
+    return { _id: uid };
+  }
+
+  const numberId = Number(uid);
+  if (!Number.isNaN(numberId)) {
+    return { uid: numberId };
+  }
+
+  return { username: uid };
+}
+
 export async function getAllUsers() {
   return User.find().select("-pwd");
 }
@@ -66,6 +79,46 @@ export async function checkUsernameExists(username) {
   return User.findOne({ username });
 }
 
+export async function updateUser(uid, updatedData) {
+  const query = buildUserQuery(uid);
+  const user = await User.findOne(query);
+
+  if (!user) {
+    return null;
+  }
+
+  if (typeof updatedData.email !== "undefined") {
+    user.email = updatedData.email;
+  }
+
+  if (typeof updatedData.aboutMe !== "undefined") {
+    user.aboutMe = updatedData.aboutMe;
+  }
+
+  if (typeof updatedData.profileImage !== "undefined") {
+    user.profileImage = updatedData.profileImage;
+  }
+
+  if (typeof updatedData.password !== "undefined" && updatedData.password) {
+    user.pwd = updatedData.password;
+  }
+
+  if (typeof updatedData.dob !== "undefined") {
+    user.dob = updatedData.dob;
+  }
+
+  const savedUser = await user.save();
+  const userObj = savedUser.toObject();
+  delete userObj.pwd;
+  return userObj;
+}
+
+export async function deleteUser(uid) {
+  const query = buildUserQuery(uid);
+  const deletedUser = await User.findOneAndDelete(query);
+  return Boolean(deletedUser);
+}
+
 
 
 
@@ -76,4 +129,6 @@ export default {
   authenticateUser,
   checkuserExists,
   checkUsernameExists,
+  updateUser,
+  deleteUser,
 };

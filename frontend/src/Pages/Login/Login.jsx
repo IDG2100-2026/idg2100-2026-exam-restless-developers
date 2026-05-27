@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_BASE = "http://localhost:6767/api/v1";
+
 function Login() {
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const [password, setPassword] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -18,23 +19,19 @@ function Login() {
     }
 
     try {
-      const res = await axios.post(
-        "http://localhost:6767/api/v1/users/login",
-        {
-          username: username.trim(),
-          password,
-        }
-      );
+      const res = await axios.post(`${API_BASE}/users/login`, {
+        username: username.trim(),
+        password,
+      });
 
       const user = res.data.user;
 
       localStorage.setItem("token", res.data.token);
-
-      const idToStore = user.id;
-
-      localStorage.setItem("currentUserId", idToStore);
+      localStorage.setItem("currentUserId", user.id);
       localStorage.setItem("currentUsername", user.username);
-      localStorage.setItem("isAdmin", "true"); //TEMPORARY WHILE DEVELOPING
+
+      const tokenPayload = JSON.parse(atob(res.data.token.split(".")[1]));
+      localStorage.setItem("isAdmin", String(tokenPayload?.role === "admin"));
 
       navigate("/profile");
     } catch (err) {
@@ -75,6 +72,9 @@ function Login() {
             type="button"
             onClick={() => {
               const guestId = "guest-" + Date.now();
+
+              localStorage.removeItem("token");
+              localStorage.setItem("isAdmin", "false");
 
               localStorage.setItem("currentUserId", guestId);
               localStorage.setItem("currentUsername", "Guest");

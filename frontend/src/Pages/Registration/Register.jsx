@@ -19,10 +19,13 @@ function Register() {
   async function handleRegister(event) {
     event.preventDefault();
 
-    const trimmedUsername = username.trim();
-    const trimmedEmail = email.trim();
-
-    if (!trimmedUsername || !password || !repeatPassword || !trimmedEmail || !dob) {
+    if (
+      !username.trim() ||
+      !password ||
+      !repeatPassword ||
+      !email.trim() ||
+      !dob
+    ) {
       setError("Please fill in all fields");
       return;
     }
@@ -41,18 +44,16 @@ function Register() {
       setError("");
 
       await axios.post(`${API_BASE}/users`, {
-        username: trimmedUsername,
+        username: username.trim(),
         password,
-        email: trimmedEmail,
+        email: email.trim(),
         dob: Number(dob),
       });
 
       navigate("/login");
     } catch (err) {
-      const validationErrors = err.response?.data?.errors;
-
-      if (Array.isArray(validationErrors) && validationErrors.length > 0) {
-        setError(validationErrors.map((item) => item.msg).join(" "));
+      if (Array.isArray(err.response?.data?.errors)) {
+        setError(err.response.data.errors.map((item) => item.msg).join(" "));
         return;
       }
 

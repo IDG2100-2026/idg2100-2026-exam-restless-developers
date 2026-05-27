@@ -72,6 +72,17 @@ const userSchema = new mongoose.Schema({
     default: "user",
   },
 
+  aboutMe: {
+    type: String,
+    default: "",
+    maxlength: [700, "About me cannot be longer than 700 characters"],
+  },
+
+  profileImage: {
+    type: String,
+    default: "",
+  },
+
   dob: {
     type: Number,
     required: true,

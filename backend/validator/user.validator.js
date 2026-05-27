@@ -116,3 +116,49 @@ export function validateLoginUser() {
     handleValidationErrors,
   ];
 }
+
+export function validateUpdateUser() {
+  return [
+    body("email")
+      .optional()
+      .trim()
+      .isEmail()
+      .withMessage("Invalid email format."),
+
+    body("aboutMe")
+      .optional()
+      .isString()
+      .isLength({ max: 700 })
+      .withMessage("About me cannot be longer than 700 characters."),
+
+    body("profileImage")
+      .optional()
+      .isString()
+      .withMessage("Profile image must be a string."),
+
+    body("password")
+      .optional()
+      .trim()
+      .isStrongPassword({
+        minLength: MIN_LENGTH_PWD,
+        minLowercase: MIN_LOWERCASE_USERNAME,
+        minUppercase: MIN_UPPERCASE_USERNAME,
+        minNumbers: 1,
+        minSymbols: MIN_SYMBOLS_USERNAME,
+      })
+      .withMessage(
+        `Password must be between ${MIN_LENGTH_PWD} and ${MAX_LENGTH_PWD} characters long and contain uppercase letters, lowercase letters, numbers, and symbols.`
+      ),
+
+    body("dob")
+      .optional()
+      .isInt({
+        min: new Date().getFullYear() - MAX_AGE,
+        max: new Date().getFullYear() - MIN_AGE,
+      })
+      .withMessage(`User must be between ${MIN_AGE} and ${MAX_AGE} years old.`)
+      .toInt(),
+
+    handleValidationErrors,
+  ];
+}
