@@ -33,23 +33,17 @@ function TournamentPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!tournament) {
-      return;
-    }
+    if (!tournament) return;
 
     function updateCountdown() {
       const now = new Date();
-
       let targetDate = null;
 
       if (tournament.status === "upcoming") {
         targetDate = tournament.startDate;
       }
 
-      if (
-        tournament.status === "ongoing" &&
-        tournament.nextRoundStart
-      ) {
+      if (tournament.status === "ongoing" && tournament.nextRoundStart) {
         targetDate = tournament.nextRoundStart;
       }
 
@@ -61,40 +55,27 @@ function TournamentPage() {
       const difference = new Date(targetDate) - now;
 
       if (difference <= 0) {
-        if (tournament.status === "ongoing") {
-          setTimeLeft("Round starting now");
-        } else {
-          setTimeLeft("Tournament has started");
-        }
-
+        setTimeLeft(
+          tournament.status === "ongoing"
+            ? "Round starting now"
+            : "Tournament has started"
+        );
         return;
       }
 
-      const days = Math.floor(
-        difference / (1000 * 60 * 60 * 24)
-      );
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / (1000 * 60)) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
 
-      const hours = Math.floor(
-        (difference / (1000 * 60 * 60)) % 24
+      setTimeLeft(
+        days > 0
+          ? `${days}d ${hours}h ${minutes}m`
+          : `${hours}h ${minutes}m ${seconds}s`
       );
-
-      const minutes = Math.floor(
-        (difference / (1000 * 60)) % 60
-      );
-
-      const seconds = Math.floor(
-        (difference / 1000) % 60
-      );
-
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
-      } else {
-        setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-      }
     }
 
     updateCountdown();
-
     const intervalId = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(intervalId);
@@ -217,14 +198,8 @@ function TournamentPage() {
   }
 
   function renderCountdownLabel() {
-    if (tournament.status === "upcoming") {
-      return "Starts in";
-    }
-
-    if (tournament.status === "ongoing") {
-      return "Next round in";
-    }
-
+    if (tournament.status === "upcoming") return "Starts in";
+    if (tournament.status === "ongoing") return "Next round in";
     return "Ended";
   }
 
@@ -243,19 +218,11 @@ function TournamentPage() {
       );
     }
 
-    if (tournament.status === "upcoming" && currentUserJoined) {
-      return (
-        <button
-          className="secondary-action-button"
-          onClick={handleLeaveTournament}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Leaving..." : "Leave tournament"}
-        </button>
-      );
-    }
-
-    if (tournament.status === "ongoing" && currentUserJoined) {
+    if (
+      (tournament.status === "upcoming" ||
+        tournament.status === "ongoing") &&
+      currentUserJoined
+    ) {
       return (
         <button
           className="secondary-action-button"
@@ -290,9 +257,7 @@ function TournamentPage() {
     return <p className="tournament-page-loading">Loading tournament...</p>;
   }
 
-  const latestRound = tournament.rounds?.[
-    tournament.rounds.length - 1
-  ];
+  const latestRound = tournament.rounds?.[tournament.rounds.length - 1];
 
   const sortedStandings = [...(tournament.standings || [])].sort(
     (a, b) => b.points - a.points
@@ -325,14 +290,28 @@ function TournamentPage() {
 
           {renderTournamentAction()}
 
-          {actionMessage && (
-            <p className="join-message">{actionMessage}</p>
-          )}
+          {actionMessage && <p className="join-message">{actionMessage}</p>}
         </div>
       </section>
 
       <section className="tournament-layout">
         <div className="tournament-main-content">
+          {tournament.status === "finished" && tournament.winner && (
+            <section className="champion-card">
+              <div className="champion-icon">🏆</div>
+
+              <div>
+                <span className="champion-label">
+                  Tournament Champion
+                </span>
+
+                <h2>{tournament.winner.username}</h2>
+
+                <p>Winner of {tournament.title}</p>
+              </div>
+            </section>
+          )}
+
           <section className="detail-card">
             <h2>Rules</h2>
             <p>{tournament.rules}</p>
@@ -344,10 +323,8 @@ function TournamentPage() {
             <div className="settings-grid">
               <div>
                 <strong>
-                  {tournament.players?.length || 0}/
-                  {tournament.maxPlayers}
+                  {tournament.players?.length || 0}/{tournament.maxPlayers}
                 </strong>
-
                 <span>Players</span>
               </div>
 
@@ -365,7 +342,6 @@ function TournamentPage() {
                 <strong>
                   {tournament.minElo}–{tournament.maxElo}
                 </strong>
-
                 <span>Elo range</span>
               </div>
             </div>
@@ -377,8 +353,7 @@ function TournamentPage() {
             <p>
               {tournament.gameVariant?.rounds} rounds,{" "}
               {tournament.gameVariant?.timeControl}s,{" "}
-              {tournament.gameVariant?.maxPlayersPerGame} players
-              per game.
+              {tournament.gameVariant?.maxPlayersPerGame} players per game.
             </p>
 
             <p>
@@ -389,11 +364,16 @@ function TournamentPage() {
             </p>
           </section>
 
-          {tournament.status === "ongoing" && (
+          {(tournament.status === "ongoing" ||
+            tournament.status === "finished") && (
             <>
               <section className="detail-card">
                 <div className="section-header-row">
-                  <h2>Current Round</h2>
+                  <h2>
+                    {tournament.status === "finished"
+                      ? "Final Round"
+                      : "Current Round"}
+                  </h2>
 
                   <span className="round-indicator">
                     Round {tournament.currentRound} of{" "}
@@ -404,24 +384,21 @@ function TournamentPage() {
                 {latestRound?.pairings?.length > 0 ? (
                   <div className="pairings-list">
                     {latestRound.pairings.map((pairing) => (
-                      <div
-                        className="pairing-card"
-                        key={pairing._id}
-                      >
+                      <div className="pairing-card" key={pairing._id}>
                         <div className="pairing-players">
                           {pairing.players.map((player) => (
-                            <span
-                              key={player._id || player}
-                            >
-                              {player.username ||
-                                "Unknown player"}
+                            <span key={player._id || player}>
+                              {player.username || "Unknown player"}
                             </span>
                           ))}
                         </div>
 
                         <span className="pairing-status">
                           {pairing.winner
-                            ? `Winner: ${pairing.winner.username}`
+                            ? `Winner: ${
+                                pairing.winner.username ||
+                                "Unknown player"
+                              }`
                             : "Game pending"}
                         </span>
                       </div>
@@ -445,27 +422,26 @@ function TournamentPage() {
                       <span>Losses</span>
                     </div>
 
-                    {sortedStandings.map(
-                      (standing, index) => (
-                        <div
-                          className="standings-row"
-                          key={standing._id}
-                        >
-                          <span>{index + 1}</span>
+                    {sortedStandings.map((standing, index) => (
+                      <div className="standings-row" key={standing._id}>
+                        <span>{index + 1}</span>
 
-                          <span>
-                            {standing.player?.username ||
-                              "Unknown"}
-                          </span>
+                        <span className="standings-player">
+                          {standing.player?.username || "Unknown"}
 
-                          <span>{standing.points}</span>
+                          {tournament.winner?._id ===
+                            standing.player?._id && (
+                            <span className="winner-badge">
+                              Champion
+                            </span>
+                          )}
+                        </span>
 
-                          <span>{standing.wins}</span>
-
-                          <span>{standing.losses}</span>
-                        </div>
-                      )
-                    )}
+                        <span>{standing.points}</span>
+                        <span>{standing.wins}</span>
+                        <span>{standing.losses}</span>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p>No standings available yet.</p>
@@ -485,26 +461,14 @@ function TournamentPage() {
             {tournament.trophy?.imageUrl ? (
               <img
                 src={tournament.trophy.imageUrl}
-                alt={
-                  tournament.trophy?.title ||
-                  "Tournament trophy"
-                }
+                alt={tournament.trophy?.title || "Tournament trophy"}
               />
             ) : (
-              <div className="large-trophy-placeholder">
-                🏆
-              </div>
+              <div className="large-trophy-placeholder">🏆</div>
             )}
 
-            <h2>
-              {tournament.trophy?.title ||
-                "Champion Trophy"}
-            </h2>
-
-            <p>
-              {tournament.trophy?.description ||
-                "Awarded to the winner."}
-            </p>
+            <h2>{tournament.trophy?.title || "Champion Trophy"}</h2>
+            <p>{tournament.trophy?.description || "Awarded to the winner."}</p>
           </section>
 
           <section className="detail-card">
@@ -514,8 +478,7 @@ function TournamentPage() {
               <ul className="players-list">
                 {tournament.players.map((player) => (
                   <li key={player._id || player}>
-                    {player.username ||
-                      "Unknown player"}
+                    {player.username || "Unknown player"}
                   </li>
                 ))}
               </ul>
@@ -526,9 +489,7 @@ function TournamentPage() {
 
           <section className="detail-card">
             <h2>Author</h2>
-            <p>
-              {tournament.author?.username || "Platform"}
-            </p>
+            <p>{tournament.author?.username || "Platform"}</p>
           </section>
         </aside>
       </section>
