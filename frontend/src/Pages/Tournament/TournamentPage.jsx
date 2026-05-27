@@ -230,12 +230,16 @@ function TournamentPage() {
       }
 
       const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}/start`,
+        `http://localhost:6767/api/v1/tournaments/${id}`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            status: "ongoing",
+          }),
         }
       );
 
@@ -261,14 +265,92 @@ function TournamentPage() {
 
   function handleEditTournament() {
     navigate(`/admin/tournaments/${id}/edit`);
+}
+
+  async function handleCancelTournament() {
+    try {
+      setActionMessage("");
+      setIsSubmitting(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/401";
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/api/v1/tournaments/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: "cancelled",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not cancel tournament");
+      }
+
+      setTournament(data);
+      setActionMessage("Tournament cancelled.");
+    } catch (error) {
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function handleCancelTournament() {
-    setActionMessage("Cancel tournament backend endpoint is not implemented yet.");
-  }
+  async function handleDeleteTournament() {
+    try {
+      setActionMessage("");
+      setIsSubmitting(true);
 
-  function handleDeleteTournament() {
-    setActionMessage("Delete tournament backend endpoint is not implemented yet.");
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/401";
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/api/v1/tournaments/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Could not delete tournament");
+      }
+
+      navigate("/tournaments");
+    } catch (error) {
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function renderCountdownLabel() {
@@ -277,50 +359,51 @@ function TournamentPage() {
     return "Ended";
   }
 
-  function renderAdminActions() {
+  function renderTopAdminActions() {
     if (!isCurrentUserAdmin()) {
       return null;
     }
 
     return (
-      <div className="admin-actions">
-        <span className="admin-actions-label">Admin actions</span>
-
+      <div className="inline-admin-actions">
         {tournament.status === "upcoming" && (
           <button
-            className="primary-action-button"
+            className="primary-action-button small-action-button"
             type="button"
             onClick={handleStartTournament}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Starting..." : "Start tournament"}
+            {isSubmitting ? "Starting..." : "Start"}
           </button>
         )}
 
         <button
-          className="secondary-action-button"
+          className="secondary-action-button small-action-button"
           type="button"
           onClick={handleEditTournament}
         >
-          Edit tournament
+          Edit
         </button>
 
-        {tournament.status !== "finished" && (
-          <button
-            className="secondary-action-button"
-            type="button"
-            onClick={handleCancelTournament}
-          >
-            Cancel tournament
-          </button>
-        )}
+        {tournament.status !== "finished" &&
+          tournament.status !== "cancelled" && (
+            <button
+              className="secondary-action-button small-action-button"
+              type="button"
+              onClick={handleCancelTournament}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+          )}
 
         <button
-          className="danger-action-button"
+          className="danger-action-button small-action-button"
           type="button"
           onClick={handleDeleteTournament}
+          disabled={isSubmitting}
         >
-          Delete tournament
+          Delete
         </button>
       </div>
     );
@@ -342,8 +425,7 @@ function TournamentPage() {
     }
 
     if (
-      (tournament.status === "upcoming" ||
-        tournament.status === "ongoing") &&
+      (tournament.status === "upcoming" || tournament.status === "ongoing") &&
       currentUserJoined
     ) {
       return (
@@ -361,6 +443,14 @@ function TournamentPage() {
       return (
         <button className="primary-action-button" type="button">
           Spectate tournament
+        </button>
+      );
+    }
+
+    if (tournament.status === "cancelled") {
+      return (
+        <button className="disabled-action-button" disabled>
+          Tournament cancelled
         </button>
       );
     }
@@ -388,9 +478,13 @@ function TournamentPage() {
 
   return (
     <main className="single-tournament-page">
-      <Link to="/tournaments" className="back-link">
-        ← Back to tournaments
-      </Link>
+      <div className="top-actions-row">
+        <Link to="/tournaments" className="back-link">
+          ← Back to tournaments
+        </Link>
+
+        {renderTopAdminActions()}
+      </div>
 
       <section className="single-tournament-hero">
         <div>
@@ -411,8 +505,6 @@ function TournamentPage() {
             <strong>{timeLeft}</strong>
           </div>
 
-          {renderAdminActions()}
-
           {renderTournamentAction()}
 
           {actionMessage && <p className="join-message">{actionMessage}</p>}
@@ -426,9 +518,7 @@ function TournamentPage() {
               <div className="champion-icon">🏆</div>
 
               <div>
-                <span className="champion-label">
-                  Tournament Champion
-                </span>
+                <span className="champion-label">Tournament Champion</span>
 
                 <h2>{tournament.winner.username}</h2>
 
@@ -521,8 +611,7 @@ function TournamentPage() {
                         <span className="pairing-status">
                           {pairing.winner
                             ? `Winner: ${
-                                pairing.winner.username ||
-                                "Unknown player"
+                                pairing.winner.username || "Unknown player"
                               }`
                             : "Game pending"}
                         </span>
@@ -554,11 +643,8 @@ function TournamentPage() {
                         <span className="standings-player">
                           {standing.player?.username || "Unknown"}
 
-                          {tournament.winner?._id ===
-                            standing.player?._id && (
-                            <span className="winner-badge">
-                              Champion
-                            </span>
+                          {tournament.winner?._id === standing.player?._id && (
+                            <span className="winner-badge">Champion</span>
                           )}
                         </span>
 
