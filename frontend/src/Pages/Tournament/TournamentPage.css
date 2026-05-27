@@ -6,7 +6,7 @@
   text-align: left;
 }
 
-/* ---------------- TOP ACTIONS ---------------- */
+/* TOP ACTIONS */
 
 .top-actions-row {
   display: flex;
@@ -23,36 +23,27 @@
   flex-wrap: wrap;
 }
 
-/* FORCE INLINE BUTTONS */
-
 .inline-admin-actions .primary-action-button,
 .inline-admin-actions .secondary-action-button,
 .inline-admin-actions .danger-action-button {
   width: auto;
   flex: 0 0 auto;
-
   min-height: auto;
-
   padding: 0.5rem 0.85rem;
-
   font-size: 0.8rem;
-
   border-radius: 11px;
 }
 
-/* ---------------- BACK LINK ---------------- */
+/* BACK LINK */
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-
   color: #6b5d4d;
   text-decoration: none;
-
   font-size: 0.88rem;
   font-weight: 700;
-
   transition: 0.2s ease;
 }
 
@@ -60,159 +51,19 @@
   color: #2c2a28;
 }
 
-/* ---------------- HERO ---------------- */
-
-.single-tournament-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  align-items: center;
-  gap: 1.5rem;
-
-  padding: 1.4rem;
-  margin-bottom: 1.5rem;
-
-  border-radius: 20px;
-
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.7), transparent 35%),
-    linear-gradient(135deg, #f7f4ee, #eee7dc);
-
-  border: 1px solid #ddd6c8;
-
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
-}
-
-.single-tournament-hero h1 {
-  margin: 0.65rem 0 0.45rem;
-  font-size: 1.8rem;
-  line-height: 1.1;
-  color: #2c2a28;
-}
-
-.single-tournament-hero p {
-  margin: 0;
-  max-width: 680px;
-  line-height: 1.55;
-  color: #5f5a52;
-}
-
-/* ---------------- STATUS BADGES ---------------- */
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: fit-content;
-
-  border-radius: 999px;
-
-  padding: 0.28rem 0.7rem;
-
-  font-size: 0.7rem;
-  font-weight: 800;
-
-  text-transform: capitalize;
-  letter-spacing: 0.03em;
-}
-
-.status-badge.upcoming {
-  background: #e7efe7;
-  color: #4c6252;
-}
-
-.status-badge.ongoing {
-  background: #dfeee5;
-  color: #3f5d4c;
-}
-
-.status-badge.finished {
-  background: #ece8e1;
-  color: #6b645c;
-}
-
-/* ---------------- HERO ACTIONS ---------------- */
-
-.hero-actions {
-  display: grid;
-  gap: 0.7rem;
-  min-width: 0;
-}
-
-.hero-actions > p {
-  margin: 0;
-
-  padding: 0.75rem 0.9rem;
-
-  border-radius: 13px;
-
-  background: rgba(255, 255, 255, 0.55);
-
-  border: 1px solid #ddd6c8;
-
-  font-size: 0.86rem;
-  font-weight: 800;
-
-  color: #5f5a52;
-
-  text-align: center;
-}
-
-/* ---------------- COUNTDOWN ---------------- */
-
-.countdown-box {
-  padding: 0.8rem 0.9rem;
-
-  border-radius: 13px;
-
-  background: #fffdf9;
-
-  border: 1px solid #ddd6c8;
-
-  text-align: center;
-}
-
-.countdown-box span {
-  display: block;
-
-  margin-bottom: 0.2rem;
-
-  font-size: 0.66rem;
-  font-weight: 800;
-
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-
-  color: #6b5d4d;
-}
-
-.countdown-box strong {
-  display: block;
-
-  font-size: 1.05rem;
-  line-height: 1.2;
-
-  color: #2c2a28;
-}
-
-/* ---------------- BUTTONS ---------------- */
+/* BUTTONS */
 
 .primary-action-button,
 .secondary-action-button,
 .disabled-action-button,
 .danger-action-button {
   width: 100%;
-
   border: none;
   border-radius: 13px;
-
   padding: 0.8rem 1rem;
-
   font-size: 0.9rem;
   font-weight: 800;
-
   cursor: pointer;
-
   transition:
     transform 0.2s ease,
     background 0.2s ease,
@@ -262,25 +113,7 @@
   cursor: not-allowed;
 }
 
-/* ---------------- ACTION MESSAGE ---------------- */
-
-.join-message {
-  margin: 0;
-
-  padding: 0.7rem 0.85rem;
-
-  border-radius: 12px;
-
-  background: #f7f4ee;
-
-  border: 1px solid #ddd6c8;
-
-  font-size: 0.84rem;
-
-  color: #5f5a52;
-}
-
-/* ---------------- MAIN LAYOUT ---------------- */
+/* MAIN LAYOUT */
 
 .tournament-layout {
   display: grid;
@@ -294,27 +127,14 @@
   gap: 0.9rem;
 }
 
-.tournament-sidebar {
-  display: grid;
-  gap: 0.9rem;
-  align-self: start;
-
-  position: sticky;
-  top: 1rem;
-}
-
-/* ---------------- DETAIL CARDS ---------------- */
+/* SHARED CARDS */
 
 .detail-card,
 .trophy-card {
   padding: 1rem;
-
   border-radius: 17px;
-
   background: #fffdf9;
-
   border: 1px solid #e4ddd1;
-
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.025);
 }
 
@@ -332,106 +152,59 @@
   color: #5f5a52;
 }
 
-/* ---------------- SETTINGS GRID ---------------- */
+/* CHAMPION CARD */
 
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.65rem;
+.champion-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 17px;
+  background: #fff8df;
+  border: 1px solid #eadc9d;
 }
 
-.settings-grid div {
-  padding: 0.75rem;
-
-  border-radius: 13px;
-
-  background: #f3efe7;
-
-  text-align: center;
+.champion-icon {
+  font-size: 2rem;
 }
 
-.settings-grid strong {
+.champion-label {
   display: block;
-  font-size: 0.95rem;
-  color: #36453b;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #7a5d00;
 }
 
-.settings-grid span {
-  display: block;
-
-  margin-top: 0.15rem;
-
-  font-size: 0.7rem;
-
-  color: #6b7280;
-}
-
-/* ---------------- TROPHY ---------------- */
-
-.trophy-card {
-  text-align: center;
-}
-
-.trophy-card img,
-.large-trophy-placeholder {
-  width: 100%;
-  max-width: 180px;
-  height: 180px;
-
-  margin: 0 auto 0.85rem;
-
-  border-radius: 16px;
-
-  object-fit: cover;
-}
-
-.large-trophy-placeholder {
-  display: grid;
-  place-items: center;
-
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
-
-  font-size: 4rem;
-}
-
-/* ---------------- PLAYERS ---------------- */
-
-.players-list {
-  list-style: none;
-  padding: 0;
+.champion-card h2 {
   margin: 0;
-
-  display: grid;
-  gap: 0.45rem;
-}
-
-.players-list li {
-  padding: 0.65rem 0.8rem;
-
-  border-radius: 12px;
-
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
-
-  font-size: 0.86rem;
-
   color: #2c2a28;
 }
 
-/* ---------------- RESPONSIVE ---------------- */
+.champion-card p {
+  margin: 0.2rem 0 0;
+  color: #5f5a52;
+}
+
+/* LOADING / ERROR */
+
+.tournament-page-error,
+.tournament-page-loading {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+  border-radius: 14px;
+  background: #fffdf9;
+  border: 1px solid #e4ddd1;
+  color: #5f5a52;
+}
+
+/* RESPONSIVE */
 
 @media (max-width: 850px) {
-  .single-tournament-hero {
-    grid-template-columns: 1fr;
-  }
-
   .tournament-layout {
     grid-template-columns: 1fr;
-  }
-
-  .tournament-sidebar {
-    position: static;
   }
 }
 
@@ -443,14 +216,6 @@
   .top-actions-row {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .single-tournament-hero {
-    padding: 1.1rem;
-  }
-
-  .single-tournament-hero h1 {
-    font-size: 1.45rem;
   }
 
   .inline-admin-actions {
