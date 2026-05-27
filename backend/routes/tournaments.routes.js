@@ -1,14 +1,14 @@
 import express from "express";
 import { requireAuth, requireAdmin } from "../middleware/auth.middleware.js";
 
-
 import {
   getAllTournaments,
   getTournamentById,
   joinTournament,
   leaveTournament,
   createTournament,
-  startTournament,
+  updateTournament,
+  deleteTournament,
   recordRoundResult,
 } from "../controllers/tournament.controller.js";
 
@@ -21,16 +21,24 @@ const router = express.Router();
 
 router.get("/", getAllTournaments);
 
-router.post("/", requireAuth, validateCreateTournament, createTournament);
+router.post("/", requireAuth, requireAdmin, validateCreateTournament, createTournament);
 
 router.get("/:id", validateTournamentId, getTournamentById);
+
+router.patch("/:id", requireAuth, requireAdmin, validateTournamentId, updateTournament);
+
+router.delete("/:id", requireAuth, requireAdmin, validateTournamentId, deleteTournament);
 
 router.post("/:id/players", requireAuth, validateTournamentId, joinTournament);
 
 router.delete("/:id/players", requireAuth, validateTournamentId, leaveTournament);
 
-router.post("/:id/start", requireAuth, requireAdmin, validateTournamentId, startTournament);
-
-router.post("/:id/rounds/:roundNumber/results", requireAuth, requireAdmin, validateTournamentId, recordRoundResult);
+router.post(
+  "/:id/rounds/:roundNumber/results",
+  requireAuth,
+  requireAdmin,
+  validateTournamentId,
+  recordRoundResult
+);
 
 export default router;

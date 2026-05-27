@@ -41,6 +41,7 @@ function App() {
           <Route path="/admin/tournaments/create" element={<CreateTournament />} />
           <Route path="/create-game" element={<CreateGame />} />
           <Route path="/game/:id" element={<GamePage />} />
+          <Route path="/admin/tournaments/:id/edit" element={<CreateTournament />} />
           <Route path="/401" element={<Unauthorized />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

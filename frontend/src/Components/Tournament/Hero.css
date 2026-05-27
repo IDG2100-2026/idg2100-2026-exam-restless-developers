@@ -1,0 +1,142 @@
+.single-tournament-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: center;
+  gap: 1.5rem;
+
+  padding: 1.4rem;
+  margin-bottom: 1.5rem;
+
+  border-radius: 20px;
+
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.7), transparent 35%),
+    linear-gradient(135deg, #f7f4ee, #eee7dc);
+
+  border: 1px solid #ddd6c8;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
+}
+
+.single-tournament-hero h1 {
+  margin: 0.65rem 0 0.45rem;
+  font-size: 1.8rem;
+  line-height: 1.1;
+  color: #2c2a28;
+}
+
+.single-tournament-hero p {
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.55;
+  color: #5f5a52;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+
+  border-radius: 999px;
+
+  padding: 0.28rem 0.7rem;
+
+  font-size: 0.7rem;
+  font-weight: 800;
+
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+}
+
+.status-badge.upcoming {
+  background: #e7efe7;
+  color: #4c6252;
+}
+
+.status-badge.ongoing {
+  background: #dfeee5;
+  color: #3f5d4c;
+}
+
+.status-badge.finished {
+  background: #ece8e1;
+  color: #6b645c;
+}
+
+.hero-actions {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.hero-actions > p {
+  margin: 0;
+
+  padding: 0.75rem 0.9rem;
+
+  border-radius: 13px;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  border: 1px solid #ddd6c8;
+
+  font-size: 0.86rem;
+  font-weight: 800;
+
+  color: #5f5a52;
+
+  text-align: center;
+}
+
+.countdown-box {
+  padding: 0.8rem 0.9rem;
+
+  border-radius: 13px;
+
+  background: #fffdf9;
+
+  border: 1px solid #ddd6c8;
+
+  text-align: center;
+}
+
+.countdown-box span {
+  display: block;
+
+  margin-bottom: 0.2rem;
+
+  font-size: 0.66rem;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #6b5d4d;
+}
+
+.countdown-box strong {
+  display: block;
+
+  font-size: 1.05rem;
+  line-height: 1.2;
+
+  color: #2c2a28;
+}
+
+.join-message {
+  margin: 0;
+
+  padding: 0.7rem 0.85rem;
+
+  border-radius: 12px;
+
+  background: #f7f4ee;
+
+  border: 1px solid #ddd6c8;
+
+  font-size: 0.84rem;
+
+  color: #5f5a52;
+}

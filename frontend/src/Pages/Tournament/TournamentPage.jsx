@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { io } from "socket.io-client";
 import "./TournamentPage.css";
+
+import Hero from "../../Components/Tournament/Hero";
+import Comments from "../../Components/Tournament/Comments";
+import Sidebar from "../../Components/Tournament/Sidebar";
+import Standings from "../../Components/Tournament/Standings";
+import Rounds from "../../Components/Tournament/Rounds";
+import Settings from "../../Components/Tournament/Settings";
+import GameVariant from "../../Components/Tournament/GameVariant";
+import Rules from "../../Components/Tournament/Rules";
+
+const socket = io("http://localhost:6767");
 
 function TournamentPage() {
   const { id } = useParams();
@@ -11,6 +23,8 @@ function TournamentPage() {
   const [actionMessage, setActionMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const [comments, setComments] = useState([]);
+  const [commentInput, setCommentInput] = useState("");
 
   useEffect(() => {
     async function fetchTournament() {
@@ -31,6 +45,51 @@ function TournamentPage() {
     }
 
     fetchTournament();
+  }, [id]);
+
+  useEffect(() => {
+    async function fetchComments() {
+      try {
+        const response = await fetch(
+          `http://localhost:6767/api/v1/comments/${id}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Could not fetch comments");
+        }
+
+        const data = await response.json();
+        setComments(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchComments();
+  }, [id]);
+
+  useEffect(() => {
+    socket.on("new-tournament-comment", ({ tournamentId, comment }) => {
+      if (tournamentId !== id) {
+        return;
+      }
+
+      setComments((prevComments) => {
+        const commentAlreadyExists = prevComments.some(
+          (existingComment) => existingComment._id === comment._id
+        );
+
+        if (commentAlreadyExists) {
+          return prevComments;
+        }
+
+        return [comment, ...prevComments];
+      });
+    });
+
+    return () => {
+      socket.off("new-tournament-comment");
+    };
   }, [id]);
 
   useEffect(() => {
@@ -230,12 +289,16 @@ function TournamentPage() {
       }
 
       const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}/start`,
+        `http://localhost:6767/api/v1/tournaments/${id}`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            status: "ongoing",
+          }),
         }
       );
 
@@ -263,12 +326,134 @@ function TournamentPage() {
     navigate(`/admin/tournaments/${id}/edit`);
   }
 
-  function handleCancelTournament() {
-    setActionMessage("Cancel tournament backend endpoint is not implemented yet.");
+  async function handleCancelTournament() {
+    try {
+      setActionMessage("");
+      setIsSubmitting(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/401";
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/api/v1/tournaments/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: "cancelled",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not cancel tournament");
+      }
+
+      setTournament(data);
+      setActionMessage("Tournament cancelled.");
+    } catch (error) {
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function handleDeleteTournament() {
-    setActionMessage("Delete tournament backend endpoint is not implemented yet.");
+  async function handleDeleteTournament() {
+    try {
+      setActionMessage("");
+      setIsSubmitting(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/401";
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/api/v1/tournaments/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Could not delete tournament");
+      }
+
+      navigate("/tournaments");
+    } catch (error) {
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSubmitComment(event) {
+    event.preventDefault();
+
+    try {
+      setActionMessage("");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/401";
+        return;
+      }
+
+      if (!commentInput.trim()) {
+        setActionMessage("Comment cannot be empty.");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/api/v1/comments/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: commentInput,
+          }),
+        }
+      );
+
+      await response.json();
+
+      if (!response.ok) {
+        throw new Error("Could not post comment");
+      }
+
+      setCommentInput("");
+    } catch (error) {
+      setActionMessage(error.message);
+    }
   }
 
   function renderCountdownLabel() {
@@ -277,50 +462,51 @@ function TournamentPage() {
     return "Ended";
   }
 
-  function renderAdminActions() {
+  function renderTopAdminActions() {
     if (!isCurrentUserAdmin()) {
       return null;
     }
 
     return (
-      <div className="admin-actions">
-        <span className="admin-actions-label">Admin actions</span>
-
+      <div className="inline-admin-actions">
         {tournament.status === "upcoming" && (
           <button
-            className="primary-action-button"
+            className="primary-action-button small-action-button"
             type="button"
             onClick={handleStartTournament}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Starting..." : "Start tournament"}
+            {isSubmitting ? "Starting..." : "Start"}
           </button>
         )}
 
         <button
-          className="secondary-action-button"
+          className="secondary-action-button small-action-button"
           type="button"
           onClick={handleEditTournament}
         >
-          Edit tournament
+          Edit
         </button>
 
-        {tournament.status !== "finished" && (
-          <button
-            className="secondary-action-button"
-            type="button"
-            onClick={handleCancelTournament}
-          >
-            Cancel tournament
-          </button>
-        )}
+        {tournament.status !== "finished" &&
+          tournament.status !== "cancelled" && (
+            <button
+              className="secondary-action-button small-action-button"
+              type="button"
+              onClick={handleCancelTournament}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+          )}
 
         <button
-          className="danger-action-button"
+          className="danger-action-button small-action-button"
           type="button"
           onClick={handleDeleteTournament}
+          disabled={isSubmitting}
         >
-          Delete tournament
+          Delete
         </button>
       </div>
     );
@@ -342,8 +528,7 @@ function TournamentPage() {
     }
 
     if (
-      (tournament.status === "upcoming" ||
-        tournament.status === "ongoing") &&
+      (tournament.status === "upcoming" || tournament.status === "ongoing") &&
       currentUserJoined
     ) {
       return (
@@ -361,6 +546,14 @@ function TournamentPage() {
       return (
         <button className="primary-action-button" type="button">
           Spectate tournament
+        </button>
+      );
+    }
+
+    if (tournament.status === "cancelled") {
+      return (
+        <button className="disabled-action-button" disabled>
+          Tournament cancelled
         </button>
       );
     }
@@ -388,36 +581,22 @@ function TournamentPage() {
 
   return (
     <main className="single-tournament-page">
-      <Link to="/tournaments" className="back-link">
-        ← Back to tournaments
-      </Link>
+      <div className="top-actions-row">
+        <Link to="/tournaments" className="back-link">
+          ← Back to tournaments
+        </Link>
 
-      <section className="single-tournament-hero">
-        <div>
-          <span className={`status-badge ${tournament.status}`}>
-            {tournament.status}
-          </span>
+        {renderTopAdminActions()}
+      </div>
 
-          <h1>{tournament.title}</h1>
-
-          <p>{tournament.description}</p>
-        </div>
-
-        <div className="hero-actions">
-          <p>{formatDate(tournament.startDate)}</p>
-
-          <div className="countdown-box">
-            <span>{renderCountdownLabel()}</span>
-            <strong>{timeLeft}</strong>
-          </div>
-
-          {renderAdminActions()}
-
-          {renderTournamentAction()}
-
-          {actionMessage && <p className="join-message">{actionMessage}</p>}
-        </div>
-      </section>
+      <Hero
+        tournament={tournament}
+        formatDate={formatDate}
+        renderCountdownLabel={renderCountdownLabel}
+        timeLeft={timeLeft}
+        renderTournamentAction={renderTournamentAction}
+        actionMessage={actionMessage}
+      />
 
       <section className="tournament-layout">
         <div className="tournament-main-content">
@@ -426,9 +605,7 @@ function TournamentPage() {
               <div className="champion-icon">🏆</div>
 
               <div>
-                <span className="champion-label">
-                  Tournament Champion
-                </span>
+                <span className="champion-label">Tournament Champion</span>
 
                 <h2>{tournament.winner.username}</h2>
 
@@ -437,186 +614,33 @@ function TournamentPage() {
             </section>
           )}
 
-          <section className="detail-card">
-            <h2>Rules</h2>
-            <p>{tournament.rules}</p>
-          </section>
+          <Rules tournament={tournament} />
 
-          <section className="detail-card">
-            <h2>Tournament Settings</h2>
+          <Settings tournament={tournament} />
 
-            <div className="settings-grid">
-              <div>
-                <strong>
-                  {tournament.players?.length || 0}/{tournament.maxPlayers}
-                </strong>
-                <span>Players</span>
-              </div>
-
-              <div>
-                <strong>{tournament.buyIn}</strong>
-                <span>Buy-in</span>
-              </div>
-
-              <div>
-                <strong>{tournament.tournamentRounds}</strong>
-                <span>Tournament rounds</span>
-              </div>
-
-              <div>
-                <strong>
-                  {tournament.minElo}–{tournament.maxElo}
-                </strong>
-                <span>Elo range</span>
-              </div>
-            </div>
-          </section>
-
-          <section className="detail-card">
-            <h2>Game Variant</h2>
-
-            <p>
-              {tournament.gameVariant?.rounds} rounds,{" "}
-              {tournament.gameVariant?.timeControl}s,{" "}
-              {tournament.gameVariant?.maxPlayersPerGame} players per game.
-            </p>
-
-            <p>
-              Straights:{" "}
-              {tournament.gameVariant?.straightsAllowed
-                ? "Allowed"
-                : "Not allowed"}
-            </p>
-          </section>
+          <GameVariant tournament={tournament} />
 
           {(tournament.status === "ongoing" ||
             tournament.status === "finished") && (
             <>
-              <section className="detail-card">
-                <div className="section-header-row">
-                  <h2>
-                    {tournament.status === "finished"
-                      ? "Final Round"
-                      : "Current Round"}
-                  </h2>
+              <Rounds tournament={tournament} latestRound={latestRound} />
 
-                  <span className="round-indicator">
-                    Round {tournament.currentRound} of{" "}
-                    {tournament.tournamentRounds}
-                  </span>
-                </div>
-
-                {latestRound?.pairings?.length > 0 ? (
-                  <div className="pairings-list">
-                    {latestRound.pairings.map((pairing) => (
-                      <div className="pairing-card" key={pairing._id}>
-                        <div className="pairing-players">
-                          {pairing.players.map((player) => (
-                            <span key={player._id || player}>
-                              {player.username || "Unknown player"}
-                            </span>
-                          ))}
-                        </div>
-
-                        <span className="pairing-status">
-                          {pairing.winner
-                            ? `Winner: ${
-                                pairing.winner.username ||
-                                "Unknown player"
-                              }`
-                            : "Game pending"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p>No pairings available yet.</p>
-                )}
-              </section>
-
-              <section className="detail-card">
-                <h2>Standings</h2>
-
-                {sortedStandings.length > 0 ? (
-                  <div className="standings-table">
-                    <div className="standings-header">
-                      <span>#</span>
-                      <span>Player</span>
-                      <span>Points</span>
-                      <span>Wins</span>
-                      <span>Losses</span>
-                    </div>
-
-                    {sortedStandings.map((standing, index) => (
-                      <div className="standings-row" key={standing._id}>
-                        <span>{index + 1}</span>
-
-                        <span className="standings-player">
-                          {standing.player?.username || "Unknown"}
-
-                          {tournament.winner?._id ===
-                            standing.player?._id && (
-                            <span className="winner-badge">
-                              Champion
-                            </span>
-                          )}
-                        </span>
-
-                        <span>{standing.points}</span>
-                        <span>{standing.wins}</span>
-                        <span>{standing.losses}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p>No standings available yet.</p>
-                )}
-              </section>
+              <Standings
+                sortedStandings={sortedStandings}
+                tournament={tournament}
+              />
             </>
           )}
 
-          <section className="detail-card">
-            <h2>Comments</h2>
-            <p>Comments will be added here.</p>
-          </section>
+          <Comments
+            comments={comments}
+            commentInput={commentInput}
+            setCommentInput={setCommentInput}
+            handleSubmitComment={handleSubmitComment}
+          />
         </div>
 
-        <aside className="tournament-sidebar">
-          <section className="trophy-card">
-            {tournament.trophy?.imageUrl ? (
-              <img
-                src={tournament.trophy.imageUrl}
-                alt={tournament.trophy?.title || "Tournament trophy"}
-              />
-            ) : (
-              <div className="large-trophy-placeholder">🏆</div>
-            )}
-
-            <h2>{tournament.trophy?.title || "Champion Trophy"}</h2>
-            <p>{tournament.trophy?.description || "Awarded to the winner."}</p>
-          </section>
-
-          <section className="detail-card">
-            <h2>Players Joined</h2>
-
-            {tournament.players?.length > 0 ? (
-              <ul className="players-list">
-                {tournament.players.map((player) => (
-                  <li key={player._id || player}>
-                    {player.username || "Unknown player"}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No players have joined yet.</p>
-            )}
-          </section>
-
-          <section className="detail-card">
-            <h2>Author</h2>
-            <p>{tournament.author?.username || "Platform"}</p>
-          </section>
-        </aside>
+        <Sidebar tournament={tournament} />
       </section>
     </main>
   );

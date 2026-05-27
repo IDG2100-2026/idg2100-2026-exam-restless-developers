@@ -1,0 +1,39 @@
+.standings-table {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.standings-header,
+.standings-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 80px 80px 80px;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.standings-header {
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.standings-row {
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: #f7f4ee;
+  border: 1px solid #e5ddd1;
+}
+
+.standings-player {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.winner-badge {
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: #efe7c8;
+  color: #7a5d00;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
