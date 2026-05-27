@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import "./TournamentPage.css";
 
 function TournamentPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [tournament, setTournament] = useState(null);
   const [error, setError] = useState("");
@@ -93,6 +94,25 @@ function TournamentPage() {
 
   function getCurrentUserId() {
     return localStorage.getItem("currentUserId");
+  }
+
+  function getCurrentUserRole() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.role || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function isCurrentUserAdmin() {
+    return getCurrentUserRole() === "admin";
   }
 
   function isCurrentUserJoined() {
@@ -197,10 +217,113 @@ function TournamentPage() {
     }
   }
 
+  async function handleStartTournament() {
+    try {
+      setActionMessage("");
+      setIsSubmitting(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        window.location.href = "/401";
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:6767/api/v1/tournaments/${id}/start`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Could not start tournament");
+      }
+
+      setTournament(data);
+      setActionMessage("Tournament started.");
+    } catch (error) {
+      setActionMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleEditTournament() {
+    navigate(`/admin/tournaments/${id}/edit`);
+  }
+
+  function handleCancelTournament() {
+    setActionMessage("Cancel tournament backend endpoint is not implemented yet.");
+  }
+
+  function handleDeleteTournament() {
+    setActionMessage("Delete tournament backend endpoint is not implemented yet.");
+  }
+
   function renderCountdownLabel() {
     if (tournament.status === "upcoming") return "Starts in";
     if (tournament.status === "ongoing") return "Next round in";
     return "Ended";
+  }
+
+  function renderAdminActions() {
+    if (!isCurrentUserAdmin()) {
+      return null;
+    }
+
+    return (
+      <div className="admin-actions">
+        <span className="admin-actions-label">Admin actions</span>
+
+        {tournament.status === "upcoming" && (
+          <button
+            className="primary-action-button"
+            type="button"
+            onClick={handleStartTournament}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Starting..." : "Start tournament"}
+          </button>
+        )}
+
+        <button
+          className="secondary-action-button"
+          type="button"
+          onClick={handleEditTournament}
+        >
+          Edit tournament
+        </button>
+
+        {tournament.status !== "finished" && (
+          <button
+            className="secondary-action-button"
+            type="button"
+            onClick={handleCancelTournament}
+          >
+            Cancel tournament
+          </button>
+        )}
+
+        <button
+          className="danger-action-button"
+          type="button"
+          onClick={handleDeleteTournament}
+        >
+          Delete tournament
+        </button>
+      </div>
+    );
   }
 
   function renderTournamentAction() {
@@ -287,6 +410,8 @@ function TournamentPage() {
             <span>{renderCountdownLabel()}</span>
             <strong>{timeLeft}</strong>
           </div>
+
+          {renderAdminActions()}
 
           {renderTournamentAction()}
 

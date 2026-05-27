@@ -7,6 +7,7 @@ export function generateToken(user, ip) {
     {
       id: user._id,
       username: user.username,
+      role: user.role,
       ip,
     },
     JWT_SECRET,
