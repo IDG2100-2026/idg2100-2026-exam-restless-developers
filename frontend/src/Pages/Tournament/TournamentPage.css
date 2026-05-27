@@ -497,3 +497,114 @@
     font-size: 0.78rem;
   }
 }
+
+.standings-player {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.winner-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.2rem 0.55rem;
+
+  border-radius: 999px;
+
+  background: #efe4b7;
+  color: #6d5520;
+
+  font-size: 0.7rem;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.champion-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 1.4rem;
+
+  border-radius: 20px;
+
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,0.7), transparent 40%),
+    linear-gradient(135deg, #f7f1dc, #efe5bc);
+
+  border: 1px solid #dfcf91;
+
+  box-shadow: 0 10px 24px rgba(0,0,0,0.04);
+}
+
+.champion-icon {
+  font-size: 3rem;
+}
+
+.champion-label {
+  display: inline-block;
+
+  margin-bottom: 0.35rem;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #7a6529;
+}
+
+.champion-card h2 {
+  margin: 0;
+
+  font-size: 2rem;
+
+  color: #2d2618;
+}
+
+.champion-card p {
+  margin-top: 0.35rem;
+  color: #6f6754;
+}
+
+.admin-actions {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border-radius: 14px;
+  background: #fffdf9;
+  border: 1px solid #ddd6c8;
+}
+
+.admin-actions-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b5d4d;
+}
+
+.danger-action-button {
+  width: 100%;
+  border: none;
+  border-radius: 13px;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: #efe2df;
+  color: #7a3b32;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.danger-action-button:hover {
+  background: #e7d2ce;
+  transform: translateY(-1px);
+}

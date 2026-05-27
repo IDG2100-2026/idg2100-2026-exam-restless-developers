@@ -1,5 +1,6 @@
 import express from "express";
-import { requireAuth } from "../middleware/auth.middleware.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.middleware.js";
+
 
 import {
   getAllTournaments,
@@ -28,8 +29,8 @@ router.post("/:id/players", requireAuth, validateTournamentId, joinTournament);
 
 router.delete("/:id/players", requireAuth, validateTournamentId, leaveTournament);
 
-router.post("/:id/start", requireAuth, validateTournamentId, startTournament);
+router.post("/:id/start", requireAuth, requireAdmin, validateTournamentId, startTournament);
 
-router.post("/:id/rounds/:roundNumber/results", requireAuth, validateTournamentId, recordRoundResult);
+router.post("/:id/rounds/:roundNumber/results", requireAuth, requireAdmin, validateTournamentId, recordRoundResult);
 
 export default router;
