@@ -7,7 +7,6 @@ import {
   loginUser,
   updateUser,
   deleteUser,
-  verifyUserEmail,
 } from "../controllers/user.controller.js";
 
 import {
@@ -25,8 +24,6 @@ router.get("/:uid", validateUserId(), getUser);
 router.post("/", validateCreateUser(), createUser);
 
 router.post("/login", validateLoginUser(), loginUser);
-
-router.post("/verify", verifyUserEmail);
 
 router.put("/:uid", updateUser);
 

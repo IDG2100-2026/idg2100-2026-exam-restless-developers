@@ -65,12 +65,6 @@ export async function loginUser(req, res) {
       });
     }
 
-    if (!user.isEmailVerified) {
-      return res.status(403).json({
-        error: "Please verify your email before logging in.",
-      });
-    }
-
     const token = generateToken(user, req.ip);
 
     res.json({
@@ -104,20 +98,6 @@ export async function deleteUser(req, res) {
   }
 }
 
-
-
-export async function verifyUserEmail(req, res) {
-  const { email, code } = req.body;
-
-  const result = await userServices.verifyUserEmail(email, code);
-
-  if (!result.success) {
-    return res.status(400).json({ error: result.message });
-  }
-
-  res.json({ message: result.message });
-}
-
 export default {
   getAllusers,
   getUser,
@@ -125,5 +105,4 @@ export default {
   updateUser,
   loginUser,
   deleteUser,
-  verifyUserEmail,
 };

@@ -76,7 +76,7 @@ export function validateCreateUser() {
         minLength: MIN_LENGTH_PWD,
         minLowercase: MIN_LOWERCASE_USERNAME,
         minUppercase: MIN_UPPERCASE_USERNAME,
-        minNumbers: MIN_NUMBERS_USERNAME,
+        minNumbers: 1,
         minSymbols: MIN_SYMBOLS_USERNAME,
       })
       .withMessage(

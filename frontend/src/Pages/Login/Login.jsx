@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Login() {
@@ -85,6 +85,10 @@ function Login() {
             Continue as Guest
           </button>
         </div>
+
+        <p>
+          No account yet? <Link to="/register">Register here</Link>.
+        </p>
 
         {error && <p style={{ color: "red" }}>{error}</p>}
       </form>

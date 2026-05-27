@@ -9,6 +9,7 @@ import AboutSpanishDice from "./Pages/About/AboutSpanishDice.jsx";
 import Admin from "./Pages/Admin/Admin.jsx";
 import Lobby from "./Pages/Lobby/Lobby.jsx";
 import Login from "./Pages/Login/Login.jsx";
+import Register from "./Pages/Registration/Register.jsx";
 import PrivacyPolicy from "./Pages/PrivacyPolicy/PrivacyPolicy.jsx";
 import Terms from "./Pages/Terms/Terms.jsx";
 import TournamentList from "./Pages/Tournament/TournamentList.jsx";
@@ -31,6 +32,7 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/lobby" element={<Lobby />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/tournaments" element={<TournamentList />} />
