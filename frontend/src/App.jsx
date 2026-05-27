@@ -37,6 +37,7 @@ function App() {
           <Route path="/tournaments/:id" element={<TournamentPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin/tournaments/create" element={<CreateTournament />} />
+          <Route path="/admin/tournaments/:id/edit" element={<CreateTournament />} />
           <Route path="/401" element={<Unauthorized />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

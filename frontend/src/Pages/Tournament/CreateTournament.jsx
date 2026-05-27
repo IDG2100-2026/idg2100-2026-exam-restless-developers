@@ -1,9 +1,12 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "./CreateTournament.css";
 
 function CreateTournament() {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const isEditMode = Boolean(id);
   const today = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
@@ -23,13 +26,51 @@ function CreateTournament() {
     trophyTitle: "",
     trophyDescription: "",
     trophyImageUrl: "",
-    // TODO AFTER AUTH IS IMPLEMENTED:
-    // Re-enable author handling. Backend should use req.user.id.
-    // author: "",
   });
 
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function fetchTournament() {
+      if (!isEditMode) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:6767/api/v1/tournaments/${id}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Could not fetch tournament");
+        }
+
+        setFormData({
+          title: data.title || "",
+          description: data.description || "",
+          startDate: data.startDate ? data.startDate.split("T")[0] : "",
+          straightsAllowed: data.gameVariant?.straightsAllowed ?? true,
+          rounds: String(data.gameVariant?.rounds || 5),
+          timeControl: String(data.gameVariant?.timeControl || 30),
+          maxPlayersPerGame: String(data.gameVariant?.maxPlayersPerGame || 2),
+          tournamentRounds: String(data.tournamentRounds || 3),
+          buyIn: String(data.buyIn || 10),
+          maxPlayers: String(data.maxPlayers || 16),
+          rules: data.rules || "",
+          minElo: String(data.minElo || 0),
+          maxElo: String(data.maxElo || 3000),
+          trophyTitle: data.trophy?.title || "",
+          trophyDescription: data.trophy?.description || "",
+          trophyImageUrl: data.trophy?.imageUrl || "",
+        });
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+
+    fetchTournament();
+  }, [id, isEditMode]);
 
   const handleChange = (event) => {
     const { name, value, type, checked, min, max } = event.target;
@@ -79,26 +120,37 @@ function CreateTournament() {
         description: formData.trophyDescription.trim(),
         imageUrl: formData.trophyImageUrl.trim(),
       },
-
-      // TODO AFTER AUTH IS IMPLEMENTED:
-      // Backend should attach author automatically from logged-in user.
-      // author: formData.author,
     };
 
     try {
-      const response = await fetch("http://localhost:6767/api/v1/tournaments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(tournamentData),
-      });
+      const response = await fetch(
+        isEditMode
+          ? `http://localhost:6767/api/v1/tournaments/${id}`
+          : "http://localhost:6767/api/v1/tournaments",
+        {
+          method: isEditMode ? "PATCH" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(tournamentData),
+        }
+      );
 
       const data = await response.json();
 
+      if (response.status === 401) {
+        window.location.href = "/401";
+        return;
+      }
+
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create tournament");
+        throw new Error(
+          data.message ||
+            (isEditMode
+              ? "Failed to update tournament"
+              : "Failed to create tournament")
+        );
       }
 
       navigate(`/tournaments/${data._id}`);
@@ -111,10 +163,12 @@ function CreateTournament() {
 
   return (
     <div className="create-tournament-container">
-      <h1>Create Tournament</h1>
+      <h1>{isEditMode ? "Edit Tournament" : "Create Tournament"}</h1>
 
       <p className="create-tournament-intro">
-        Create a new tournament for players to join.
+        {isEditMode
+          ? "Edit the tournament details below."
+          : "Create a new tournament for players to join."}
       </p>
 
       {error && <p className="form-error">{error}</p>}
@@ -154,7 +208,7 @@ function CreateTournament() {
             name="startDate"
             value={formData.startDate}
             onChange={handleChange}
-            min={today}
+            min={isEditMode ? undefined : today}
             required
           />
         </label>
@@ -309,14 +363,14 @@ function CreateTournament() {
           />
         </label>
 
-        {/*
-        TODO AFTER AUTH IS IMPLEMENTED:
-        Re-add author handling if needed.
-        Backend should later use req.user.id automatically.
-        */}
-
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Tournament"}
+          {isSubmitting
+            ? isEditMode
+              ? "Saving..."
+              : "Creating..."
+            : isEditMode
+              ? "Save Changes"
+              : "Create Tournament"}
         </button>
       </form>
     </div>
