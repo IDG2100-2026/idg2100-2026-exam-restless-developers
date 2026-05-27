@@ -1,0 +1,31 @@
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.65rem;
+}
+
+.settings-grid div {
+  padding: 0.75rem;
+
+  border-radius: 13px;
+
+  background: #f3efe7;
+
+  text-align: center;
+}
+
+.settings-grid strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #36453b;
+}
+
+.settings-grid span {
+  display: block;
+
+  margin-top: 0.15rem;
+
+  font-size: 0.7rem;
+
+  color: #6b7280;
+}

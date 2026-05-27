@@ -1,0 +1,57 @@
+.tournament-sidebar {
+  display: grid;
+  gap: 0.9rem;
+  align-self: start;
+
+  position: sticky;
+  top: 1rem;
+}
+
+.trophy-card {
+  text-align: center;
+}
+
+.trophy-card img,
+.large-trophy-placeholder {
+  width: 100%;
+  max-width: 180px;
+  height: 180px;
+
+  margin: 0 auto 0.85rem;
+
+  border-radius: 16px;
+
+  object-fit: cover;
+}
+
+.large-trophy-placeholder {
+  display: grid;
+  place-items: center;
+
+  background: #f7f4ee;
+  border: 1px solid #e5ddd1;
+
+  font-size: 4rem;
+}
+
+.players-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  display: grid;
+  gap: 0.45rem;
+}
+
+.players-list li {
+  padding: 0.65rem 0.8rem;
+
+  border-radius: 12px;
+
+  background: #f7f4ee;
+  border: 1px solid #e5ddd1;
+
+  font-size: 0.86rem;
+
+  color: #2c2a28;
+}
