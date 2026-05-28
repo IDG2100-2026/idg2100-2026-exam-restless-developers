@@ -7,13 +7,13 @@ import {
   loginUser,
   updateUser,
   deleteUser,
-  verifyUserEmail,
 } from "../controllers/user.controller.js";
 
 import {
   validateUserId,
   validateCreateUser,
   validateLoginUser,
+  validateUpdateUser,
 } from "../validator/user.validator.js";
 
 const router = express.Router();
@@ -26,9 +26,7 @@ router.post("/", validateCreateUser(), createUser);
 
 router.post("/login", validateLoginUser(), loginUser);
 
-router.post("/verify", verifyUserEmail);
-
-router.put("/:uid", updateUser);
+router.put("/:uid", validateUserId(), validateUpdateUser(), updateUser);
 
 router.delete("/:uid", deleteUser);
 

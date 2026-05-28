@@ -1,6 +1,18 @@
 import User from "../models/user.js";
-import UserActivation from "../models/userActivation.model.js";
-import { hashPWD, checkPWD } from "../utils/hash.js";
+import { checkPWD } from "../utils/hash.js";
+
+function buildUserQuery(uid) {
+  if (/^[0-9a-fA-F]{24}$/.test(uid)) {
+    return { _id: uid };
+  }
+
+  const numberId = Number(uid);
+  if (!Number.isNaN(numberId)) {
+    return { uid: numberId };
+  }
+
+  return { username: uid };
+}
 
 export async function getAllUsers() {
   return User.find().select("-pwd");
@@ -24,30 +36,19 @@ export async function getAUser(uid) {
 }
 
 export async function createUser(usrObj) {
-  const verificationCode = Math.floor(
-    100000 + Math.random() * 900000
-  ).toString();
-
   const newUser = new User({
     uid: Math.floor(Math.random() * 1000000),
     username: usrObj.username,
     email: usrObj.email,
-    pwd: hashPWD(usrObj.pwd),
+    pwd: usrObj.pwd,
     dob: usrObj.dob,
-    isEmailVerified: false,
   });
 
   await newUser.save();
-
-  await UserActivation.create({
-    email: newUser.email,
-    code: verificationCode,
-    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
-  });
-
   return {
     uid: newUser.uid,
-    verificationCode,
+    username: newUser.username,
+    email: newUser.email,
   };
 }
 
@@ -78,30 +79,48 @@ export async function checkUsernameExists(username) {
   return User.findOne({ username });
 }
 
+export async function updateUser(uid, updatedData) {
+  const query = buildUserQuery(uid);
+  const user = await User.findOne(query);
 
-
-
-export async function verifyUserEmail(email, code) {
-  const activation = await UserActivation.findOne({ email, code });
-
-  if (!activation) {
-    return { success: false, message: "Invalid verification code" };
+  if (!user) {
+    return null;
   }
 
-  if (activation.expiresAt < new Date()) {
-    await UserActivation.deleteOne({ email, code });
-    return { success: false, message: "Verification code has expired" };
+  if (typeof updatedData.email !== "undefined") {
+    user.email = updatedData.email;
   }
 
-  await User.findOneAndUpdate(
-    { email },
-    { isEmailVerified: true }
-  );
+  if (typeof updatedData.aboutMe !== "undefined") {
+    user.aboutMe = updatedData.aboutMe;
+  }
 
-  await UserActivation.deleteOne({ email, code });
+  if (typeof updatedData.profileImage !== "undefined") {
+    user.profileImage = updatedData.profileImage;
+  }
 
-  return { success: true, message: "Email verified successfully" };
+  if (typeof updatedData.password !== "undefined" && updatedData.password) {
+    user.pwd = updatedData.password;
+  }
+
+  if (typeof updatedData.dob !== "undefined") {
+    user.dob = updatedData.dob;
+  }
+
+  const savedUser = await user.save();
+  const userObj = savedUser.toObject();
+  delete userObj.pwd;
+  return userObj;
 }
+
+export async function deleteUser(uid) {
+  const query = buildUserQuery(uid);
+  const deletedUser = await User.findOneAndDelete(query);
+  return Boolean(deletedUser);
+}
+
+
+
 
 export default {
   getAllUsers,
@@ -110,5 +129,6 @@ export default {
   authenticateUser,
   checkuserExists,
   checkUsernameExists,
-  verifyUserEmail,
+  updateUser,
+  deleteUser,
 };

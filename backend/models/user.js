@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { hashPWD } from "../utils/hash.js";
-import UserActivation from "./userActivation.model.js";
+import { hashPWD, checkPWD } from "../utils/hash.js";
 
 import {
   MIN_AGE,
@@ -65,25 +64,25 @@ const userSchema = new mongoose.Schema({
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       "Please fill in a valid email address",
     ],
-    // THIS IS TAKEN FROM https://emailregex.com/ || A friend suggested it to me and it seems to work pretty well. Public source of course.
-    validate: {
-      validator: async function (email) {
-        const existing = await UserActivation.exists({ email });
-        return !existing;
-      },
-      message:
-        "This email is already in use for an account that has not been activated.",
-    },
   },
-  isEmailVerified: {
-    type: Boolean,
-    default: false,
-},
+
   role: {
     type: String,
-    enum: ["user", "admin"],
+    enum: ["user", "admin", "anonymous"],
     default: "user",
-},
+  },
+
+  aboutMe: {
+    type: String,
+    default: "",
+    maxlength: [700, "About me cannot be longer than 700 characters"],
+  },
+
+  profileImage: {
+    type: String,
+    default: "",
+  },
+
   dob: {
     type: Number,
     required: true,
@@ -93,12 +92,9 @@ const userSchema = new mongoose.Schema({
         const age = currentYear - year;
         return age >= MIN_AGE && age <= MAX_AGE;
       },
-      message: `User must be between ${MIN_AGE} and ${MAX_AGE} years old. Either you are too young, or you are a troll.`,
-      // Muligens forbedre meldingen xD
+      message: `User must be between ${MIN_AGE} and ${MAX_AGE} years old.`,
     },
   },
-
-  // Er usikker på om jeg må gjøre DOB strengere eller ikke. Spørst veldig på hvordan vi skal gjøre det. Tror det holder med årstall?
 
   elo: {
     type: Number,
@@ -124,8 +120,14 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+userSchema.pre("save", function () {
+  if (this.isModified("pwd")) {
+    this.pwd = hashPWD(this.pwd);
+  }
+});
+
 userSchema.methods.comparePWD = async function (candidatePWD) {
-  return await hashPWD.comparePWD(candidatePWD, this.pwd);
+  return checkPWD(candidatePWD, this.pwd);
 };
 
 export default mongoose.model("User", userSchema);
