@@ -10,6 +10,7 @@ import tournamentRoutes from "./routes/tournaments.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import matchesRoutes from "./routes/matches.routes.js";
 import commentRoutes from "./routes/comments.routes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/tournaments", tournamentRoutes);
 app.use("/api/v1/matches", matchesRoutes);
 app.use("/api/v1/comments", commentRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 const PORT = process.env.BACKEND_PORT || 6767;
 
