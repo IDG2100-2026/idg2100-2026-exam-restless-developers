@@ -18,6 +18,9 @@ import Profile from "./Pages/User/Profile.jsx";
 import CreateTournament from "./Pages/Tournament/CreateTournament.jsx";
 import Unauthorized from "./Pages/Errors/Unauthorized.jsx";
 import NotFound from "./Pages/Errors/NotFound.jsx";
+import AdminUsers from "./Pages/Admin/AdminUsers.jsx";
+import AdminComments from "./Pages/Admin/AdminComments.jsx";
+
 
 function App() {
   return (
@@ -30,6 +33,8 @@ function App() {
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/about-spanish-dice" element={<AboutSpanishDice />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/comments" element={<AdminComments />} />
           <Route path="/lobby" element={<Lobby />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
