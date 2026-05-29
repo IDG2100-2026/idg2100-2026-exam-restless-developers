@@ -19,14 +19,16 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
   },
 });
 
 app.set("io", io);
 
 io.on("connection", (socket) => {
-  console.log("User connected");
+  socket.on("join:match", (matchId) => {
+    socket.join(`match:${matchId}`);
+  });
 });
 
 app.use(cors());

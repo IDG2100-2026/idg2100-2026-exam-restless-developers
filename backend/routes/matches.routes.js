@@ -1,8 +1,9 @@
 import express from "express";
-import { createMatch, getMatch, joinMatch, endTurn, startNextRound, rollDice } from "../controllers/match.controller.js";
+import { listMatches, createMatch, getMatch, joinMatch, endTurn, startNextRound, rollDice } from "../controllers/match.controller.js";
 
 const router = express.Router();
 
+router.get("/", listMatches);
 router.post("/", createMatch);
 router.get("/:id", getMatch);
 router.post("/:id/join", joinMatch);

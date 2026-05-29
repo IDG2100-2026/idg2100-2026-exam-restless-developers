@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
+import { io as socketIO } from "socket.io-client";
 import "../../WebComponents/GameBoard.js";
 import "./GamePage.css";
 
@@ -36,6 +37,33 @@ function getHandName(dice, straightsAllowed) {
   return "High Card";
 }
 
+function HiddenDie({ held }) {
+  return (
+    <div style={{
+      width: "64px", height: "64px", borderRadius: "12px",
+      background: held ? "#f0c040" : "white",
+      border: `3px solid ${held ? "#c89a00" : "#333"}`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      transform: held ? "translateY(-4px)" : "none",
+      fontSize: "26px", fontWeight: "bold", fontFamily: "serif",
+      color: "#aaa", userSelect: "none",
+    }}>?</div>
+  );
+}
+
+function RevealedDie({ value }) {
+  const colors = { 1: "#333", 2: "#cc0000", 3: "#333", 4: "#333", 5: "#cc0000", 6: "#cc0000" };
+  return (
+    <div style={{
+      width: "64px", height: "64px", borderRadius: "12px",
+      background: "white", border: "3px solid #333",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: "26px", fontWeight: "bold", fontFamily: "serif",
+      color: colors[value] || "#333", userSelect: "none",
+    }}>{FACE[value] || "?"}</div>
+  );
+}
+
 function GamePage() {
   const { id } = useParams();
   const currentUserId = localStorage.getItem("currentUserId");
@@ -43,7 +71,6 @@ function GamePage() {
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const intervalRef = useRef(null);
   const joinedRef = useRef(false);
   const boardContainerRef = useRef(null);
   const boardElementRef = useRef(null);
@@ -95,8 +122,14 @@ function GamePage() {
 
     init();
 
-    intervalRef.current = setInterval(fetchMatch, 15000);
-    return () => clearInterval(intervalRef.current);
+    const socket = socketIO("http://localhost:6767");
+    socket.emit("join:match", id);
+    socket.on("match:update", (updatedMatch) => {
+      setMatch(updatedMatch);
+      setLoading(false);
+    });
+
+    return () => socket.disconnect();
   }, [id]);
 
   // Mount the game-board web component once the loading screen is gone
@@ -200,7 +233,35 @@ function GamePage() {
       </div>
 
       {match.status === "waiting" && (
-        <p>Waiting for players ({match.players.length}/{match.maxPlayers}) — refreshes every 15s</p>
+        <p>Waiting for players ({match.players.length}/{match.maxPlayers})</p>
+      )}
+
+      {(match.status === "active" || match.roundPending) && (
+        match.players
+          .filter(p => String(p.userId?._id ?? p.userId) !== String(currentUserId))
+          .map(opponent => {
+            const oppId = String(opponent.userId?._id ?? opponent.userId);
+            const isTheirTurn = !match.roundPending &&
+              String(match.currentTurn?._id ?? match.currentTurn) === oppId;
+            return (
+              <div key={oppId}>
+                <p>
+                  <strong>{opponent.userId?.username}</strong>
+                  {isTheirTurn ? " — taking their turn..." : ""}
+                  {" — Round wins: "}{opponent.roundWins ?? 0}
+                  {match.roundPending && (
+                    <span> — {getHandName(opponent.dice, match.variant.straightsAllowed)}</span>
+                  )}
+                </p>
+                <div style={{ display: "flex", gap: "8px", margin: "8px 0" }}>
+                  {match.roundPending
+                    ? opponent.dice.map((d, i) => <RevealedDie key={i} value={d} />)
+                    : [0, 1, 2, 3, 4].map(i => <HiddenDie key={i} held={opponent.held?.[i] ?? false} />)
+                  }
+                </div>
+              </div>
+            );
+          })
       )}
 
       <div ref={boardContainerRef} style={{ display: match.status === "active" && !match.roundPending ? "block" : "none" }} />
@@ -208,12 +269,6 @@ function GamePage() {
       {match.roundPending && (
         <div>
           <h2>Round {match.currentRound} results</h2>
-          {match.players.map((player) => (
-            <div key={player.userId._id ?? player.userId}>
-              <strong>{player.userId.username}</strong>
-              <span> — {player.dice.map((d) => FACE[d]).join(" ")} — {getHandName(player.dice, match.variant.straightsAllowed)}</span>
-            </div>
-          ))}
           <p>
             {roundWinner
               ? `${roundWinner.userId.username} wins this round!`
@@ -227,6 +282,9 @@ function GamePage() {
         <div>
           <p>Game over!</p>
           {winner && <p>{winner.userId.username} wins the match!</p>}
+          {match.eloChange?.winnerDelta !== 0 && winner && (
+            <p>ELO: +{match.eloChange.winnerDelta} / {match.eloChange.loserDelta}</p>
+          )}
           <Link to="/lobby">Back to lobby</Link>
         </div>
       )}

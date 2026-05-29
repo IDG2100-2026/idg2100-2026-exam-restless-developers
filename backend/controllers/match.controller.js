@@ -1,4 +1,6 @@
 import Match from "../models/match.js";
+import User from "../models/user.js";
+import { MIN_ELO_RATING, MAX_ELO_RATING } from "../config/constants.js";
 
 // Die values 1-6 map to: 1=7, 2=8, 3=J, 4=Q, 5=K, 6=A (ordered low→high)
 function rollAllDice() {
@@ -38,6 +40,20 @@ function compareHands(a, b) {
     if (diff !== 0) return diff;
   }
   return 0;
+}
+
+export async function listMatches(req, res) {
+  try {
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    const matches = await Match.find(filter)
+      .populate("players.userId", "username elo")
+      .sort({ _id: -1 })
+      .limit(50);
+    res.json(matches);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 }
 
 export async function createMatch(req, res) {
@@ -98,6 +114,7 @@ export async function joinMatch(req, res) {
     await match.save();
     await match.populate("players.userId", "username elo");
 
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -148,6 +165,27 @@ export async function endTurn(req, res) {
         const matchLoser = match.players.find((p) => p.userId?.toString() !== matchWinner.userId?.toString());
         if (matchLoser) match.loser = matchLoser.userId;
         match.currentTurn = null;
+
+        if (!match.isAnonymousMatch && match.winner && match.loser) {
+          const [winnerUser, loserUser] = await Promise.all([
+            User.findById(match.winner),
+            User.findById(match.loser),
+          ]);
+          if (winnerUser && loserUser) {
+            const K = 32;
+            const expected = 1 / (1 + Math.pow(10, (loserUser.elo - winnerUser.elo) / 400));
+            const winnerDelta = Math.round(K * (1 - expected));
+            const loserDelta = -winnerDelta;
+            winnerUser.elo = Math.min(MAX_ELO_RATING, winnerUser.elo + winnerDelta);
+            winnerUser.wins += 1;
+            winnerUser.totalGames += 1;
+            loserUser.elo = Math.max(MIN_ELO_RATING, loserUser.elo + loserDelta);
+            loserUser.losses += 1;
+            loserUser.totalGames += 1;
+            await Promise.all([winnerUser.save(), loserUser.save()]);
+            match.eloChange = { winnerDelta, loserDelta };
+          }
+        }
       } else {
         // Round over but match continues — wait for "Start Next Round"
         match.roundPending = true;
@@ -166,6 +204,7 @@ export async function endTurn(req, res) {
     await match.save();
     await match.populate("players.userId", "username elo");
 
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -202,6 +241,7 @@ export async function startNextRound(req, res) {
     await match.save();
     await match.populate("players.userId", "username elo");
 
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -235,6 +275,7 @@ export async function rollDice(req, res) {
     await match.save();
     await match.populate("players.userId", "username elo");
 
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
