@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import { connectDB } from "./config/db.config.js";
 import tournamentRoutes from "./routes/tournaments.routes.js";
 import usersRoutes from "./routes/users.routes.js";
+import matchesRoutes from "./routes/matches.routes.js";
 import commentRoutes from "./routes/comments.routes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 
@@ -19,14 +20,16 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
   },
 });
 
 app.set("io", io);
 
 io.on("connection", (socket) => {
-  console.log("User connected");
+  socket.on("join:match", (matchId) => {
+    socket.join(`match:${matchId}`);
+  });
 });
 
 app.use(cors());
@@ -35,6 +38,7 @@ app.use(express.json());
 
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/tournaments", tournamentRoutes);
+app.use("/api/v1/matches", matchesRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/admin", adminRoutes);
 

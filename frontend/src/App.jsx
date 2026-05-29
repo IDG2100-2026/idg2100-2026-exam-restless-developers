@@ -21,6 +21,8 @@ import NotFound from "./Pages/Errors/NotFound.jsx";
 import AdminUsers from "./Pages/Admin/AdminUsers.jsx";
 import AdminComments from "./Pages/Admin/AdminComments.jsx";
 
+import CreateGame from "./Pages/Game/CreateGame.jsx";
+import GamePage from "./Pages/Game/GamePage.jsx";
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
           <Route path="/tournaments/:id" element={<TournamentPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin/tournaments/create" element={<CreateTournament />} />
+          <Route path="/create-game" element={<CreateGame />} />
+          <Route path="/game/:id" element={<GamePage />} />
           <Route path="/admin/tournaments/:id/edit" element={<CreateTournament />} />
           <Route path="/401" element={<Unauthorized />} />
           <Route path="*" element={<NotFound />} />
