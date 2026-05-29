@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import Match from "../models/match.js";
 
 export async function getAdminDashboard(req, res) {
   try {
@@ -15,6 +16,23 @@ export async function getAdminDashboard(req, res) {
       role: "admin",
     });
 
+    const gamesPlayedLastWeek = await Match.countDocuments({
+      status: "finished",
+      updatedAt: { $gte: oneWeekAgo },
+    });
+
+    const availableGames = await Match.countDocuments({
+      status: "waiting",
+    });
+
+    const activeMatches = await Match.find({
+      status: "active",
+    }).select("players");
+
+    const activePlayers = activeMatches.reduce((total, match) => {
+      return total + match.players.length;
+    }, 0);
+
     res.status(200).json({
       users: {
         totalUsers,
@@ -22,9 +40,9 @@ export async function getAdminDashboard(req, res) {
         adminUsers,
       },
       games: {
-        activePlayers: 0,
-        gamesPlayedLastWeek: 0,
-        availableGames: 0,
+        activePlayers,
+        gamesPlayedLastWeek,
+        availableGames,
       },
       security: {
         rateLimitIncidents: [],
