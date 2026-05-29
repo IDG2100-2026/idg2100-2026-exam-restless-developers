@@ -107,9 +107,14 @@ export async function updateUser(uid, updatedData) {
     user.dob = updatedData.dob;
   }
 
+  if (typeof updatedData.role !== "undefined") {
+    user.role = updatedData.role;
+  }
+
   const savedUser = await user.save();
   const userObj = savedUser.toObject();
   delete userObj.pwd;
+
   return userObj;
 }
 

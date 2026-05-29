@@ -48,6 +48,7 @@ export async function updateUser(req, res) {
     aboutMe: data.aboutMe,
     profileImage: data.profileImage,
     dob: data.dob,
+    role: data.role,
   };
 
   const userUpdated = await updateUserService(uid, updatedUser);

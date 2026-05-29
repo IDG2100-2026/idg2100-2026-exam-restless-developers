@@ -1,0 +1,154 @@
+.admin-search-section {
+  margin-bottom: 1rem;
+}
+
+.admin-search-label {
+  display: grid;
+  gap: 0.45rem;
+  color: #5f5a52;
+  font-weight: 700;
+}
+
+.admin-search-label input {
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+  border: 1px solid #e4ddd1;
+  border-radius: 13px;
+  padding: 0.75rem 1rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #2c2a28;
+  background: #fffdf9;
+}
+
+.admin-search-label input::placeholder {
+  color: #7c756d;
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 1;
+}
+
+.admin-search-label input:focus {
+  outline: 2px solid #d2ded2;
+  border-color: #d2ded2;
+}
+
+.admin-table-wrapper {
+  width: 100%;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.8rem 0.65rem;
+  border-bottom: 1px solid #e4ddd1;
+  text-align: left;
+  color: #5f5a52;
+}
+
+.admin-table th {
+  color: #2c2a28;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.admin-action-button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ece8e1;
+  color: #5f5a52;
+  transition: 0.2s ease;
+}
+
+.admin-action-button:hover {
+  background: #e1dbd2;
+}
+
+.admin-action-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  .admin-search-label input {
+    max-width: 100%;
+  }
+
+  .admin-table,
+  .admin-table thead,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table th,
+  .admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tr {
+    padding: 1rem 0;
+    border-bottom: 1px solid #e4ddd1;
+  }
+
+  .admin-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-bottom: none;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  .admin-table td::before {
+    font-weight: 800;
+    color: #2c2a28;
+    text-align: left;
+  }
+
+  .admin-table td:nth-child(1)::before {
+    content: "Username";
+  }
+
+  .admin-table td:nth-child(2)::before {
+    content: "Email";
+  }
+
+  .admin-table td:nth-child(3)::before {
+    content: "Role";
+  }
+
+  .admin-table td:nth-child(4)::before {
+    content: "Elo";
+  }
+
+  .admin-table td:nth-child(5)::before {
+    content: "Total games";
+  }
+
+  .admin-table td:nth-child(6)::before {
+    content: "Actions";
+  }
+
+  .admin-action-button {
+    width: auto;
+  }
+}
+

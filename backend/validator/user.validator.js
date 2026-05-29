@@ -83,10 +83,7 @@ export function validateCreateUser() {
         `Password must be between ${MIN_LENGTH_PWD} and ${MAX_LENGTH_PWD} characters long and contain uppercase letters, lowercase letters, numbers, and symbols.`
       ),
 
-    body("email")
-      .trim()
-      .isEmail()
-      .withMessage("Invalid email format."),
+    body("email").trim().isEmail().withMessage("Invalid email format."),
 
     body("dob")
       .isInt({
@@ -104,14 +101,9 @@ export function validateCreateUser() {
 
 export function validateLoginUser() {
   return [
-    body("username")
-      .trim()
-      .notEmpty()
-      .withMessage("Username is required"),
+    body("username").trim().notEmpty().withMessage("Username is required"),
 
-    body("password")
-      .notEmpty()
-      .withMessage("Password is required"),
+    body("password").notEmpty().withMessage("Password is required"),
 
     handleValidationErrors,
   ];
@@ -158,6 +150,11 @@ export function validateUpdateUser() {
       })
       .withMessage(`User must be between ${MIN_AGE} and ${MAX_AGE} years old.`)
       .toInt(),
+
+    body("role")
+      .optional()
+      .isIn(["user", "admin", "anonymous"])
+      .withMessage("Role must be user, admin, or anonymous."),
 
     handleValidationErrors,
   ];
