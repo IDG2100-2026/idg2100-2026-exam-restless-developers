@@ -1,6 +1,7 @@
 import TournamentOverview from "../../Components/Tournament/tournamentOverview.jsx";
 import LobbyPreview from "../../Components/Home/LobbyPreview.jsx";
 import PlatformActivity from "../../Components/Home/PlatformActivity.jsx";
+import TopGames from "../../Components/Home/TopGames.jsx";
 import { Link } from "react-router-dom";
 import "./Homepage.css";
 
@@ -27,6 +28,7 @@ function Homepage() {
         </div>
 
         <div className="homepage-right">
+          <TopGames />
           <TournamentOverview />
         </div>
       </div>
