@@ -1,4 +1,6 @@
 import Tournament from "../models/tournament.js";
+import Match from "../models/match.js";
+import { startMatch } from "./match.controller.js";
 
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
@@ -27,7 +29,8 @@ async function getPopulatedTournament(id) {
     .populate("winner", "username")
     .populate("standings.player", "username elo")
     .populate("rounds.pairings.players", "username elo")
-    .populate("rounds.pairings.winner", "username");
+    .populate("rounds.pairings.winner", "username")
+    .populate("rounds.pairings.game");
 }
 
 export async function getAllTournaments(req, res) {
@@ -48,7 +51,6 @@ export async function getAllTournaments(req, res) {
 export async function getTournamentById(req, res) {
   try {
     const { id } = req.params;
-
     const tournament = await getPopulatedTournament(id);
 
     if (!tournament) {
@@ -209,7 +211,8 @@ export async function updateTournament(req, res) {
         });
       }
 
-      if (tournament.players.length < 2) {
+      // TODO before delivery: change this back to < 2
+      if (tournament.players.length < 1) {
         return res.status(400).json({
           message: "At least 2 players are required to start a tournament",
         });
@@ -218,7 +221,9 @@ export async function updateTournament(req, res) {
       tournament.status = "ongoing";
       tournament.startDate = new Date();
       tournament.currentRound = 1;
-      tournament.nextRoundStart = new Date(Date.now() + 1000 * 60 * 10);
+
+      // TODO before delivery: change this back to 1000 * 60 * 10
+      tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
 
       tournament.standings = tournament.players.map((playerId) => ({
         player: playerId,
@@ -275,7 +280,6 @@ export async function updateTournament(req, res) {
 export async function deleteTournament(req, res) {
   try {
     const { id } = req.params;
-
     const tournament = await Tournament.findByIdAndDelete(id);
 
     if (!tournament) {
@@ -366,7 +370,8 @@ export async function recordRoundResult(req, res) {
           completedAt: null,
         });
 
-        tournament.nextRoundStart = new Date(Date.now() + 1000 * 60 * 10);
+        // TODO before delivery: change this back to 1000 * 60 * 10
+        tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
       } else {
         tournament.status = "finished";
         tournament.nextRoundStart = null;
@@ -388,5 +393,87 @@ export async function recordRoundResult(req, res) {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to record round result" });
+  }
+}
+
+export async function createTournamentMatch(req, res) {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id.toString();
+
+    const tournament = await Tournament.findById(id);
+
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    if (tournament.status !== "ongoing") {
+      return res.status(400).json({ message: "Tournament is not ongoing" });
+    }
+
+    const round = tournament.rounds.find(
+      (round) => round.roundNumber === tournament.currentRound
+    );
+
+    if (!round) {
+      return res.status(404).json({ message: "Current round not found" });
+    }
+
+    const pairing = round.pairings.find((pairing) =>
+      pairing.players.some((playerId) => playerId.toString() === userId)
+    );
+
+    if (!pairing) {
+      return res.status(403).json({
+        message: "You are not part of a pairing in this round",
+      });
+    }
+
+    if (pairing.game) {
+      return res.status(200).json({
+        matchId: pairing.game,
+      });
+    }
+
+    const match = new Match({
+      players: pairing.players.map((playerId) => ({
+        userId: playerId,
+        isAnonymous: false,
+        dice: [],
+        held: [],
+        rollsLeft: 3,
+        roundWins: 0,
+      })),
+
+      
+      maxPlayers: tournament.gameVariant.maxPlayersPerGame,
+
+      buyIn: tournament.buyIn,
+
+      variant: {
+        rounds: tournament.gameVariant.rounds,
+        straightsAllowed: tournament.gameVariant.straightsAllowed,
+        timeControl: tournament.gameVariant.timeControl,
+      },
+
+      tournamentId: tournament._id,
+      isAnonymousMatch: false,
+    });
+
+    startMatch(match);
+
+    await match.save();
+
+    pairing.game = match._id;
+    await tournament.save();
+
+    return res.status(201).json({
+      matchId: match._id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to create tournament match",
+    });
   }
 }
