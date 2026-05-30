@@ -1,4 +1,5 @@
 import express from "express";
+import { requireAuth, requireAdmin } from "../middleware/auth.middleware.js";
 
 import {
   getAllusers,
@@ -26,8 +27,8 @@ router.post("/", validateCreateUser(), createUser);
 
 router.post("/login", validateLoginUser(), loginUser);
 
-router.put("/:uid", validateUserId(), validateUpdateUser(), updateUser);
+router.put("/:uid", requireAuth, validateUserId(), validateUpdateUser(), updateUser);
 
-router.delete("/:uid", deleteUser);
+router.delete("/:uid", requireAuth, requireAdmin, deleteUser);
 
 export default router;

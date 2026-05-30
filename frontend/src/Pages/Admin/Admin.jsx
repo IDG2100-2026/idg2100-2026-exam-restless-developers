@@ -9,8 +9,14 @@ function Admin() {
   useEffect(() => {
     async function fetchDashboardData() {
       try {
+        const token = localStorage.getItem("token");
         const response = await fetch(
-          "http://localhost:6767/api/v1/admin/dashboard"
+          "http://localhost:6767/api/v1/admin/dashboard",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
         const data = await response.json();
