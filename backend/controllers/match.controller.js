@@ -1,5 +1,6 @@
 import Match from "../models/match.js";
 import User from "../models/user.js";
+import Tournament from "../models/tournament.js";
 import { MIN_ELO_RATING, MAX_ELO_RATING } from "../config/constants.js";
 
 function rollAllDice() {
@@ -59,6 +60,54 @@ function compareHands(a, b) {
   }
 
   return 0;
+}
+
+async function updateTournamentAfterMatchFinished(match, winnerId) {
+  if (!match.tournamentId) {
+    return;
+  }
+
+  const tournament = await Tournament.findById(match.tournamentId);
+
+  if (!tournament) {
+    return;
+  }
+
+  const round = tournament.rounds.find(
+    (round) => round.roundNumber === tournament.currentRound
+  );
+
+  if (!round) {
+    return;
+  }
+
+  const pairing = round.pairings.find(
+    (pairing) => pairing.game?.toString() === match._id.toString()
+  );
+
+  if (!pairing || pairing.winner) {
+    return;
+  }
+
+  pairing.winner = winnerId;
+  pairing.pointsAwarded = 3;
+
+  pairing.players.forEach((playerId) => {
+    const standing = tournament.standings.find(
+      (standing) => standing.player.toString() === playerId.toString()
+    );
+
+    if (!standing) return;
+
+    if (playerId.toString() === winnerId.toString()) {
+      standing.points += 3;
+      standing.wins += 1;
+    } else {
+      standing.losses += 1;
+    }
+  });
+
+  await tournament.save();
 }
 
 export async function listMatches(req, res) {
@@ -232,6 +281,8 @@ export async function endTurn(req, res) {
         match.status = "finished";
         match.winner = matchWinner.userId;
 
+        await updateTournamentAfterMatchFinished(match, matchWinner.userId);
+
         const matchLoser = match.players.find(
           (p) => p.userId?.toString() !== matchWinner.userId?.toString()
         );
@@ -302,6 +353,9 @@ export async function endTurn(req, res) {
     res.status(500).json({ message: err.message });
   }
 }
+
+
+
 
 export async function startNextRound(req, res) {
   const { userId } = req.body;
