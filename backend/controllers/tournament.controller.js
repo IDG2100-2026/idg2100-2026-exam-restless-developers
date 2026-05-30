@@ -212,7 +212,7 @@ export async function updateTournament(req, res) {
       }
 
       // TODO before delivery: change this back to < 2
-      if (tournament.players.length < 1) {
+      if (tournament.players.length < 2) {
         return res.status(400).json({
           message: "At least 2 players are required to start a tournament",
         });
@@ -270,11 +270,17 @@ export async function updateTournament(req, res) {
     await tournament.save();
 
     const updatedTournament = await getPopulatedTournament(id);
+
+    req.app
+    .get("io")
+    .to(`tournament:${id}`)
+    .emit("tournament:update", updatedTournament);
+
     res.status(200).json(updatedTournament);
-  } catch (error) {
+    } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to update tournament" });
-  }
+    }
 }
 
 export async function deleteTournament(req, res) {

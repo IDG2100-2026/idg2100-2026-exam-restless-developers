@@ -30,6 +30,10 @@ io.on("connection", (socket) => {
   socket.on("join:match", (matchId) => {
     socket.join(`match:${matchId}`);
   });
+
+  socket.on("join:tournament", (tournamentId) => {
+    socket.join(`tournament:${tournamentId}`);
+  });
 });
 
 app.use(cors());
