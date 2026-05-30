@@ -17,6 +17,26 @@ export function startMatch(match) {
   return match;
 }
 
+function shuffleArray(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function createPairings(players, maxPlayersPerGame) {
+  const shuffledPlayers = shuffleArray(players);
+  const pairings = [];
+
+  for (let i = 0; i < shuffledPlayers.length; i += maxPlayersPerGame) {
+    pairings.push({
+      players: shuffledPlayers.slice(i, i + maxPlayersPerGame),
+      winner: null,
+      pointsAwarded: 0,
+      game: null,
+    });
+  }
+
+  return pairings;
+}
+
 function evaluateHand(dice, straightsAllowed) {
   const counts = {};
   for (const d of dice) counts[d] = (counts[d] || 0) + 1;
@@ -107,7 +127,41 @@ async function updateTournamentAfterMatchFinished(match, winnerId) {
     }
   });
 
+    const allPairingsCompleted = round.pairings.every(
+    (pairing) => pairing.winner
+  );
+
+  
+if (allPairingsCompleted) {
+  round.status = "completed";
+  round.completedAt = new Date();
+
+  const hasMoreRounds = tournament.currentRound < tournament.tournamentRounds;
+
+if (hasMoreRounds) {
+  const nextRoundNumber = tournament.currentRound + 1;
+
+  tournament.currentRound = nextRoundNumber;
+
+  tournament.rounds.push({
+    roundNumber: nextRoundNumber,
+    status: "active",
+    pairings: createPairings(
+      tournament.players,
+      tournament.gameVariant.maxPlayersPerGame
+    ),
+    startedAt: new Date(),
+    completedAt: null,
+  });
+
+  tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
+} else {
+  tournament.status = "finished";
+  tournament.nextRoundStart = null;
+}
+
   await tournament.save();
+}
 }
 
 export async function listMatches(req, res) {
@@ -334,12 +388,12 @@ export async function endTurn(req, res) {
           ? null
           : match.players[bestIndex].userId;
       }
-    } else {
-      match.currentTurn = match.players[nextIndex].userId;
-      match.players[nextIndex].dice = rollAllDice();
-      match.players[nextIndex].rollsLeft = 2;
-      match.players[nextIndex].held = [false, false, false, false, false];
-    }
+} else {
+  match.currentTurn = match.players[nextIndex].userId;
+  match.players[nextIndex].dice = rollAllDice();
+  match.players[nextIndex].rollsLeft = 2;
+  match.players[nextIndex].held = [false, false, false, false, false];
+}
 
     match.markModified("players");
 

@@ -396,6 +396,7 @@ export async function recordRoundResult(req, res) {
   }
 }
 
+
 export async function createTournamentMatch(req, res) {
   try {
     const { id } = req.params;
@@ -445,9 +446,7 @@ export async function createTournamentMatch(req, res) {
         roundWins: 0,
       })),
 
-      
       maxPlayers: tournament.gameVariant.maxPlayersPerGame,
-
       buyIn: tournament.buyIn,
 
       variant: {
@@ -461,11 +460,36 @@ export async function createTournamentMatch(req, res) {
     });
 
     startMatch(match);
-
     await match.save();
 
-    pairing.game = match._id;
-    await tournament.save();
+    const updateResult = await Tournament.updateOne(
+      { _id: tournament._id },
+      {
+        $set: {
+          "rounds.$[round].pairings.$[pairing].game": match._id,
+        },
+      },
+      {
+        arrayFilters: [
+          { "round.roundNumber": tournament.currentRound },
+          { "pairing._id": pairing._id, "pairing.game": null },
+        ],
+      }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      await Match.findByIdAndDelete(match._id);
+
+      const updatedTournament = await Tournament.findById(tournament._id);
+      const updatedRound = updatedTournament.rounds.find(
+        (round) => round.roundNumber === tournament.currentRound
+      );
+      const updatedPairing = updatedRound.pairings.id(pairing._id);
+
+      return res.status(200).json({
+        matchId: updatedPairing.game,
+      });
+    }
 
     return res.status(201).json({
       matchId: match._id,
