@@ -120,7 +120,7 @@ const tournamentSchema = new Schema(
 
             game: {
               type: Schema.Types.ObjectId,
-              ref: "Game",
+              ref: "Match",
               default: null,
             },
           },

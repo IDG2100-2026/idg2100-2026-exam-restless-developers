@@ -2,7 +2,7 @@
 // Contains code from marte kaland's oblig3 (formatVariant, polling pattern, joinedRef, player card layout)
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { io as socketIO } from "socket.io-client";
 import "../../WebComponents/GameBoard.js";
 import "./GamePage.css";
@@ -66,6 +66,7 @@ function RevealedDie({ value }) {
 
 function GamePage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const currentUserId = localStorage.getItem("currentUserId");
 
   const [match, setMatch] = useState(null);
@@ -186,6 +187,26 @@ function GamePage() {
     board.setAttribute("rolls-left", String(myPlayer?.rollsLeft ?? 3));
     board.setAttribute("my-turn", isMyTurn ? "true" : "false");
   }, [match]);
+
+  useEffect(() => {
+    if (match?.status !== "finished") return;
+    if (!match?.tournamentId) return;
+
+    const tournamentId =
+      typeof match.tournamentId === "object"
+        ? match.tournamentId._id
+        : match.tournamentId;
+
+    if (!tournamentId) return;
+
+    console.log("Tournament redirect:", match.tournamentId);
+
+    const timeout = setTimeout(() => {
+      navigate(`/tournaments/${tournamentId}?fromGame=true`);
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [match?.status, match?.tournamentId, navigate]);
 
   async function handleStartNextRound() {
     try {
