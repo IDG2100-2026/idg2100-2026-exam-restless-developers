@@ -119,6 +119,19 @@ function TournamentPage() {
     };
   }, [id]);
 
+  useEffect(() => {
+    socket.emit("join:tournament", id);
+
+    socket.on("tournament:update", (updatedTournament) => {
+      setTournament(updatedTournament);
+      setHasRedirectedToGame(false);
+    });
+
+    return () => {
+      socket.off("tournament:update");
+    };
+  }, [id]);
+
   function getCurrentUserId() {
     return localStorage.getItem("currentUserId");
   }
