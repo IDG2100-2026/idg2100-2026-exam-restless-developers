@@ -133,43 +133,75 @@ function GamePage() {
     return () => socket.disconnect();
   }, [id]);
 
+
+
+  useEffect(() => {
+  const intervalId = setInterval(() => {
+    fetchMatch();
+  }, 1000);
+
+  return () => clearInterval(intervalId);
+}, [id]);
+
+
   // Mount the game-board web component once the loading screen is gone
   useEffect(() => {
-    if (loading || !boardContainerRef.current || boardElementRef.current) return;
+  if (loading || !boardContainerRef.current) return;
 
-    const board = document.createElement("game-board");
-    boardElementRef.current = board;
-    boardContainerRef.current.appendChild(board);
+  boardContainerRef.current.innerHTML = "";
 
-    boardContainerRef.current.addEventListener("board-roll", async (e) => {
-      const { held } = e.detail;
-      try {
-        const res = await fetch(`${API}/matches/${id}/roll`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId, held }),
-        });
-        const data = await res.json();
-        if (res.ok) setMatch(data);
-      } catch {
-        // ignore network errors
-      }
-    });
+  const board = document.createElement("game-board");
+  boardElementRef.current = board;
+  boardContainerRef.current.appendChild(board);
 
-    boardContainerRef.current.addEventListener("board-end-turn", async () => {
-      try {
-        const res = await fetch(`${API}/matches/${id}/end-turn`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId }),
-        });
-        const data = await res.json();
-        if (res.ok) setMatch(data);
-      } catch {
-        // ignore network errors
-      }
-    });
-  }, [loading]);
+  const handleRoll = async (e) => {
+    const { held } = e.detail;
+
+    try {
+      const res = await fetch(`${API}/matches/${id}/roll`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, held }),
+      });
+
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch {
+      // ignore network errors
+    }
+  };
+
+  const handleEndTurn = async () => {
+    try {
+      const res = await fetch(`${API}/matches/${id}/end-turn`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId }),
+      });
+
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch {
+      // ignore network errors
+    }
+  };
+
+  boardContainerRef.current.addEventListener("board-roll", handleRoll);
+  boardContainerRef.current.addEventListener("board-end-turn", handleEndTurn);
+
+  return () => {
+    if (boardContainerRef.current) {
+      boardContainerRef.current.removeEventListener("board-roll", handleRoll);
+      boardContainerRef.current.removeEventListener("board-end-turn", handleEndTurn);
+      boardContainerRef.current.innerHTML = "";
+    }
+
+    boardElementRef.current = null;
+  };
+}, [loading, id, currentUserId]);
+
+
+
 
   // Push updated match state into the web component
   useEffect(() => {
@@ -199,10 +231,8 @@ function GamePage() {
 
     if (!tournamentId) return;
 
-    console.log("Tournament redirect:", match.tournamentId);
-
     const timeout = setTimeout(() => {
-      navigate(`/tournaments/${tournamentId}?fromGame=true`);
+      navigate(`/tournaments/${tournamentId}`);
     }, 2000);
 
     return () => clearTimeout(timeout);
