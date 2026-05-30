@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "../middleware/auth.middleware.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.middleware.js";
 
 import {
   getTournamentComments,
@@ -16,6 +16,6 @@ router.get("/:tournamentId", getTournamentComments);
 
 router.post("/:tournamentId", requireAuth, createComment);
 
-router.delete("/:commentId", requireAuth, deleteComment);
+router.delete("/:commentId", requireAuth, requireAdmin, deleteComment);
 
 export default router;
