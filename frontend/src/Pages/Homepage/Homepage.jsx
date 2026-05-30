@@ -1,4 +1,6 @@
 import TournamentOverview from "../../Components/Tournament/tournamentOverview.jsx";
+import LobbyPreview from "../../Components/Home/LobbyPreview.jsx";
+import PlatformActivity from "../../Components/Home/PlatformActivity.jsx";
 import { Link } from "react-router-dom";
 import "./Homepage.css";
 
@@ -12,13 +14,22 @@ function Homepage() {
         </p>
 
         <div className="homepage-ctas">
-          <Link to="/create" className="homepage-cta">Create match</Link>
+          <Link to="/create-game" className="homepage-cta">Create match</Link>
           <Link to="/lobby" className="homepage-cta">Go to lobby</Link>
           <Link to="/tournaments" className="homepage-cta">View tournaments</Link>
         </div>
       </section>
 
-      <TournamentOverview />
+      <div className="homepage-widgets">
+        <div className="homepage-left">
+          <LobbyPreview />
+          <PlatformActivity />
+        </div>
+
+        <div className="homepage-right">
+          <TournamentOverview />
+        </div>
+      </div>
     </main>
   );
 }
