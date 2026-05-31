@@ -111,6 +111,12 @@ const userSchema = new mongoose.Schema(
       ],
     },
 
+    points: {
+      type: Number,
+      default: 1000,
+      min: [0, "Points cannot be negative"],
+    },
+
     wins: {
       type: Number,
       default: 0,

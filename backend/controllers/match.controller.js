@@ -12,6 +12,7 @@ export function startMatch(match) {
   match.currentTurn = match.players[0].userId;
   match.players[0].dice = rollAllDice();
   match.players[0].rollsLeft = 2;
+  for (const p of match.players) p.stack = match.buyIn;
   match.markModified("players");
 
   return match;
@@ -35,6 +36,20 @@ function createPairings(players, maxPlayersPerGame) {
   }
 
   return pairings;
+}
+
+function enterBettingPhase(match) {
+  match.bettingPhase = true;
+  match.currentTurn = null;
+  match.pot = 0;
+  match.currentHighBet = 0;
+  for (const p of match.players) {
+    p.currentBet = 0;
+    p.hasFolded = false;
+    p.hasActed = false;
+  }
+  match.bettingTurn = match.players[0].userId;
+  match.markModified("players");
 }
 
 function evaluateHand(dice, straightsAllowed) {
@@ -186,12 +201,23 @@ export async function listMatches(req, res) {
 export async function createMatch(req, res) {
   const { rounds, straightsAllowed, timeControl, maxPlayers, buyIn, userId } =
     req.body;
+  const actualBuyIn = buyIn ?? 1;
 
   try {
+    if (userId) {
+      const creator = await User.findById(userId);
+      if (!creator) return res.status(404).json({ message: "User not found" });
+      if (creator.points < actualBuyIn) {
+        return res.status(400).json({ message: "Not enough points for buy-in" });
+      }
+      creator.points -= actualBuyIn;
+      await creator.save();
+    }
+
     const match = await Match.create({
       players: userId ? [{ userId, isAnonymous: false }] : [],
       maxPlayers: maxPlayers ?? 2,
-      buyIn: buyIn ?? 1,
+      buyIn: actualBuyIn,
       isAnonymousMatch: !userId,
       variant: {
         rounds,
@@ -247,6 +273,16 @@ export async function joinMatch(req, res) {
 
     if (alreadyJoined) {
       return res.status(400).json({ message: "Already in this match" });
+    }
+
+    if (userId) {
+      const joiner = await User.findById(userId);
+      if (!joiner) return res.status(404).json({ message: "User not found" });
+      if (joiner.points < match.buyIn) {
+        return res.status(400).json({ message: "Not enough points for buy-in" });
+      }
+      joiner.points -= match.buyIn;
+      await joiner.save();
     }
 
     match.players.push({ userId, isAnonymous: !userId });
@@ -362,6 +398,8 @@ export async function endTurn(req, res) {
             const winnerDelta = Math.round(K * (1 - expected));
             const loserDelta = -winnerDelta;
 
+            const pot = match.buyIn * match.players.length;
+            winnerUser.points = (winnerUser.points || 0) + pot;
             winnerUser.elo = Math.min(
               MAX_ELO_RATING,
               winnerUser.elo + winnerDelta
@@ -382,11 +420,8 @@ export async function endTurn(req, res) {
           }
         }
       } else {
-        match.roundPending = true;
-        match.currentTurn = null;
-        match.lastRoundWinnerId = isTie
-          ? null
-          : match.players[bestIndex].userId;
+        match.lastRoundWinnerId = isTie ? null : match.players[bestIndex].userId;
+        enterBettingPhase(match);
       }
 } else {
   match.currentTurn = match.players[nextIndex].userId;
@@ -434,7 +469,11 @@ export async function startNextRound(req, res) {
     }
 
     match.roundPending = false;
+    match.bettingPhase = false;
     match.lastRoundWinnerId = null;
+    match.pot = 0;
+    match.currentHighBet = 0;
+    match.bettingTurn = null;
     match.currentRound = (match.currentRound || 1) + 1;
     match.currentTurn = match.players[0].userId;
 
@@ -442,6 +481,9 @@ export async function startNextRound(req, res) {
       player.held = [false, false, false, false, false];
       player.rollsLeft = 3;
       player.dice = [];
+      player.currentBet = 0;
+      player.hasFolded = false;
+      player.hasActed = false;
     }
 
     match.players[0].dice = rollAllDice();
@@ -514,6 +556,88 @@ export async function rollDice(req, res) {
 
     req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
 
+    res.json(match);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+export async function placeBet(req, res) {
+  const { userId, action, amount } = req.body;
+
+  try {
+    const match = await Match.findById(req.params.id);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+    if (!match.bettingPhase) return res.status(400).json({ message: "Not in betting phase" });
+    if (match.bettingTurn?.toString() !== userId) return res.status(403).json({ message: "Not your betting turn" });
+
+    const playerIndex = match.players.findIndex((p) => p.userId?.toString() === userId);
+    if (playerIndex === -1) return res.status(403).json({ message: "Not in this match" });
+
+    const player = match.players[playerIndex];
+
+    if (action === "fold") {
+      player.hasFolded = true;
+      player.hasActed = true;
+    } else if (action === "match") {
+      const toAdd = match.currentHighBet - player.currentBet;
+      if (toAdd > player.stack) return res.status(400).json({ message: "Not enough stack to match" });
+      player.stack -= toAdd;
+      player.currentBet = match.currentHighBet;
+      match.pot += toAdd;
+      player.hasActed = true;
+    } else if (action === "bet" || action === "raise") {
+      const betAmount = Number(amount);
+      if (!betAmount || betAmount <= match.currentHighBet) {
+        return res.status(400).json({ message: "Raise must be higher than current bet" });
+      }
+      const toAdd = betAmount - player.currentBet;
+      if (toAdd > player.stack) return res.status(400).json({ message: "Not enough stack" });
+      player.stack -= toAdd;
+      player.currentBet = betAmount;
+      match.pot += toAdd;
+      match.currentHighBet = betAmount;
+      player.hasActed = true;
+      for (let i = 0; i < match.players.length; i++) {
+        if (i !== playerIndex && !match.players[i].hasFolded) {
+          match.players[i].hasActed = false;
+        }
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+
+    const activePlayers = match.players.filter((p) => !p.hasFolded);
+    const bettingDone = activePlayers.every((p) => p.hasActed);
+
+    if (bettingDone) {
+      match.bettingPhase = false;
+      if (match.lastRoundWinnerId) {
+        const winnerIndex = match.players.findIndex(
+          (p) => p.userId?.toString() === match.lastRoundWinnerId?.toString()
+        );
+        if (winnerIndex !== -1) match.players[winnerIndex].stack += match.pot;
+      } else {
+        const share = Math.floor(match.pot / activePlayers.length);
+        for (const p of match.players) {
+          if (!p.hasFolded) p.stack += share;
+        }
+      }
+      match.pot = 0;
+      match.bettingTurn = null;
+      match.roundPending = true;
+    } else {
+      let nextIndex = (playerIndex + 1) % match.players.length;
+      while (match.players[nextIndex].hasFolded || match.players[nextIndex].hasActed) {
+        nextIndex = (nextIndex + 1) % match.players.length;
+      }
+      match.bettingTurn = match.players[nextIndex].userId;
+    }
+
+    match.markModified("players");
+    await match.save();
+    await match.populate("players.userId", "username elo");
+
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
