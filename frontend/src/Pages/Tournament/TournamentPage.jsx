@@ -87,6 +87,8 @@ function TournamentPage() {
     fetchComments();
   }, [id]);
 
+
+
   useEffect(() => {
     socket.on("new-tournament-comment", ({ tournamentId, comment }) => {
       if (tournamentId !== id) {
@@ -111,6 +113,9 @@ function TournamentPage() {
     };
   }, [id]);
 
+
+
+
   useEffect(() => {
     socket.emit("join:tournament", id);
 
@@ -123,6 +128,9 @@ function TournamentPage() {
       socket.off("tournament:update");
     };
   }, [id]);
+
+
+
 
   function getCurrentUserId() {
     return localStorage.getItem("currentUserId");
@@ -237,6 +245,9 @@ function TournamentPage() {
 }
 
 
+
+
+
   useEffect(() => {
     if (!tournament) return;
 
@@ -286,6 +297,9 @@ function TournamentPage() {
       );
     }
 
+
+
+
     updateCountdown();
     const intervalId = setInterval(updateCountdown, 1000);
 
@@ -301,6 +315,9 @@ function TournamentPage() {
       minute: "2-digit",
     });
   }
+
+
+
 
   async function handleJoinTournament() {
     try {
@@ -325,6 +342,9 @@ function TournamentPage() {
     }
   }
 
+
+
+
   async function handleLeaveTournament() {
     try {
       setActionMessage("");
@@ -347,6 +367,10 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
+
+
 
   async function handleStartTournament() {
     try {
@@ -374,6 +398,8 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
 
 
   function handleEditTournament() {
@@ -454,12 +480,14 @@ function TournamentPage() {
       }
 
       await createComment(id, token, commentInput);
-      
+
       setCommentInput("");
     } catch (error) {
       setActionMessage(error.message);
     }
   }
+
+
 
   function renderCountdownLabel() {
     if (tournament.status === "upcoming") return "Starts in";
@@ -471,6 +499,8 @@ function TournamentPage() {
     if (!isCurrentUserAdmin()) {
       return null;
     }
+
+
 
     return (
       <div className="inline-admin-actions">
@@ -517,6 +547,8 @@ function TournamentPage() {
     );
   }
 
+
+  
   function renderTournamentAction() {
     const currentUserJoined = isCurrentUserJoined();
 

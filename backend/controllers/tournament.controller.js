@@ -1,6 +1,10 @@
 import Tournament from "../models/tournament.js";
 import Match from "../models/match.js";
 import { startMatch } from "./match.controller.js";
+import {
+    MIN_PLAYERS_TO_START_TOURNAMENT,
+    TOURNAMENT_ROUND_DELAY_MS,
+} from "../constants/tournament.constants.js";
 
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
@@ -212,7 +216,7 @@ export async function updateTournament(req, res) {
       }
 
       // TODO before delivery: change this back to < 2
-      if (tournament.players.length < 2) {
+      if (tournament.players.length < MIN_PLAYERS_TO_START_TOURNAMENT) {
         return res.status(400).json({
           message: "At least 2 players are required to start a tournament",
         });
@@ -223,7 +227,7 @@ export async function updateTournament(req, res) {
       tournament.currentRound = 1;
 
       // TODO before delivery: change this back to 1000 * 60 * 10
-      tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
+      tournament.nextRoundStart = new Date(Date.now() + TOURNAMENT_ROUND_DELAY_MS);
 
       tournament.standings = tournament.players.map((playerId) => ({
         player: playerId,
@@ -377,7 +381,7 @@ export async function recordRoundResult(req, res) {
         });
 
         // TODO before delivery: change this back to 1000 * 60 * 10
-        tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
+        tournament.nextRoundStart = new Date(Date.now() + TOURNAMENT_ROUND_DELAY_MS);
       } else {
         tournament.status = "finished";
         tournament.nextRoundStart = null;
