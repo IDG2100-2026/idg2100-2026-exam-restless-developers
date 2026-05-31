@@ -398,8 +398,8 @@ export async function endTurn(req, res) {
             const winnerDelta = Math.round(K * (1 - expected));
             const loserDelta = -winnerDelta;
 
-            const pot = match.buyIn * match.players.length;
-            winnerUser.points = (winnerUser.points || 0) + pot;
+            winnerUser.points = (winnerUser.points || 0) + (matchWinner.stack || 0);
+            loserUser.points = (loserUser.points || 0) + (matchLoser.stack || 0);
             winnerUser.elo = Math.min(
               MAX_ELO_RATING,
               winnerUser.elo + winnerDelta

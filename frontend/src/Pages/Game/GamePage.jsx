@@ -128,8 +128,8 @@ function GamePage() {
             return;
           }
           await fetchMatch();
-        } catch {
-          // game may already be full
+        } catch (err) {
+          console.error(err);
         }
       }
     }
@@ -179,8 +179,8 @@ function GamePage() {
 
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -194,8 +194,8 @@ function GamePage() {
 
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -262,8 +262,8 @@ function GamePage() {
       });
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -276,8 +276,8 @@ function GamePage() {
       });
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   }
 
