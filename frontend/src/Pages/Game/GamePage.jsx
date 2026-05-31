@@ -69,6 +69,15 @@ function GamePage() {
   const navigate = useNavigate();
   const currentUserId = localStorage.getItem("currentUserId");
 
+  function authHeaders() {
+  const token = localStorage.getItem("token");
+
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -111,7 +120,7 @@ function GamePage() {
         try {
           await fetch(`${API}/matches/${id}/join`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders(),
             body: JSON.stringify({ userId: currentUserId }),
           });
           await fetchMatch();
@@ -156,11 +165,12 @@ function GamePage() {
 
   const handleRoll = async (e) => {
     const { held } = e.detail;
+    const token = localStorage.getItem("token");
 
     try {
       const res = await fetch(`${API}/matches/${id}/roll`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ userId: currentUserId, held }),
       });
 
@@ -172,19 +182,22 @@ function GamePage() {
   };
 
   const handleEndTurn = async () => {
-    try {
-      const res = await fetch(`${API}/matches/${id}/end-turn`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId }),
-      });
+  const token = localStorage.getItem("token");
 
-      const data = await res.json();
-      if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
-    }
-  };
+  try {
+    const res = await fetch(`${API}/matches/${id}/end-turn`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: currentUserId }),
+    });
+
+    const data = await res.json();
+    if (res.ok) setMatch(data);
+    else setError(data.message || "Could not end turn");
+  } catch {
+    setError("Could not end turn");
+  }
+};
 
   boardContainerRef.current.addEventListener("board-roll", handleRoll);
   boardContainerRef.current.addEventListener("board-end-turn", handleEndTurn);
@@ -238,19 +251,26 @@ function GamePage() {
     return () => clearTimeout(timeout);
   }, [match?.status, match?.tournamentId, navigate]);
 
+
   async function handleStartNextRound() {
-    try {
-      const res = await fetch(`${API}/matches/${id}/next-round`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId }),
-      });
-      const data = await res.json();
-      if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+  try {
+    const res = await fetch(`${API}/matches/${id}/next-round`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: currentUserId }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setMatch(data);
+    } else {
+      setError(data.message);
     }
+  } catch {
+    setError("Could not start next round");
   }
+}
 
   if (loading) return <main><p>Loading match...</p></main>;
   if (error) return <main><p>{error}</p><Link to="/lobby">Back to lobby</Link></main>;
