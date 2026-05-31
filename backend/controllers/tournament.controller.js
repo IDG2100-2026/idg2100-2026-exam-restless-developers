@@ -1,6 +1,8 @@
 import Tournament from "../models/tournament.js";
 import Match from "../models/match.js";
 import { startMatch } from "./match.controller.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import AppError from "../utils/AppError.js";
 import {
     MIN_PLAYERS_TO_START_TOURNAMENT,
     TOURNAMENT_ROUND_DELAY_MS,
@@ -52,21 +54,18 @@ export async function getAllTournaments(req, res) {
   }
 }
 
-export async function getTournamentById(req, res) {
-  try {
+export const getTournamentById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const tournament = await getPopulatedTournament(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+      throw new AppError("Tournament not found", 404);
     }
 
     res.status(200).json(tournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch tournament" });
-  }
-}
+  });
+
+
 
 export async function joinTournament(req, res) {
   try {
