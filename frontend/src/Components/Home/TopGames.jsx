@@ -8,17 +8,40 @@ export default function TopGames() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  function dedupeById(list) {
+    const seen = new Set();
+    return list.filter((game) => {
+      if (!game?._id || seen.has(game._id)) return false;
+      seen.add(game._id);
+      return true;
+    });
+  }
+
   useEffect(() => {
     async function fetchGames() {
       setLoading(true);
       setError("");
 
       try {
-        const res = await fetch(`${API}/matches?status=active`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Could not fetch active games");
+        const activeRes = await fetch(`${API}/matches?status=active`);
+        const activeData = await activeRes.json();
+        if (!activeRes.ok) throw new Error(activeData.message || "Could not fetch active games");
 
-        setGames(Array.isArray(data) ? data.slice(0, 5) : []);
+        const activeGames = Array.isArray(activeData) ? activeData.slice(0, 5) : [];
+
+        if (activeGames.length >= 5) {
+          setGames(activeGames);
+          return;
+        }
+
+        const recentRes = await fetch(`${API}/matches`);
+        const recentData = await recentRes.json();
+        if (!recentRes.ok) throw new Error(recentData.message || "Could not fetch recent games");
+
+        const recentGames = Array.isArray(recentData) ? recentData : [];
+        const mergedGames = dedupeById([...activeGames, ...recentGames]).slice(0, 5);
+
+        setGames(mergedGames);
       } catch (err) {
         setError(err.message || "Could not fetch active games");
       } finally {
