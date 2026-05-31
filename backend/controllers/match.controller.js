@@ -558,6 +558,7 @@ export async function rollDice(req, res) {
 
     res.json(match);
   } catch (err) {
+   console.error("rollDice error:", err);
     res.status(500).json({ message: err.message });
   }
 }
