@@ -9,6 +9,14 @@ import "./GamePage.css";
 
 const API = "http://localhost:6767/api/v1";
 
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 // Die values 1-6 → Spanish poker dice faces
 const FACE = { 1: "7", 2: "8", 3: "J", 4: "Q", 5: "K", 6: "A" };
 
@@ -109,14 +117,19 @@ function GamePage() {
       if (loaded.status === "waiting" && !isOwner && hasRoom && currentUserId && !joinedRef.current) {
         joinedRef.current = true;
         try {
-          await fetch(`${API}/matches/${id}/join`, {
+          const joinRes = await fetch(`${API}/matches/${id}/join`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders(),
             body: JSON.stringify({ userId: currentUserId }),
           });
+          if (!joinRes.ok) {
+            const joinData = await joinRes.json();
+            setError(joinData.message || "Could not join match");
+            return;
+          }
           await fetchMatch();
-        } catch {
-          // game may already be full
+        } catch (err) {
+          console.error(err);
         }
       }
     }
@@ -160,14 +173,14 @@ function GamePage() {
     try {
       const res = await fetch(`${API}/matches/${id}/roll`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ userId: currentUserId, held }),
       });
 
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -175,14 +188,14 @@ function GamePage() {
     try {
       const res = await fetch(`${API}/matches/${id}/end-turn`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ userId: currentUserId }),
       });
 
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -238,17 +251,33 @@ function GamePage() {
     return () => clearTimeout(timeout);
   }, [match?.status, match?.tournamentId, navigate]);
 
+  const [betAmount, setBetAmount] = useState(1);
+
+  async function handleBet(action) {
+    try {
+      const res = await fetch(`${API}/matches/${id}/bet`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: currentUserId, action, amount: betAmount }),
+      });
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   async function handleStartNextRound() {
     try {
       const res = await fetch(`${API}/matches/${id}/next-round`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ userId: currentUserId }),
       });
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -269,7 +298,7 @@ function GamePage() {
       <p>{formatVariant(match.variant)}</p>
       <p>Buy-in: {match.buyIn} points</p>
 
-      {(match.status === "active" || match.roundPending) && (
+      {(match.status === "active" || match.bettingPhase || match.roundPending) && (
         <p>Round {match.currentRound ?? 1} of {match.variant.rounds}</p>
       )}
 
@@ -287,12 +316,12 @@ function GamePage() {
         <p>Waiting for players ({match.players.length}/{match.maxPlayers})</p>
       )}
 
-      {(match.status === "active" || match.roundPending) && (
+      {(match.status === "active" || match.bettingPhase || match.roundPending) && (
         match.players
           .filter(p => String(p.userId?._id ?? p.userId) !== String(currentUserId))
           .map(opponent => {
             const oppId = String(opponent.userId?._id ?? opponent.userId);
-            const isTheirTurn = !match.roundPending &&
+            const isTheirTurn = !match.roundPending && !match.bettingPhase &&
               String(match.currentTurn?._id ?? match.currentTurn) === oppId;
             return (
               <div key={oppId}>
@@ -315,7 +344,59 @@ function GamePage() {
           })
       )}
 
-      <div ref={boardContainerRef} style={{ display: match.status === "active" && !match.roundPending ? "block" : "none" }} />
+      <div ref={boardContainerRef} style={{ display: match.status === "active" && !match.bettingPhase && !match.roundPending ? "block" : "none" }} />
+
+      {match.bettingPhase && (() => {
+        const myPlayer = match.players.find(
+          (p) => String(p.userId?._id ?? p.userId) === String(currentUserId)
+        );
+        const isMyBettingTurn = String(match.bettingTurn?._id ?? match.bettingTurn) === String(currentUserId);
+        return (
+          <div>
+            <h2>Betting</h2>
+            <p>Pot: {match.pot} points · Current bet: {match.currentHighBet} · Your stack: {myPlayer?.stack ?? 0}</p>
+            <div style={{ margin: "8px 0" }}>
+              {match.players.map(p => (
+                <span key={String(p.userId?._id ?? p.userId)} style={{ marginRight: "16px" }}>
+                  {p.userId?.username}: {p.currentBet} bet{p.hasFolded ? " (folded)" : ""}
+                </span>
+              ))}
+            </div>
+            {isMyBettingTurn && !myPlayer?.hasFolded && (
+              <div>
+                <p>Your turn to bet</p>
+                {match.currentHighBet === 0 ? (
+                  <>
+                    <input
+                      type="number"
+                      min={1}
+                      max={myPlayer?.stack ?? 1}
+                      value={betAmount}
+                      onChange={e => setBetAmount(Number(e.target.value))}
+                    />
+                    <button onClick={() => handleBet("bet")}>Bet {betAmount}</button>
+                    <button onClick={() => handleBet("match")}>Check (0)</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleBet("match")}>Match {match.currentHighBet}</button>
+                    <button onClick={() => handleBet("fold")}>Fold</button>
+                    <input
+                      type="number"
+                      min={match.currentHighBet + 1}
+                      max={myPlayer?.stack ?? 1}
+                      value={betAmount}
+                      onChange={e => setBetAmount(Number(e.target.value))}
+                    />
+                    <button onClick={() => handleBet("raise")}>Raise to {betAmount}</button>
+                  </>
+                )}
+              </div>
+            )}
+            {!isMyBettingTurn && <p>Waiting for opponent to bet...</p>}
+          </div>
+        );
+      })()}
 
       {match.roundPending && (
         <div>
