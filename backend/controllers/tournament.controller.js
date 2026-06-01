@@ -39,20 +39,15 @@ async function getPopulatedTournament(id) {
     .populate("rounds.pairings.game");
 }
 
-export async function getAllTournaments(req, res) {
-  try {
-    const tournaments = await Tournament.find()
-      .sort({ startDate: 1 })
-      .populate("players", "username elo")
-      .populate("author", "username")
-      .populate("winner", "username");
+export const getAllTournaments = asyncHandler(async (req, res) => {
+  const tournaments = await Tournament.find()
+    .sort({ startDate: 1 })
+    .populate("players", "username elo")
+    .populate("author", "username")
+    .populate("winner", "username");
 
-    res.status(200).json(tournaments);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch tournaments" });
-  }
-}
+  res.status(200).json(tournaments);
+});
 
 export const getTournamentById = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -67,21 +62,18 @@ export const getTournamentById = asyncHandler(async (req, res) => {
 
 
 
-export async function joinTournament(req, res) {
-  try {
+export const joinTournament = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+        throw new AppError("Tournament not found", 404);
     }
 
     if (tournament.status !== "upcoming") {
-      return res.status(400).json({
-        message: "You can only join upcoming tournaments",
-      });
+        throw new AppError("You can only join upcoming tournaments",400);
     }
 
     const alreadyJoined = tournament.players.some(
@@ -89,13 +81,12 @@ export async function joinTournament(req, res) {
     );
 
     if (alreadyJoined) {
-      return res.status(400).json({
-        message: "You have already joined this tournament",
-      });
+        throw new AppError(
+            "You have already joined this tournament", 400);
     }
 
     if (tournament.players.length >= tournament.maxPlayers) {
-      return res.status(400).json({ message: "Tournament is full" });
+        throw new AppError("Tournament is full", 400);
     }
 
     tournament.players.push(req.user._id);
@@ -103,21 +94,19 @@ export async function joinTournament(req, res) {
 
     const updatedTournament = await getPopulatedTournament(id);
     res.status(200).json(updatedTournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to join tournament" });
-  }
-}
+});
 
-export async function leaveTournament(req, res) {
-  try {
+
+
+
+export const leaveTournament = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+        throw new AppError("Tournament not found", 404);
     }
 
     const alreadyJoined = tournament.players.some(
@@ -125,9 +114,7 @@ export async function leaveTournament(req, res) {
     );
 
     if (!alreadyJoined) {
-      return res.status(400).json({
-        message: "You have not joined this tournament",
-      });
+        throw new AppError("You have not joined this tournament", 400);
     }
 
     tournament.players = tournament.players.filter(
@@ -144,11 +131,9 @@ export async function leaveTournament(req, res) {
 
     const updatedTournament = await getPopulatedTournament(id);
     res.status(200).json(updatedTournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to leave tournament" });
-  }
-}
+});
+
+
 
 export async function createTournament(req, res) {
   try {
@@ -286,21 +271,20 @@ export async function updateTournament(req, res) {
     }
 }
 
-export async function deleteTournament(req, res) {
-  try {
-    const { id } = req.params;
-    const tournament = await Tournament.findByIdAndDelete(id);
 
-    if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
-    }
 
-    res.status(200).json({ message: "Tournament deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to delete tournament" });
+export const deleteTournament = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const tournament = await Tournament.findByIdAndDelete(id);
+
+  if (!tournament) {
+    throw new AppError("Tournament not found", 404);
   }
-}
+
+  res.status(200).json({ message: "Tournament deleted successfully" });
+});
+
+
 
 export async function recordRoundResult(req, res) {
   try {
