@@ -476,9 +476,6 @@ function GamePage() {
         <div>
           <p>Game over!</p>
           {winner && <p>{winner.userId.username} wins the match!</p>}
-          {match.eloChange?.winnerDelta !== 0 && winner && (
-            <p>ELO: +{match.eloChange.winnerDelta} / {match.eloChange.loserDelta}</p>
-          )}
           <Link to="/lobby">Back to lobby</Link>
         </div>
       )}

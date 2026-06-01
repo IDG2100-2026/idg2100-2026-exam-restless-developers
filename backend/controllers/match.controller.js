@@ -427,40 +427,31 @@ async function doEndTurn(match, userId, io) {
 
       if (!match.isAnonymousMatch) {
         const K = 32;
-        const userDocs = await Promise.all(
-          match.players.map((p) => User.findById(p.userId))
-        );
+        const users = await Promise.all(match.players.map((p) => User.findById(p.userId)));
 
-        const eloDeltas = new Array(match.players.length).fill(0);
-
+        // Run ELO for each pair — winner of pair is whoever ended with more points
         for (let i = 0; i < match.players.length; i++) {
           for (let j = i + 1; j < match.players.length; j++) {
-            const ui = userDocs[i];
-            const uj = userDocs[j];
-            if (!ui || !uj) continue;
+            if (!users[i] || !users[j]) continue;
 
-            const stackI = match.players[i].stack ?? 0;
-            const stackJ = match.players[j].stack ?? 0;
-            const scoreI = stackI > stackJ ? 1 : stackI < stackJ ? 0 : 0.5;
-            const scoreJ = 1 - scoreI;
+            const stackA = match.players[i].stack ?? 0;
+            const stackB = match.players[j].stack ?? 0;
+            let scoreA = 0.5;
+            if (stackA > stackB) scoreA = 1;
+            if (stackA < stackB) scoreA = 0;
 
-            const expectedI = 1 / (1 + Math.pow(10, (uj.elo - ui.elo) / 400));
-            const expectedJ = 1 - expectedI;
-
-            eloDeltas[i] += Math.round(K * (scoreI - expectedI));
-            eloDeltas[j] += Math.round(K * (scoreJ - expectedJ));
+            const expected = 1 / (1 + Math.pow(10, (users[j].elo - users[i].elo) / 400));
+            const delta = Math.round(K * (scoreA - expected));
+            users[i].elo += delta;
+            users[j].elo -= delta;
           }
         }
 
-        const winnerIdx = match.players.findIndex((p) => p.userId?.toString() === matchWinner.userId?.toString());
-        const winnerDelta = eloDeltas[winnerIdx] ?? 0;
-        const loserDelta = match.players.length === 2 ? eloDeltas[winnerIdx === 0 ? 1 : 0] ?? 0 : null;
-
         for (let i = 0; i < match.players.length; i++) {
-          const u = userDocs[i];
+          const u = users[i];
           if (!u) continue;
           u.points = (u.points || 0) + (match.players[i].stack || 0);
-          u.elo = Math.min(MAX_ELO_RATING, Math.max(MIN_ELO_RATING, u.elo + eloDeltas[i]));
+          u.elo = Math.min(MAX_ELO_RATING, Math.max(MIN_ELO_RATING, u.elo));
           u.totalGames += 1;
           if (match.players[i].userId?.toString() === matchWinner.userId?.toString()) {
             u.wins += 1;
@@ -469,8 +460,6 @@ async function doEndTurn(match, userId, io) {
           }
           await u.save();
         }
-
-        match.eloChange = { winnerDelta, loserDelta };
       }
     } else {
       match.lastRoundWinnerId = isTie ? null : match.players[bestIndex].userId;
