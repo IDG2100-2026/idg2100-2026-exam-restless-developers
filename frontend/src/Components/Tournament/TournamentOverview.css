@@ -1,12 +1,12 @@
 .tournament-overview {
   width: 100%;
-  max-width: 360px;
-  padding: 0.85rem;
-  border-radius: 16px;
-  background: #f7f4ee;
-  border: 1px solid #ddd6c8;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.035);
-
+  max-width: 380px;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #fffbe0; /* slightly off-white, student paper */
+  border: 2px dashed #b38b00; /* hand-drawn feel */
+  box-shadow: none;
+  font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
   text-align: left;
 }
 
@@ -21,11 +21,11 @@
 .tournament-overview-kicker {
   display: block;
   margin-bottom: 0.15rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #6b5d4d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #7b4f00;
 }
 
 .tournament-overview-header h2 {
@@ -36,10 +36,10 @@
 }
 
 .view-all-tournaments {
-  color: #4b5563;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-decoration: none;
+  color: #0b6e4f;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .tournament-overview-list {
@@ -55,21 +55,20 @@
   align-items: flex-start;
   gap: 0.75rem;
 
-  padding: 0.55rem 0.7rem;
-  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
 
-  background: #fffdf9;
-  border: 1px solid #e7dfd1;
+  background: #fffaf0;
+  border: 1px solid #e0c38a;
 
-  color: #1f2937;
+  color: #111827;
   text-decoration: none;
 
-  transition: 0.2s ease;
+  transition: none;
 }
 
 .tournament-overview-item:hover {
-  background: #f8f5ef;
-  border-color: #d6cbbd;
+  background: #fff5e6;
 }
 
 .tournament-overview-main {
@@ -88,24 +87,53 @@
 .tournament-overview-main h3 {
   margin: 0;
 
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.05;
 
-  color: #2c2a28;
+  color: #2b2b2b;
 
   text-align: left;
 
   word-break: break-word;
 }
 
+.tournament-overview-main h3:before {
+  content: "🏆 ";
+  margin-right: 0.25rem;
+}
+
 .tournament-overview-main p {
   margin: 0;
 
-  font-size: 0.68rem;
-  color: #6b7280;
+  font-size: 0.75rem;
+  color: #5b5246;
 
   text-align: left;
+}
+
+.to-variant {
+  font-size: 0.78rem;
+  color: #3b3b3b;
+  margin-top: 0.15rem;
+}
+
+.to-buyin {
+  font-size: 0.78rem;
+  color: #9b111e;
+  font-weight: 700;
+  margin-top: 0.15rem;
+}
+
+.to-countdown {
+  font-size: 0.78rem;
+  color: #055160;
+  margin-top: 0.15rem;
+  font-weight: 700;
+  background: #e6fffb;
+  padding: 0.08rem 0.38rem;
+  border-radius: 10px;
+  display: inline-block;
 }
 
 .overview-tournament-meta {
@@ -118,11 +146,11 @@
 .overview-tournament-meta strong {
   display: block;
 
-  font-size: 0.82rem;
-  color: #2f3e34;
+  font-size: 0.9rem;
+  color: #1f2937;
 }
 
 .overview-tournament-meta span {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   color: #6b7280;
 }
