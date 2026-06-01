@@ -49,6 +49,7 @@ export async function updateUser(req, res) {
     profileImage: data.profileImage,
     dob: data.dob,
     role: data.role,
+    isBanned: data.isBanned,
   };
 
   const userUpdated = await updateUserService(uid, updatedUser);
@@ -70,6 +71,12 @@ export async function loginUser(req, res) {
       return res.status(401).json({
         error: "Invalid username or password",
       });
+    }
+
+    if (user.isBanned) {
+        return res.status(403).json({
+            error: "This account has been banned",
+        });
     }
 
     const token = generateToken(user, req.ip);

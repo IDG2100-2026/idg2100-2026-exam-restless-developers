@@ -156,6 +156,12 @@ export function validateUpdateUser() {
       .isIn(["user", "admin", "anonymous"])
       .withMessage("Role must be user, admin, or anonymous."),
 
+    body("isBanned")
+        .optional()
+        .isBoolean()
+        .withMessage("isBanned must be true or false.")
+        .toBoolean(),
+
     handleValidationErrors,
   ];
 }
