@@ -1,13 +1,13 @@
 /* Uses variables from src/index.css */
 .homepage {
-  padding: 44px 24px 96px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
+	padding: 44px 24px 96px;
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
 }
 
 .homepage-hero {
-	background: linear-gradient(180deg, var(--surface-alt), rgba(255,255,255,0));
+	background: linear-gradient(180deg, var(--surface-alt), rgba(255, 255, 255, 0));
 	padding: 40px;
 	border-radius: 12px;
 	box-shadow: var(--shadow-soft);
@@ -41,7 +41,7 @@
 	padding: 10px 14px;
 	border-radius: 8px;
 	text-decoration: none;
-	box-shadow: 0 6px 12px -8px rgba(0,0,0,0.12);
+	box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.12);
 }
 
 .homepage-widgets {
@@ -58,14 +58,197 @@
 	gap: 18px;
 }
 
+.homepage-left > *,
+.homepage-right > * {
+	width: 100%;
+	max-width: 340px;
+	margin-inline: auto;
+	box-sizing: border-box;
+	font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+}
+
+.lobby-preview,
+.platform-activity {
+	max-width: 340px;
+	padding: 0.7rem;
+	background: #fffbe0;
+	border: 2px dashed #b38b00;
+	border-radius: 8px;
+	margin: 0 auto;
+	box-shadow: none;
+	font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+}
+
+.lobby-preview-header,
+.platform-activity h2 {
+	margin: 0 0 0.5rem;
+	color: #2c2a28;
+}
+
+.lobby-preview-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.lobby-preview-header h2 {
+	font-size: 1rem;
+	line-height: 1.2;
+	margin: 0;
+}
+
+
+.lobby-preview-header h2,
+.lobby-preview-all,
+.lobby-preview-item,
+.lp-main strong {
+	color: #2c2a28;
+	font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+	text-align: left;
+}
+
+.platform-activity h2 {
+	color: #2c2a28;
+	font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+	text-align: center;
+}
+
+.lobby-preview-all {
+	color: #0b6e4f;
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-decoration: underline;
+}
+
+.lobby-preview-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.lobby-preview-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.6rem;
+	padding: 0.45rem 0.6rem;
+	border-radius: 6px;
+	background: #fffaf0;
+	border: 1px solid #e0c38a;
+	color: #111827;
+}
+
+.lp-main {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.15rem;
+	min-width: 0;
+	text-align: left;
+}
+
+.lp-main strong {
+	font-size: 0.95rem;
+	font-weight: 800;
+	color: #2b2b2b;
+	word-break: break-word;
+}
+
+.lp-variant,
+.lp-meta {
+	font-size: 0.78rem;
+	color: #5b5246;
+}
+
+.lp-actions {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.35rem;
+	flex-shrink: 0;
+}
+
+.lp-join,
+.lp-watch {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0.35rem 0.7rem;
+	border-radius: 999px;
+	border: 1px solid #e0c38a;
+	background: #fffaf0;
+	color: #111827;
+	text-decoration: none;
+	font: inherit;
+	cursor: pointer;
+}
+
+.lp-join:hover,
+.lp-watch:hover,
+.lobby-preview-all:hover,
+.view-all-tournaments:hover {
+	background: #fff5e6;
+}
+
+.platform-activity {
+	text-align: center;
+}
+
+.platform-activity h2 {
+	font-size: 1rem;
+	line-height: 1.2;
+	text-align: center;
+}
+
+.pa-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.5rem;
+}
+
+.pa-card {
+	padding: 0.55rem 0.5rem;
+	border-radius: 6px;
+	background: #fffaf0;
+	border: 1px solid #e0c38a;
+	display: flex;
+	flex-direction: column;
+	gap: 0.1rem;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+.pa-card strong {
+	font-size: 1rem;
+	font-weight: 800;
+	color: #2b2b2b;
+}
+
+.pa-card span {
+	font-size: 0.75rem;
+	color: #5b5246;
+}
+
 .homepage-right .tournament-overview {
 	max-width: 100%;
 	width: 100%;
 }
 
 @media (max-width: 900px) {
-  .homepage-hero h1 { font-size: 28px; }
-  .homepage-widgets { grid-template-columns: 1fr; }
-  .homepage { padding: 20px; }
+	.homepage-hero h1 {
+		font-size: 28px;
+	}
+
+	.homepage-widgets {
+		grid-template-columns: 1fr;
+	}
+
+	.homepage {
+		padding: 20px;
+	}
 }
 

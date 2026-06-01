@@ -11,17 +11,32 @@
 
 .top-games-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 0.75rem;
     margin-bottom: 0.5rem;
 }
 
 .top-games-header h3 {
     margin: 0;
     font-size: 1rem;
+    font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+    color: #2c2a28;
+    text-align: left;
 }
 
+.view-all-games {
+    color: #0b6e4f;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: underline;
+    font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+    text-align: right;
+}
+
+.view-all-games:hover {
+    background: #fff5e6;
+}
 .top-games-list {
     list-style: none;
     padding: 0;

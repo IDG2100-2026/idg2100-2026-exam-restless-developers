@@ -40,6 +40,10 @@
   font-size: 0.85rem;
   font-weight: 600;
   text-decoration: underline;
+
+  font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+  align-self: center;
+  text-align: right;
 }
 
 .tournament-overview-list {
