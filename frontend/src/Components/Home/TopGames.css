@@ -1,21 +1,25 @@
 .top-games {
-    max-width: 380px;
-    padding: 0.9rem;
-    background: #fffaf5;
-    border: 1px solid #efdbc0;
+    max-width: 340px;
+    padding: 0.7rem;
+    background: #fffbe0;
+    border: 2px dashed #b38b00;
     border-radius: 8px;
+    margin: 0 auto;
+    font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
+    text-align: center;
 }
 
 .top-games-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 0.6rem
+    gap: 8px;
+    margin-bottom: 0.5rem;
 }
 
 .top-games-header h3 {
     margin: 0;
-    font-size: 1rem
+    font-size: 1rem;
 }
 
 .top-games-list {
@@ -23,24 +27,24 @@
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 0.5rem
+    gap: 0.5rem;
 }
 
 .top-games-item {
     padding: 0.45rem;
     border-radius: 6px;
-    background: #fff;
-    border: 1px solid #f0e6d8
+    background: #fffaf0;
+    border: 1px solid #e0c38a;
 }
 
 .top-games-item a {
     color: inherit;
     text-decoration: none;
     display: flex;
-    justify-content: space-between
+    justify-content: space-between;
 }
 
 .top-games-item .meta {
     font-size: 0.78rem;
-    color: #555
+    color: #555;
 }

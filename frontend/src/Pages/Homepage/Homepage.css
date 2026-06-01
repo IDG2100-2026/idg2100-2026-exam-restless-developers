@@ -1,0 +1,71 @@
+/* Uses variables from src/index.css */
+.homepage {
+  padding: 44px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.homepage-hero {
+	background: linear-gradient(180deg, var(--surface-alt), rgba(255,255,255,0));
+	padding: 40px;
+	border-radius: 12px;
+	box-shadow: var(--shadow-soft);
+	text-align: left;
+}
+
+.homepage-hero h1 {
+	margin: 0 0 12px 0;
+	color: var(--text-h);
+	font-size: 44px;
+	line-height: 1.02;
+	word-break: normal;
+}
+
+.homepage-description {
+	color: var(--text);
+	margin: 14px 0 22px 0;
+	max-width: 68ch;
+	line-height: 1.45;
+}
+
+.homepage-ctas {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.homepage-cta {
+	background: var(--accent);
+	color: var(--accent-contrast);
+	padding: 10px 14px;
+	border-radius: 8px;
+	text-decoration: none;
+	box-shadow: 0 6px 12px -8px rgba(0,0,0,0.12);
+}
+
+.homepage-widgets {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 20px;
+	align-items: start;
+}
+
+.homepage-left,
+.homepage-right {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.homepage-right .tournament-overview {
+	max-width: 100%;
+	width: 100%;
+}
+
+@media (max-width: 900px) {
+  .homepage-hero h1 { font-size: 28px; }
+  .homepage-widgets { grid-template-columns: 1fr; }
+  .homepage { padding: 20px; }
+}
+

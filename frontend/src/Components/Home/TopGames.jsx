@@ -58,7 +58,7 @@ function TopGames() {
     <section className="top-games">
       <div className="top-games-header">
         <h3>Top games</h3>
-        <Link to="/matches" className="view-all-games">
+        <Link to="/lobby" className="view-all-games">
           View all
         </Link>
       </div>
@@ -71,7 +71,7 @@ function TopGames() {
         <ul className="top-games-list">
           {games.map((g) => (
             <li key={g._id} className="top-games-item">
-              <Link to={`/matches/${g._id}`}>
+              <Link to={`/game/${g._id}`}>
                 <strong>{g.name || `Match ${g._id.slice(-4)}`}</strong>
                 <div className="meta">{g.players?.length || 0} players</div>
               </Link>

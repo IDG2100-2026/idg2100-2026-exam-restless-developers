@@ -23,12 +23,12 @@ function Homepage() {
 
       <div className="homepage-widgets">
         <div className="homepage-left">
+          <TopGames />
           <LobbyPreview />
           <PlatformActivity />
         </div>
 
         <div className="homepage-right">
-          <TopGames />
           <TournamentOverview />
         </div>
       </div>
