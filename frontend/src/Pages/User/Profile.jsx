@@ -66,6 +66,50 @@ function readStoredProfile(username) {
   }
 }
 
+function buildProfileData(user, fallback = {}) {
+  const source = user || {};
+  const defaultSource = fallback || {};
+
+  return {
+    email: source.email ?? defaultSource.email ?? "",
+    aboutMe: source.aboutMe ?? defaultSource.aboutMe ?? "",
+    imageData: source.profileImage ?? defaultSource.imageData ?? "",
+    elo: Number(source.elo ?? defaultSource.elo ?? 0),
+    wins: Number(source.wins ?? defaultSource.wins ?? 0),
+    losses: Number(source.losses ?? defaultSource.losses ?? 0),
+    totalGames: Number(source.totalGames ?? defaultSource.totalGames ?? 0),
+  };
+}
+
+function countRecentMatches(matches = [], userId = "") {
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const currentUserId = String(userId);
+
+  return matches.reduce(
+    (accumulator, match) => {
+      if (!match || match.status !== "finished" || !match.createdAt) {
+        return accumulator;
+      }
+
+      const createdAt = new Date(match.createdAt).getTime();
+      if (Number.isNaN(createdAt) || createdAt < cutoff) {
+        return accumulator;
+      }
+
+      if (String(match.winner || "") === currentUserId) {
+        accumulator.winsLastMonth += 1;
+      }
+
+      if (String(match.loser || "") === currentUserId) {
+        accumulator.lossesLastMonth += 1;
+      }
+
+      return accumulator;
+    },
+    { winsLastMonth: 0, lossesLastMonth: 0 }
+  );
+}
+
 function saveStoredProfile(username, data) {
   if (!username) {
     return;
@@ -89,26 +133,39 @@ function saveStoredProfile(username, data) {
 }
 
 function Profile() {
-  const [username, setUsername] = useState("");
-  const [userId, setUserId] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(() => readCurrentUser());
+  const [username, setUsername] = useState(() => readCurrentUser()?.username || "");
+  const [userId, setUserId] = useState(() => readCurrentUser()?.userId || "");
+  const [profileData, setProfileData] = useState(() => {
+    const user = readCurrentUser();
+    const storedProfile = user?.username ? readStoredProfile(user.username) : null;
+    return buildProfileData(storedProfile);
+  });
+  const [recentStats, setRecentStats] = useState({
+    winsLastMonth: 0,
+    lossesLastMonth: 0,
+  });
   const [error, setError] = useState("");
   const [saveMessage, setSaveMessage] = useState("");
   const [form, setForm] = useState({
-    email: "",
-    aboutMe: "",
+    email: profileData.email,
+    aboutMe: profileData.aboutMe,
     newPassword: "",
-    imageData: "",
+    imageData: profileData.imageData,
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadProfile() {
       const user = readCurrentUser();
+      if (cancelled) {
+        return;
+      }
+
       setCurrentUser(user);
 
       if (!user?.username) {
-        setLoading(false);
         return;
       }
 
@@ -116,39 +173,59 @@ function Profile() {
       setUserId(user.userId || "");
 
       const stored = readStoredProfile(user.username);
+      const storedProfile = buildProfileData(stored);
 
       setForm({
-        email: stored?.email || "",
-        aboutMe: stored?.aboutMe || "",
+        email: storedProfile.email,
+        aboutMe: storedProfile.aboutMe,
         newPassword: "",
-        imageData: stored?.imageData || "",
+        imageData: storedProfile.imageData,
       });
+
+      setProfileData(storedProfile);
 
       const userKey = user.userId || user.username;
 
       if (!userKey || String(userKey).startsWith("guest-")) {
-        setLoading(false);
         return;
       }
 
       try {
-        const response = await axios.get(`${API_BASE}/users/${userKey}`);
-        const apiUser = response.data;
+        const userResponse = await axios.get(`${API_BASE}/users/${userKey}`);
+        const apiUser = userResponse.data;
+        const apiProfile = buildProfileData(apiUser, storedProfile);
 
         setForm((current) => ({
           ...current,
-          email: apiUser.email || current.email,
-          aboutMe: apiUser.aboutMe || "",
-          imageData: apiUser.profileImage || "",
+          email: apiProfile.email,
+          aboutMe: apiProfile.aboutMe,
+          imageData: apiProfile.imageData,
         }));
+        setProfileData(apiProfile);
+
+        try {
+          const matchesResponse = await axios.get(`${API_BASE}/matches`);
+          setRecentStats(countRecentMatches(matchesResponse.data, userKey));
+        } catch {
+          setRecentStats({ winsLastMonth: 0, lossesLastMonth: 0 });
+        }
       } catch {
         setError("Could not load profile data from backend.");
-      } finally {
-        setLoading(false);
       }
     }
 
     loadProfile();
+
+    function handleFocus() {
+      loadProfile();
+    }
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   const initial = username ? username.slice(0, 1).toUpperCase() : "U";
@@ -200,20 +277,23 @@ function Profile() {
     try {
       const response = await axios.put(`${API_BASE}/users/${userKey}`, payload);
       const updatedUser = response.data.user;
+      const updatedProfile = buildProfileData(updatedUser, profileData);
 
       saveStoredProfile(username, {
-        email: updatedUser?.email || form.email,
-        aboutMe: updatedUser?.aboutMe || form.aboutMe,
-        imageData: updatedUser?.profileImage || form.imageData,
+        email: updatedProfile.email,
+        aboutMe: updatedProfile.aboutMe,
+        imageData: updatedProfile.imageData,
       });
 
       setForm((current) => ({
         ...current,
-        email: updatedUser?.email || current.email,
-        aboutMe: updatedUser?.aboutMe || current.aboutMe,
-        imageData: updatedUser?.profileImage || current.imageData,
+        email: updatedProfile.email,
+        aboutMe: updatedProfile.aboutMe,
+        imageData: updatedProfile.imageData,
         newPassword: "",
       }));
+
+      setProfileData(updatedProfile);
 
       setSaveMessage("Profile saved to backend.");
     } catch (saveError) {
@@ -225,15 +305,6 @@ function Profile() {
 
       setError(saveError.response?.data?.error || "Could not save profile.");
     }
-  }
-
-  if (loading) {
-    return (
-      <section className="profile-page">
-        <h1>Your Profile</h1>
-        <p>Loading profile...</p>
-      </section>
-    );
   }
 
   if (!currentUser) {
@@ -330,27 +401,27 @@ function Profile() {
             <h2>Stats</h2>
             <div className="profile-stats-grid">
               <div>
-                <strong>1000</strong>
-                <span>Elo (5s)</span>
+                <strong>{profileData.elo}</strong>
+                <span>Elo</span>
               </div>
               <div>
-                <strong>1000</strong>
-                <span>Elo (10s)</span>
-              </div>
-              <div>
-                <strong>1000</strong>
-                <span>Elo (15s)</span>
-              </div>
-              <div>
-                <strong>0</strong>
+                <strong>{profileData.totalGames}</strong>
                 <span>Total games</span>
               </div>
               <div>
-                <strong>0</strong>
+                <strong>{profileData.wins}</strong>
+                <span>Wins</span>
+              </div>
+              <div>
+                <strong>{profileData.losses}</strong>
+                <span>Losses</span>
+              </div>
+              <div>
+                <strong>{recentStats.winsLastMonth}</strong>
                 <span>Wins last month</span>
               </div>
               <div>
-                <strong>0</strong>
+                <strong>{recentStats.lossesLastMonth}</strong>
                 <span>Losses last month</span>
               </div>
             </div>
