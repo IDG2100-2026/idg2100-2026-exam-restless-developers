@@ -3,12 +3,16 @@ import { Link } from "react-router-dom";
 import "./TopGames.css";
 
 function dedupeById(items) {
-  const seen = new Set();
-  return items.filter((it) => {
-    if (seen.has(it._id)) return false;
-    seen.add(it._id);
-    return true;
-  });
+  const out = [];
+  const ids = {};
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    if (!it || !it._id) continue;
+    if (ids[it._id]) continue;
+    ids[it._id] = true;
+    out.push(it);
+  }
+  return out;
 }
 
 function TopGames() {
@@ -17,39 +21,37 @@ function TopGames() {
   const limit = 5;
 
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
 
     async function load() {
       setLoading(true);
       try {
-        // Try active games first
-        const activeRes = await fetch("http://localhost:6767/api/v1/matches?status=active");
-        const active = activeRes.ok ? await activeRes.json() : [];
+        const a = await fetch("http://localhost:6767/api/v1/matches?status=active");
+        const active = a.ok ? await a.json() : [];
 
-        if (!mounted) return;
+        if (!alive) return;
 
-        if (active.length >= limit) {
+        if (active && active.length >= limit) {
           setGames(active.slice(0, limit));
           setLoading(false);
           return;
         }
 
-        // Fallback: fetch recent matches and merge
-        const recentRes = await fetch("http://localhost:6767/api/v1/matches");
-        const recent = recentRes.ok ? await recentRes.json() : [];
+        const r = await fetch("http://localhost:6767/api/v1/matches");
+        const recent = r.ok ? await r.json() : [];
 
-        const merged = dedupeById([...active, ...recent]).slice(0, limit);
+        const merged = dedupeById(active.concat(recent)).slice(0, limit);
         setGames(merged);
       } catch (err) {
-        console.error("TopGames load error", err);
+        console.log("TopGames error", err);
         setGames([]);
       } finally {
-        if (mounted) setLoading(false);
+        if (alive) setLoading(false);
       }
     }
 
     load();
-    return () => (mounted = false);
+    return () => (alive = false);
   }, []);
 
   return (

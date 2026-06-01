@@ -11,7 +11,9 @@ function TournamentOverview() {
   useEffect(() => {
     async function fetchTournaments() {
       try {
-        const response = await fetch("http://localhost:6767/api/v1/tournaments");
+        const response = await fetch(
+          "http://localhost:6767/api/v1/tournaments",
+        );
 
         if (!response.ok) {
           throw new Error("Could not fetch tournaments");
@@ -32,40 +34,15 @@ function TournamentOverview() {
     fetchTournaments();
   }, []);
 
-  // simple ticking clock for countdowns
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
+    const t = setInterval(function () {
+      setNow(Date.now());
+    }, 1000);
+    return function () {
+      clearInterval(t);
+    };
   }, []);
-
-  function formatDate(date) {
-    return new Date(date).toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  function formatVariant(variant) {
-    if (!variant) return "—";
-    const straights = variant.straightsAllowed ? "Straights" : "No straights";
-    return `Best of ${variant.rounds} · ${variant.timeControl}s · ${straights}`;
-  }
-
-  function formatCountdown(startDate) {
-    const diff = new Date(startDate).getTime() - now;
-    if (isNaN(diff)) return "";
-    if (diff <= 0) return "Started";
-    const sec = Math.floor(diff / 1000);
-    const days = Math.floor(sec / 86400);
-    const hours = Math.floor((sec % 86400) / 3600);
-    const minutes = Math.floor((sec % 3600) / 60);
-    const seconds = sec % 60;
-    if (days > 0) return `${days}d ${String(hours).padStart(2, "0")}h`;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-  }
 
   return (
     <section className="tournament-overview">
@@ -82,67 +59,91 @@ function TournamentOverview() {
 
       {error && <p className="tournament-overview-error">{error}</p>}
 
-      {tournaments.length === 0 ? (
-        <p className="empty-tournaments">No upcoming tournaments yet.</p>
-      ) : (
-        <div className="tournament-overview-list">
-          {tournaments.map((tournament) => (
-            <div className="tournament-overview-item" key={tournament._id}>
-              <div className="tournament-overview-main">
-                <Link to={`/tournaments/${tournament._id}`}>
-                  <h3>{tournament.title}</h3>
-                </Link>
-                <p className="to-date">{formatDate(tournament.startDate)}</p>
-                <p className="to-variant">{formatVariant(tournament.variant)}</p>
-                {tournament.buyIn != null && (
-                  <p className="to-buyin">Buy-in: {tournament.buyIn} pts</p>
-                )}
-                <p className="to-countdown">{formatCountdown(tournament.startDate)}</p>
-              </div>
+      {(() => {
+        let listContent;
+        if (tournaments.length === 0) {
+          listContent = (
+            <p className="empty-tournaments">No upcoming tournaments yet.</p>
+          );
+        } else {
+          listContent = (
+            <div className="tournament-overview-list">
+              {tournaments.map((tournament) => {
+                let dateStr = "";
+                if (tournament.startDate) {
+                  dateStr = new Date(tournament.startDate).toLocaleString();
+                }
 
-              <div className="overview-tournament-meta">
-                <strong>
-                  {tournament.players?.length || 0}/{tournament.maxPlayers}
-                </strong>
-                <span>players</span>
-              </div>
+                let varStr = "—";
+                if (tournament.variant) {
+                  varStr = "Best of " + (tournament.variant.rounds || "?");
+                  if (tournament.variant.timeControl) {
+                    varStr =
+                      varStr + " · " + tournament.variant.timeControl + "s";
+                  }
+                }
 
-              <div className="tournament-actions">
-                <button
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const currentUserId = localStorage.getItem("currentUserId");
-                    if (!currentUserId) {
-                      navigate("/login");
-                      return;
-                    }
+                let diff = NaN;
+                if (tournament.startDate) {
+                  diff = new Date(tournament.startDate).getTime() - now;
+                }
 
-                    try {
-                      const res = await fetch(`${API}/tournaments/${tournament._id}/join`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId: currentUserId }),
-                      });
+                let cd = "";
+                if (!isNaN(diff)) {
+                  if (diff <= 0) {
+                    cd = "Started";
+                  } else {
+                    cd = Math.floor(diff / 1000 / 3600) + "h";
+                  }
+                }
 
-                      const json = await res.json();
-                      if (!res.ok) throw new Error(json.message || "Could not join tournament");
+                return (
+                  <div
+                    className="tournament-overview-item"
+                    key={tournament._id}
+                  >
+                    <div className="tournament-overview-main">
+                      <Link to={`/tournaments/${tournament._id}`}>
+                        <h3>{tournament.title}</h3>
+                      </Link>
+                      <p className="to-date">{dateStr}</p>
+                      <p className="to-variant">{varStr}</p>
+                      {tournament.buyIn != null && (
+                        <p className="to-buyin">
+                          Buy-in: {tournament.buyIn} pts
+                        </p>
+                      )}
+                      <p className="to-countdown">{cd}</p>
+                    </div>
 
-                      navigate(`/tournaments/${tournament._id}`);
-                    } catch (err) {
-                      setError(err.message || "Could not join tournament");
-                    }
-                  }}
-                >
-                  Join
-                </button>
+                    <div className="overview-tournament-meta">
+                      <strong>
+                        {tournament.players?.length || 0}/
+                        {tournament.maxPlayers}
+                      </strong>
+                      <span>players</span>
+                    </div>
 
-                <Link to={`/tournaments/${tournament._id}`}>Spectate</Link>
-              </div>
+                    <div className="tournament-actions">
+                      <Link
+                        to={`/tournaments/${tournament._id}`}
+                        className="btn-join"
+                      >
+                        Open
+                      </Link>
+                      <Link to={`/tournaments/${tournament._id}`}>
+                        Spectate
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      )}
+          );
+        }
+
+        return listContent;
+      })()}
     </section>
   );
 }
