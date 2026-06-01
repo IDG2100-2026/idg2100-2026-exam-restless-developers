@@ -5,6 +5,8 @@ import {
   getUser,
   createUser,
   loginUser,
+  forgotPassword,
+  resetPassword,
   updateUser,
   deleteUser,
 } from "../controllers/user.controller.js";
@@ -25,6 +27,10 @@ router.get("/:uid", validateUserId(), getUser);
 router.post("/", validateCreateUser(), createUser);
 
 router.post("/login", validateLoginUser(), loginUser);
+
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password", resetPassword);
 
 router.put("/:uid", validateUserId(), validateUpdateUser(), updateUser);
 
