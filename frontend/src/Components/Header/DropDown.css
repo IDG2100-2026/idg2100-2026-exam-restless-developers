@@ -45,6 +45,27 @@
   background: var(--surface-hover);
 }
 
+.color-swatches {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.color-swatch--active {
+  border-color: #1f2937;
+  outline: 2px solid white;
+  outline-offset: -4px;
+}
+
 @media (max-width: 900px) {
   .dropdown-menu {
     position: static;

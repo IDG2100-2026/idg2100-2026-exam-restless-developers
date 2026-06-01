@@ -221,6 +221,38 @@ if (hasMoreRounds) {
 }
 }
 
+export async function leaveMatch(req, res) {
+  const { userId } = req.body;
+
+  try {
+    const match = await Match.findById(req.params.id);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+    if (match.status !== "waiting") return res.status(400).json({ message: "Can only leave before the game starts" });
+
+    const playerIndex = match.players.findIndex((p) => p.userId?.toString() === userId);
+    if (playerIndex === -1) return res.status(403).json({ message: "Not in this match" });
+
+    match.players.splice(playerIndex, 1);
+
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        user.points = (user.points || 0) + match.buyIn;
+        await user.save();
+      }
+    }
+
+    match.markModified("players");
+    await match.save();
+    await match.populate("players.userId", "username elo");
+
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
+    res.json(match);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export async function listMatches(req, res) {
   try {
     const filter = {};
@@ -391,35 +423,42 @@ async function doEndTurn(match, userId, io) {
 
       await updateTournamentAfterMatchFinished(match, matchWinner.userId);
 
-      const matchLoser = match.players.find(
-        (p) => p.userId?.toString() !== matchWinner.userId?.toString()
-      );
-      if (matchLoser) match.loser = matchLoser.userId;
       match.currentTurn = null;
 
-      if (!match.isAnonymousMatch && match.winner && match.loser) {
-        const [winnerUser, loserUser] = await Promise.all([
-          User.findById(match.winner),
-          User.findById(match.loser),
-        ]);
+      if (!match.isAnonymousMatch) {
+        const K = 32;
+        const users = await Promise.all(match.players.map((p) => User.findById(p.userId)));
 
-        if (winnerUser && loserUser) {
-          const K = 32;
-          const expected = 1 / (1 + Math.pow(10, (loserUser.elo - winnerUser.elo) / 400));
-          const winnerDelta = Math.round(K * (1 - expected));
-          const loserDelta = -winnerDelta;
+        // Run ELO for each pair — winner of pair is whoever ended with more points
+        for (let i = 0; i < match.players.length; i++) {
+          for (let j = i + 1; j < match.players.length; j++) {
+            if (!users[i] || !users[j]) continue;
 
-          winnerUser.points = (winnerUser.points || 0) + (matchWinner.stack || 0);
-          loserUser.points = (loserUser.points || 0) + (matchLoser.stack || 0);
-          winnerUser.elo = Math.min(MAX_ELO_RATING, winnerUser.elo + winnerDelta);
-          winnerUser.wins += 1;
-          winnerUser.totalGames += 1;
-          loserUser.elo = Math.max(MIN_ELO_RATING, loserUser.elo + loserDelta);
-          loserUser.losses += 1;
-          loserUser.totalGames += 1;
+            const stackA = match.players[i].stack ?? 0;
+            const stackB = match.players[j].stack ?? 0;
+            let scoreA = 0.5;
+            if (stackA > stackB) scoreA = 1;
+            if (stackA < stackB) scoreA = 0;
 
-          await Promise.all([winnerUser.save(), loserUser.save()]);
-          match.eloChange = { winnerDelta, loserDelta };
+            const expected = 1 / (1 + Math.pow(10, (users[j].elo - users[i].elo) / 400));
+            const delta = Math.round(K * (scoreA - expected));
+            users[i].elo += delta;
+            users[j].elo -= delta;
+          }
+        }
+
+        for (let i = 0; i < match.players.length; i++) {
+          const u = users[i];
+          if (!u) continue;
+          u.points = (u.points || 0) + (match.players[i].stack || 0);
+          u.elo = Math.min(MAX_ELO_RATING, Math.max(MIN_ELO_RATING, u.elo));
+          u.totalGames += 1;
+          if (match.players[i].userId?.toString() === matchWinner.userId?.toString()) {
+            u.wins += 1;
+          } else {
+            u.losses += 1;
+          }
+          await u.save();
         }
       }
     } else {
@@ -693,4 +732,3 @@ export async function rollDice(req, res) {
     res.status(500).json({ message: err.message });
   }
 }
-

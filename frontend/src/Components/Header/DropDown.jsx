@@ -31,14 +31,27 @@ function DropDown() {
     <div className="dropdown-menu">
       <h3>Settings</h3>
 
-      <label className="dropdown-field">
-        Board color
-        <input
-          type="color"
-          value={boardColor}
-          onChange={(event) => setBoardColor(event.target.value)}
-        />
-      </label>
+      <div className="dropdown-field">
+        <span>Board color</span>
+        <div className="color-swatches">
+          {[
+            { color: "#facc15", label: "Yellow" },
+            { color: "#22c55e", label: "Green" },
+            { color: "#3b82f6", label: "Blue" },
+            { color: "#ef4444", label: "Red" },
+            { color: "#a855f7", label: "Purple" },
+            { color: "#f97316", label: "Orange" },
+          ].map(({ color, label }) => (
+            <button
+              key={color}
+              className={`color-swatch${boardColor === color ? " color-swatch--active" : ""}`}
+              style={{ background: color }}
+              title={label}
+              onClick={() => setBoardColor(color)}
+            />
+          ))}
+        </div>
+      </div>
 
       <div className="dropdown-field">
         <span>Sound</span>

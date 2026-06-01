@@ -334,7 +334,23 @@ function GamePage() {
       </div>
 
       {match.status === "waiting" && (
-        <p>Waiting for players ({match.players.length}/{match.maxPlayers})</p>
+        <div>
+          <p>Waiting for players ({match.players.length}/{match.maxPlayers})</p>
+          {match.players.some(p => String(p.userId?._id ?? p.userId) === String(currentUserId)) && (
+            <button onClick={async () => {
+              try {
+                const res = await fetch(`${API}/matches/${id}/leave`, {
+                  method: "POST",
+                  headers: authHeaders(),
+                  body: JSON.stringify({ userId: currentUserId }),
+                });
+                if (res.ok) navigate("/lobby");
+              } catch { /* ignore */ }
+            }}>
+              Leave game
+            </button>
+          )}
+        </div>
       )}
 
       {(match.status === "active" || match.bettingPhase || match.roundPending) && (
@@ -404,13 +420,25 @@ function GamePage() {
                 )}
                 <button onClick={() => handleBet("fold")}>Fold</button>
                 <div>
+                  <button
+                    onClick={() => setBetAmount(a => Math.max(1, a - 1))}
+                    disabled={betAmount <= 1}
+                  >-</button>
                   <input
                     type="number"
                     min={1}
                     max={myPlayer?.stack ?? 0}
                     value={betAmount}
-                    onChange={e => setBetAmount(Number(e.target.value))}
+                    onFocus={e => e.target.select()}
+                    onChange={e => {
+                      const val = parseInt(e.target.value, 10);
+                      if (!isNaN(val) && val >= 0) setBetAmount(val);
+                    }}
                   />
+                  <button
+                    onClick={() => setBetAmount(a => Math.min(myPlayer?.stack ?? 0, a + 1))}
+                    disabled={betAmount >= (myPlayer?.stack ?? 0)}
+                  >+</button>
                   <button
                     onClick={() => handleBet("bet")}
                     disabled={betAmount <= 0 || betAmount > (myPlayer?.stack ?? 0)}
@@ -448,9 +476,6 @@ function GamePage() {
         <div>
           <p>Game over!</p>
           {winner && <p>{winner.userId.username} wins the match!</p>}
-          {match.eloChange?.winnerDelta !== 0 && winner && (
-            <p>ELO: +{match.eloChange.winnerDelta} / {match.eloChange.loserDelta}</p>
-          )}
           <Link to="/lobby">Back to lobby</Link>
         </div>
       )}
