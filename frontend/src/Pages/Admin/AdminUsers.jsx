@@ -67,6 +67,47 @@ function AdminUsers() {
     }
   }
 
+  async function handleBanToggle(user) {
+  const userIdentifier = user.uid || user._id;
+
+  setError("");
+    setUpdatingUserId(userIdentifier);
+
+    try {
+        const response = await fetch(
+        `http://localhost:6767/api/v1/users/${userIdentifier}`,
+        {
+            method: "PUT",
+            headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify({
+            isBanned: !user.isBanned,
+            }),
+        }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+        throw new Error(data.message || data.error || "Could not update user");
+        }
+
+        setUsers((previousUsers) =>
+        previousUsers.map((currentUser) =>
+            (currentUser.uid || currentUser._id) === userIdentifier
+            ? data.user
+            : currentUser
+        )
+        );
+    } catch (error) {
+        setError(error.message);
+    } finally {
+        setUpdatingUserId(null);
+    }
+    }
+
   const filteredUsers = users.filter((user) => {
     const search = searchValue.toLowerCase();
 
@@ -110,6 +151,7 @@ function AdminUsers() {
                   <th>Username</th>
                   <th>Email</th>
                   <th>Role</th>
+                  <th>Status</th>
                   <th>Elo</th>
                   <th>Total games</th>
                   <th>Actions</th>
@@ -126,6 +168,7 @@ function AdminUsers() {
                       <td>{user.username}</td>
                       <td>{user.email}</td>
                       <td>{user.role}</td>
+                      <td>{user.isBanned ? "Banned" : "Active"}</td>
                       <td>{user.elo}</td>
                       <td>{user.totalGames}</td>
                       <td>
@@ -141,6 +184,20 @@ function AdminUsers() {
                               ? "Remove admin"
                               : "Make admin"}
                         </button>
+
+                        <button
+                            className="admin-action-button"
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() => handleBanToggle(user)}
+                            >
+                            {isUpdating
+                                ? "Saving..."
+                                : user.isBanned
+                                ? "Unban user"
+                                : "Ban user"}
+                        </button>
+
                       </td>
                     </tr>
                   );

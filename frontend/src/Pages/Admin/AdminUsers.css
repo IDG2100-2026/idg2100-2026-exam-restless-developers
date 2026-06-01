@@ -38,6 +38,7 @@
 
 .admin-table-wrapper {
   width: 100%;
+  overflow-x: auto;
 }
 
 .admin-table {
@@ -51,12 +52,21 @@
   border-bottom: 1px solid #e4ddd1;
   text-align: left;
   color: #5f5a52;
+  vertical-align: middle;
 }
 
 .admin-table th {
   color: #2c2a28;
   font-size: 0.85rem;
   font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-table td:last-child {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 180px;
 }
 
 .admin-action-button {
@@ -69,6 +79,7 @@
   background: #ece8e1;
   color: #5f5a52;
   transition: 0.2s ease;
+  white-space: nowrap;
 }
 
 .admin-action-button:hover {
@@ -82,9 +93,13 @@
 
 /* MOBILE */
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .admin-search-label input {
     max-width: 100%;
+  }
+
+  .admin-table-wrapper {
+    overflow-x: visible;
   }
 
   .admin-table,
@@ -102,25 +117,36 @@
   }
 
   .admin-table tr {
-    padding: 1rem 0;
-    border-bottom: 1px solid #e4ddd1;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #e4ddd1;
+    border-radius: 16px;
+    background: #fffdf9;
   }
 
   .admin-table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.45rem 0;
-    border-bottom: none;
-    text-align: right;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #eee7dc;
+    text-align: left;
     word-break: break-word;
+  }
+
+  .admin-table td:last-child {
+    display: block;
+    min-width: 0;
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
   .admin-table td::before {
     font-weight: 800;
     color: #2c2a28;
-    text-align: left;
   }
 
   .admin-table td:nth-child(1)::before {
@@ -136,19 +162,29 @@
   }
 
   .admin-table td:nth-child(4)::before {
-    content: "Elo";
+    content: "Status";
   }
 
   .admin-table td:nth-child(5)::before {
-    content: "Total games";
+    content: "Elo";
   }
 
   .admin-table td:nth-child(6)::before {
-    content: "Actions";
+    content: "Total games";
   }
 
-  .admin-action-button {
-    width: auto;
+  .admin-table td:nth-child(7)::before {
+    content: "Actions";
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .admin-table td:nth-child(7) {
+    padding-top: 0.75rem;
+  }
+
+  .admin-table td:nth-child(7) .admin-action-button {
+    width: 100%;
+    margin-top: 0.45rem;
   }
 }
-

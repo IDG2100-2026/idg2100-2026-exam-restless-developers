@@ -632,6 +632,8 @@ export async function placeBet(req, res) {
   }
 }
 
+
+
 export async function rollDice(req, res) {
   const { userId, held } = req.body;
 
@@ -691,3 +693,4 @@ export async function rollDice(req, res) {
     res.status(500).json({ message: err.message });
   }
 }
+
