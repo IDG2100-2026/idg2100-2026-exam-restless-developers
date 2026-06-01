@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 import { connectDB } from "./config/db.config.js";
+import User from "./models/user.js";
 import tournamentRoutes from "./routes/tournaments.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import matchesRoutes from "./routes/matches.routes.js";
@@ -59,9 +60,22 @@ app.get("/", (req, res) => {
 
 app.use(errorHandler);
 
+async function grantWeeklyPoints() {
+  try {
+    const result = await User.updateMany({}, { $inc: { points: 100 } });
+    console.log(`Weekly grant: +100 points to ${result.modifiedCount} users`);
+  } catch (err) {
+    console.error("Weekly points grant failed:", err);
+  }
+}
+
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 async function startServer() {
   try {
     await connectDB();
+
+    setInterval(grantWeeklyPoints, ONE_WEEK_MS);
 
     httpServer.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
