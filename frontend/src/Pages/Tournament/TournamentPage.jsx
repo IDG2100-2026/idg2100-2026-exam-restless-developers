@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -17,7 +18,8 @@ const socket = io("http://localhost:6767");
 function TournamentPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  
+  
   const [tournament, setTournament] = useState(null);
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
@@ -25,6 +27,7 @@ function TournamentPage() {
   const [timeLeft, setTimeLeft] = useState("");
   const [comments, setComments] = useState([]);
   const [commentInput, setCommentInput] = useState("");
+  const [hasRedirectedToGame, setHasRedirectedToGame] = useState(false);
 
   useEffect(() => {
     async function fetchTournament() {
@@ -46,6 +49,30 @@ function TournamentPage() {
 
     fetchTournament();
   }, [id]);
+
+
+  useEffect(() => {
+  if (!tournament || tournament.status !== "ongoing") return;
+
+  const intervalId = setInterval(async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:6767/api/v1/tournaments/${id}`
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      setTournament(data);
+    } catch {
+      // ignore
+    }
+  }, 1000);
+
+  return () => clearInterval(intervalId);
+}, [id, tournament?.status]);
+
+
 
   useEffect(() => {
     async function fetchComments() {
@@ -93,63 +120,17 @@ function TournamentPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!tournament) return;
+    socket.emit("join:tournament", id);
 
-    function updateCountdown() {
-      const now = new Date();
-      let targetDate = null;
-
-      if (tournament.status === "upcoming") {
-        targetDate = tournament.startDate;
-      }
-
-      if (tournament.status === "ongoing" && tournament.nextRoundStart) {
-        targetDate = tournament.nextRoundStart;
-      }
-
-      if (!targetDate) {
-        setTimeLeft("No timer available");
-        return;
-      }
-
-      const difference = new Date(targetDate) - now;
-
-      if (difference <= 0) {
-        setTimeLeft(
-          tournament.status === "ongoing"
-            ? "Round starting now"
-            : "Tournament has started"
-        );
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / (1000 * 60)) % 60);
-      const seconds = Math.floor((difference / 1000) % 60);
-
-      setTimeLeft(
-        days > 0
-          ? `${days}d ${hours}h ${minutes}m`
-          : `${hours}h ${minutes}m ${seconds}s`
-      );
-    }
-
-    updateCountdown();
-    const intervalId = setInterval(updateCountdown, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [tournament]);
-
-  function formatDate(date) {
-    return new Date(date).toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    socket.on("tournament:update", (updatedTournament) => {
+      setTournament(updatedTournament);
+      setHasRedirectedToGame(false);
     });
-  }
+
+    return () => {
+      socket.off("tournament:update");
+    };
+  }, [id]);
 
   function getCurrentUserId() {
     return localStorage.getItem("currentUserId");
@@ -187,6 +168,145 @@ function TournamentPage() {
       }
 
       return player._id?.toString() === currentUserId.toString();
+    });
+  }
+
+
+
+  async function goToTournamentGame() {
+  try {
+    if (hasRedirectedToGame) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/401";
+      return;
+    }
+
+    const currentUserId = getCurrentUserId();
+
+    const currentRound = tournament.rounds.find(
+      (round) => round.roundNumber === tournament.currentRound
+    );
+
+    const myPairing = currentRound?.pairings.find((pairing) =>
+      pairing.players.some((player) =>
+        String(player._id ?? player) === String(currentUserId)
+      )
+    );
+
+    if (!myPairing) {
+      setActionMessage("Could not find your pairing.");
+      return;
+    }
+
+    if (myPairing.game) {
+      const matchId =
+        typeof myPairing.game === "object" ? myPairing.game._id : myPairing.game;
+
+      setHasRedirectedToGame(true);
+      navigate(`/game/${matchId}`);
+      return;
+    }
+
+    const firstPlayerId = String(myPairing.players[0]?._id ?? myPairing.players[0]);
+
+    if (String(currentUserId) !== firstPlayerId) {
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:6767/api/v1/tournaments/${id}/matches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      window.location.href = "/401";
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "Could not enter tournament game");
+    }
+
+    setHasRedirectedToGame(true);
+    navigate(`/game/${data.matchId}`);
+  } catch (error) {
+    setActionMessage(error.message);
+  }
+}
+
+
+  useEffect(() => {
+    if (!tournament) return;
+
+    function updateCountdown() {
+      const now = new Date();
+      let targetDate = null;
+
+      if (tournament.status === "upcoming") {
+        targetDate = tournament.startDate;
+      }
+
+      if (tournament.status === "ongoing" && tournament.nextRoundStart) {
+        targetDate = tournament.nextRoundStart;
+      }
+
+      if (!targetDate) {
+        setTimeLeft("No timer available");
+        return;
+      }
+
+      const difference = new Date(targetDate) - now;
+
+      if (difference <= 0) {
+         if (tournament.status === "ongoing" && isCurrentUserJoined()) {
+           setTimeLeft("Round starting now");
+           goToTournamentGame();
+           return;
+         }
+
+        setTimeLeft(
+          tournament.status === "ongoing"
+            ? "Round starting now"
+            : "Tournament has started"
+        );
+        return;
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / (1000 * 60)) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+
+      setTimeLeft(
+        days > 0
+          ? `${days}d ${hours}h ${minutes}m`
+          : `${hours}h ${minutes}m ${seconds}s`
+      );
+    }
+
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [tournament, hasRedirectedToGame]);
+
+  function formatDate(date) {
+    return new Date(date).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
@@ -574,6 +694,7 @@ function TournamentPage() {
   }
 
   const latestRound = tournament.rounds?.[tournament.rounds.length - 1];
+  
 
   const sortedStandings = [...(tournament.standings || [])].sort(
     (a, b) => b.points - a.points

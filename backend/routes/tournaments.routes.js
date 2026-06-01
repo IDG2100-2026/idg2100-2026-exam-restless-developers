@@ -10,6 +10,7 @@ import {
   updateTournament,
   deleteTournament,
   recordRoundResult,
+  createTournamentMatch,
 } from "../controllers/tournament.controller.js";
 
 import {
@@ -32,6 +33,8 @@ router.delete("/:id", requireAuth, requireAdmin, validateTournamentId, deleteTou
 router.post("/:id/players", requireAuth, validateTournamentId, joinTournament);
 
 router.delete("/:id/players", requireAuth, validateTournamentId, leaveTournament);
+
+router.post("/:id/matches", requireAuth, validateTournamentId, createTournamentMatch);
 
 router.post(
   "/:id/rounds/:roundNumber/results",

@@ -2,12 +2,20 @@
 // Contains code from marte kaland's oblig3 (formatVariant, polling pattern, joinedRef, player card layout)
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { io as socketIO } from "socket.io-client";
 import "../../WebComponents/GameBoard.js";
 import "./GamePage.css";
 
 const API = "http://localhost:6767/api/v1";
+
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 // Die values 1-6 → Spanish poker dice faces
 const FACE = { 1: "7", 2: "8", 3: "J", 4: "Q", 5: "K", 6: "A" };
@@ -66,7 +74,9 @@ function RevealedDie({ value }) {
 
 function GamePage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const currentUserId = localStorage.getItem("currentUserId");
+
 
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -108,14 +118,19 @@ function GamePage() {
       if (loaded.status === "waiting" && !isOwner && hasRoom && currentUserId && !joinedRef.current) {
         joinedRef.current = true;
         try {
-          await fetch(`${API}/matches/${id}/join`, {
+          const joinRes = await fetch(`${API}/matches/${id}/join`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders(),
             body: JSON.stringify({ userId: currentUserId }),
           });
+          if (!joinRes.ok) {
+            const joinData = await joinRes.json();
+            setError(joinData.message || "Could not join match");
+            return;
+          }
           await fetchMatch();
-        } catch {
-          // game may already be full
+        } catch (err) {
+          console.error(err);
         }
       }
     }
@@ -132,43 +147,78 @@ function GamePage() {
     return () => socket.disconnect();
   }, [id]);
 
+
+
+  useEffect(() => {
+  const intervalId = setInterval(() => {
+    fetchMatch();
+  }, 1000);
+
+  return () => clearInterval(intervalId);
+}, [id]);
+
+
   // Mount the game-board web component once the loading screen is gone
   useEffect(() => {
-    if (loading || !boardContainerRef.current || boardElementRef.current) return;
+  if (loading || !boardContainerRef.current) return;
 
-    const board = document.createElement("game-board");
-    boardElementRef.current = board;
-    boardContainerRef.current.appendChild(board);
+  boardContainerRef.current.innerHTML = "";
 
-    boardContainerRef.current.addEventListener("board-roll", async (e) => {
-      const { held } = e.detail;
-      try {
-        const res = await fetch(`${API}/matches/${id}/roll`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId, held }),
-        });
-        const data = await res.json();
-        if (res.ok) setMatch(data);
-      } catch {
-        // ignore network errors
-      }
+  const board = document.createElement("game-board");
+  boardElementRef.current = board;
+  boardContainerRef.current.appendChild(board);
+
+  const handleRoll = async (e) => {
+    const { held } = e.detail;
+
+    try {
+      const res = await fetch(`${API}/matches/${id}/roll`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: currentUserId, held }),
+      });
+
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEndTurn = async () => {
+
+  try {
+    const res = await fetch(`${API}/matches/${id}/end-turn`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: currentUserId }),
     });
 
-    boardContainerRef.current.addEventListener("board-end-turn", async () => {
-      try {
-        const res = await fetch(`${API}/matches/${id}/end-turn`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId }),
-        });
-        const data = await res.json();
-        if (res.ok) setMatch(data);
-      } catch {
-        // ignore network errors
-      }
-    });
-  }, [loading]);
+    const data = await res.json();
+    if (res.ok) setMatch(data);
+    else setError(data.message || "Could not end turn");
+  } catch (err) {
+    console.error(err);
+    setError("Could not end turn");
+  }
+};
+
+  boardContainerRef.current.addEventListener("board-roll", handleRoll);
+  boardContainerRef.current.addEventListener("board-end-turn", handleEndTurn);
+
+  return () => {
+    if (boardContainerRef.current) {
+      boardContainerRef.current.removeEventListener("board-roll", handleRoll);
+      boardContainerRef.current.removeEventListener("board-end-turn", handleEndTurn);
+      boardContainerRef.current.innerHTML = "";
+    }
+
+    boardElementRef.current = null;
+  };
+}, [loading, id, currentUserId]);
+
+
+
 
   // Push updated match state into the web component
   useEffect(() => {
@@ -187,19 +237,60 @@ function GamePage() {
     board.setAttribute("my-turn", isMyTurn ? "true" : "false");
   }, [match]);
 
-  async function handleStartNextRound() {
+  useEffect(() => {
+    if (match?.status !== "finished") return;
+    if (!match?.tournamentId) return;
+
+    const tournamentId =
+      typeof match.tournamentId === "object"
+        ? match.tournamentId._id
+        : match.tournamentId;
+
+    if (!tournamentId) return;
+
+    const timeout = setTimeout(() => {
+      navigate(`/tournaments/${tournamentId}`);
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [match?.status, match?.tournamentId, navigate]);
+
+  const [betAmount, setBetAmount] = useState(1);
+
+  async function handleBet(action) {
     try {
-      const res = await fetch(`${API}/matches/${id}/next-round`, {
+      const res = await fetch(`${API}/matches/${id}/bet`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId }),
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: currentUserId, action, amount: betAmount }),
       });
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   }
+
+  async function handleStartNextRound() {
+  try {
+    const res = await fetch(`${API}/matches/${id}/next-round`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: currentUserId }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setMatch(data);
+    } else {
+      setError(data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    setError("Could not start next round");
+  }
+}
 
   if (loading) return <main><p>Loading match...</p></main>;
   if (error) return <main><p>{error}</p><Link to="/lobby">Back to lobby</Link></main>;
@@ -218,7 +309,7 @@ function GamePage() {
       <p>{formatVariant(match.variant)}</p>
       <p>Buy-in: {match.buyIn} points</p>
 
-      {(match.status === "active" || match.roundPending) && (
+      {(match.status === "active" || match.bettingPhase || match.roundPending) && (
         <p>Round {match.currentRound ?? 1} of {match.variant.rounds}</p>
       )}
 
@@ -236,12 +327,12 @@ function GamePage() {
         <p>Waiting for players ({match.players.length}/{match.maxPlayers})</p>
       )}
 
-      {(match.status === "active" || match.roundPending) && (
+      {(match.status === "active" || match.bettingPhase || match.roundPending) && (
         match.players
           .filter(p => String(p.userId?._id ?? p.userId) !== String(currentUserId))
           .map(opponent => {
             const oppId = String(opponent.userId?._id ?? opponent.userId);
-            const isTheirTurn = !match.roundPending &&
+            const isTheirTurn = !match.roundPending && !match.bettingPhase &&
               String(match.currentTurn?._id ?? match.currentTurn) === oppId;
             return (
               <div key={oppId}>
@@ -264,7 +355,59 @@ function GamePage() {
           })
       )}
 
-      <div ref={boardContainerRef} style={{ display: match.status === "active" && !match.roundPending ? "block" : "none" }} />
+      <div ref={boardContainerRef} style={{ display: match.status === "active" && !match.bettingPhase && !match.roundPending ? "block" : "none" }} />
+
+      {match.bettingPhase && (() => {
+        const myPlayer = match.players.find(
+          (p) => String(p.userId?._id ?? p.userId) === String(currentUserId)
+        );
+        const isMyBettingTurn = String(match.bettingTurn?._id ?? match.bettingTurn) === String(currentUserId);
+        return (
+          <div>
+            <h2>Betting</h2>
+            <p>Pot: {match.pot} points · Current bet: {match.currentHighBet} · Your stack: {myPlayer?.stack ?? 0}</p>
+            <div style={{ margin: "8px 0" }}>
+              {match.players.map(p => (
+                <span key={String(p.userId?._id ?? p.userId)} style={{ marginRight: "16px" }}>
+                  {p.userId?.username}: {p.currentBet} bet{p.hasFolded ? " (folded)" : ""}
+                </span>
+              ))}
+            </div>
+            {isMyBettingTurn && !myPlayer?.hasFolded && (
+              <div>
+                <p>Your turn to bet</p>
+                {match.currentHighBet === 0 ? (
+                  <>
+                    <input
+                      type="number"
+                      min={1}
+                      max={myPlayer?.stack ?? 1}
+                      value={betAmount}
+                      onChange={e => setBetAmount(Number(e.target.value))}
+                    />
+                    <button onClick={() => handleBet("bet")}>Bet {betAmount}</button>
+                    <button onClick={() => handleBet("match")}>Check (0)</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleBet("match")}>Match {match.currentHighBet}</button>
+                    <button onClick={() => handleBet("fold")}>Fold</button>
+                    <input
+                      type="number"
+                      min={match.currentHighBet + 1}
+                      max={myPlayer?.stack ?? 1}
+                      value={betAmount}
+                      onChange={e => setBetAmount(Number(e.target.value))}
+                    />
+                    <button onClick={() => handleBet("raise")}>Raise to {betAmount}</button>
+                  </>
+                )}
+              </div>
+            )}
+            {!isMyBettingTurn && <p>Waiting for opponent to bet...</p>}
+          </div>
+        );
+      })()}
 
       {match.roundPending && (
         <div>
