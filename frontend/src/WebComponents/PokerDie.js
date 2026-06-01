@@ -21,6 +21,14 @@ class PokerDie extends HTMLElement {
       } else {
         this.setAttribute("held", "");
       }
+      if (localStorage.getItem("soundEnabled") === "true") {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        osc.connect(ctx.destination);
+        osc.frequency.value = 600;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+      }
       this.dispatchEvent(new CustomEvent("die-toggle", {
         bubbles: true,
         detail: { index: Number(this.getAttribute("index")), held: !held },

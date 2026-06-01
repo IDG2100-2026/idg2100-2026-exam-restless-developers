@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { io as socketIO } from "socket.io-client";
 import "../../WebComponents/GameBoard.js";
+import Comments from "../../Components/Tournament/Comments";
 import "./GamePage.css";
 
 const API = "http://localhost:6767/api/v1";
@@ -15,6 +16,16 @@ function authHeaders() {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
+}
+
+function playSound(frequency, duration = 0.1) {
+  if (localStorage.getItem("soundEnabled") !== "true") return;
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  osc.connect(ctx.destination);
+  osc.frequency.value = frequency;
+  osc.start();
+  osc.stop(ctx.currentTime + duration);
 }
 
 // Die values 1-6 → Spanish poker dice faces
@@ -133,8 +144,38 @@ function GamePage() {
       setLoading(false);
     });
 
+    socket.on("new-match-comment", ({ matchId, comment }) => {
+      if (matchId !== id) return;
+      setComments(prev => {
+        if (prev.some(c => c._id === comment._id)) return prev;
+        return [comment, ...prev];
+      });
+    });
+
     return () => socket.disconnect();
   }, [id]);
+
+  useEffect(() => {
+    fetch(`${API}/comments/match/${id}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setComments(data); })
+      .catch(() => {});
+  }, [id]);
+
+  async function handleSubmitComment(e) {
+    e.preventDefault();
+    if (!commentInput.trim()) return;
+    try {
+      await fetch(`${API}/comments/match/${id}`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ content: commentInput }),
+      });
+      setCommentInput("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
 
 
@@ -169,7 +210,10 @@ function GamePage() {
       });
 
       const data = await res.json();
-      if (res.ok) setMatch(data);
+      if (res.ok) {
+        setMatch(data);
+        playSound(440, 0.08);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -184,7 +228,10 @@ function GamePage() {
       });
 
       const data = await res.json();
-      if (res.ok) setMatch(data);
+      if (res.ok) {
+        setMatch(data);
+        playSound(300, 0.3);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -242,6 +289,10 @@ function GamePage() {
     return () => clearTimeout(timeout);
   }, [match?.status, match?.tournamentId, navigate]);
 
+  useEffect(() => {
+    if (match?.status === "finished") playSound(880, 0.5);
+  }, [match?.status]);
+
 
   const currentTurnId = match ? String(match.currentTurn?._id ?? match.currentTurn ?? "") : "";
 
@@ -269,6 +320,8 @@ function GamePage() {
   }, [currentTurnId, match?.status, match?.bettingPhase, match?.roundPending]);
 
   const [betAmount, setBetAmount] = useState(1);
+  const [comments, setComments] = useState([]);
+  const [commentInput, setCommentInput] = useState("");
 
   async function handleBet(action) {
     try {
@@ -479,6 +532,13 @@ function GamePage() {
           <Link to="/lobby">Back to lobby</Link>
         </div>
       )}
+
+      <Comments
+        comments={comments}
+        commentInput={commentInput}
+        setCommentInput={setCommentInput}
+        handleSubmitComment={handleSubmitComment}
+      />
     </main>
   );
 }

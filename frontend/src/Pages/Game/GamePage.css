@@ -42,3 +42,18 @@
 .board-container--hidden {
   display: none;
 }
+
+.detail-card {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.detail-card textarea {
+  color: #1f2937;
+}
+
+.detail-card .comment-item p {
+  color: #1f2937;
+}

@@ -82,6 +82,43 @@ export async function getAllComments(req, res) {
   }
 }
 
+export async function getMatchComments(req, res) {
+  try {
+    const comments = await Comment.find({ match: req.params.matchId })
+      .sort({ createdAt: -1 })
+      .populate("author", "username");
+    res.status(200).json(comments);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch comments" });
+  }
+}
+
+export async function createMatchComment(req, res) {
+  try {
+    const { content } = req.body;
+    if (!content?.trim()) {
+      return res.status(400).json({ message: "Comment content is required" });
+    }
+
+    const comment = await Comment.create({
+      match: req.params.matchId,
+      author: req.user._id,
+      content: content.trim(),
+    });
+
+    const populated = await Comment.findById(comment._id).populate("author", "username");
+
+    req.app.get("io").emit("new-match-comment", {
+      matchId: req.params.matchId,
+      comment: populated,
+    });
+
+    res.status(201).json(populated);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create comment" });
+  }
+}
+
 export async function deleteComment(req, res) {
   try {
     const { commentId } = req.params;

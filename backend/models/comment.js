@@ -5,7 +5,13 @@ const commentSchema = new mongoose.Schema(
     tournament: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tournament",
-      required: true,
+      required: false,
+    },
+
+    match: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Match",
+      required: false,
     },
 
     author: {
