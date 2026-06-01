@@ -91,6 +91,17 @@ function Admin() {
             IP change incidents:{" "}
             {dashboardData.security.ipChangeIncidents.length}
           </p>
+
+          {dashboardData.security.ipChangeIncidents.length > 0 && (
+            <ul className="security-incident-list">
+              {dashboardData.security.ipChangeIncidents.map((incident) => (
+                <li key={incident._id}>
+                  <strong>{incident.requestIp}</strong>
+                  <span>{incident.userAgent || "Unknown user agent"}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="admin-card">

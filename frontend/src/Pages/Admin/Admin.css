@@ -70,6 +70,34 @@
   color: #5f5a52;
 }
 
+.security-incident-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.security-incident-list li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.65rem;
+  border-radius: 10px;
+  background: #fffdf9;
+  border: 1px solid #e4ddd1;
+}
+
+.security-incident-list strong {
+  color: #2c2a28;
+  font-size: 0.9rem;
+}
+
+.security-incident-list span {
+  color: #5f5a52;
+  font-size: 0.8rem;
+  word-break: break-word;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 900px) {
