@@ -2,7 +2,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem 2rem;
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 /* ---------------- TOP TOOLBAR ---------------- */
@@ -17,9 +17,9 @@
   padding: 1rem 1.1rem;
 
   border-radius: 18px;
-  background: #f7f4ee;
-  border: 1px solid #ddd6c8;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.035);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 16px var(--shadow-soft);
 }
 
 .toolbar-heading {
@@ -35,7 +35,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 
-  color: #6b5d4d;
+  color: var(--text-muted);
 }
 
 .toolbar-heading h1 {
@@ -44,7 +44,7 @@
   font-size: 1.35rem;
   line-height: 1.2;
 
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 /* ---------------- CONTROLS ---------------- */
@@ -68,7 +68,7 @@
 
   font-size: 0.72rem;
   font-weight: 800;
-  color: #6b5d4d;
+  color: var(--text-muted);
 
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -80,10 +80,10 @@
   padding: 0.55rem 0.75rem;
 
   border-radius: 12px;
-  border: 1px solid #ddd6c8;
+  border: 1px solid var(--border);
 
-  background: #fffdf9;
-  color: #2c2a28;
+  background: var(--surface-alt);
+  color: var(--text-h);
 
   font-size: 0.85rem;
 }
@@ -117,13 +117,13 @@
 .section-heading h2 {
   margin: 0;
   font-size: 1.35rem;
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 .section-heading p {
   margin: 0.25rem 0 0;
   font-size: 0.9rem;
-  color: #6b645c;
+  color: var(--text);
 }
 
 .section-count {
@@ -132,8 +132,8 @@
   display: inline-grid;
   place-items: center;
   border-radius: 999px;
-  background: #dfe7df;
-  color: #425448;
+  background: var(--success-bg);
+  color: var(--success-text);
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -154,13 +154,13 @@
 
   padding: 0.65rem 0.8rem;
   border-radius: 14px;
-  border: 1px solid #e4ddd1;
-  background: #fffdf9;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
 
-  color: #2c2a28;
+  color: var(--text-h);
   text-decoration: none;
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.025);
+  box-shadow: 0 4px 12px var(--shadow-soft);
 
   transition:
     background 0.2s ease,
@@ -169,8 +169,8 @@
 }
 
 .tournament-card:hover {
-  background: #f8f5ef;
-  border-color: #d6cbbd;
+  background: var(--surface-hover);
+  border-color: var(--border);
   transform: translateY(-1px);
 }
 
@@ -200,18 +200,18 @@
 }
 
 .status-badge.upcoming {
-  background: #e7efe7;
-  color: #4c6252;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .status-badge.ongoing {
-  background: #dfeee5;
-  color: #3f5d4c;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .status-badge.finished {
-  background: #ece8e1;
-  color: #6b645c;
+  background: var(--surface-hover);
+  color: var(--text-muted);
 }
 
 .tournament-card-main {
@@ -222,7 +222,7 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.2;
-  color: #2c2a28;
+  color: var(--text-h);
 
   white-space: nowrap;
   overflow: hidden;
@@ -233,7 +233,7 @@
   margin: 0.12rem 0 0;
   font-size: 0.72rem;
   line-height: 1.3;
-  color: #6b645c;
+  color: var(--text);
 
   white-space: nowrap;
   overflow: hidden;
@@ -242,7 +242,7 @@
 
 .tournament-card-date {
   font-size: 0.75rem;
-  color: #6b645c;
+  color: var(--text);
   white-space: nowrap;
 }
 
@@ -250,21 +250,21 @@
   text-align: center;
   padding: 0.38rem 0.45rem;
   border-radius: 10px;
-  background: #f3efe7;
+  background: var(--surface-hover);
 }
 
 .tournament-card-stat strong {
   display: block;
   font-size: 0.82rem;
   line-height: 1.1;
-  color: #36453b;
+  color: var(--text-h);
 }
 
 .tournament-card-stat span {
   display: block;
   margin-top: 0.1rem;
   font-size: 0.65rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 /* ---------------- TROPHY ---------------- */
@@ -278,8 +278,8 @@
   padding: 0.4rem 0.5rem;
   border-radius: 12px;
 
-  background: #f4efe7;
-  border: 1px solid #e2d9cb;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
 }
 
 .trophy-image,
@@ -297,8 +297,8 @@
 .trophy-placeholder {
   display: grid;
   place-items: center;
-  background: #fffdf9;
-  border: 1px solid #e5ddd1;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   font-size: 1.2rem;
 }
 
@@ -314,7 +314,7 @@
   display: block;
   font-size: 0.75rem;
   line-height: 1.15;
-  color: #2c2a28;
+  color: var(--text-h);
 
   white-space: nowrap;
   overflow: hidden;
@@ -326,7 +326,7 @@
   margin-top: 0.1rem;
   font-size: 0.65rem;
   line-height: 1.2;
-  color: #6b645c;
+  color: var(--text);
 
   white-space: nowrap;
   overflow: hidden;
@@ -356,23 +356,23 @@
 }
 
 .load-more-button {
-  background: #dfe7df;
-  color: #425448;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .load-more-button:hover {
   transform: translateY(-2px);
-  background: #d2ded2;
+  background: var(--surface-hover);
 }
 
 .show-less-button {
-  background: #ece8e1;
-  color: #5f5a52;
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 .show-less-button:hover {
   transform: translateY(-2px);
-  background: #e1dbd2;
+  background: var(--surface-alt);
 }
 
 /* ---------------- STATES ---------------- */
@@ -380,9 +380,9 @@
 .empty-message {
   padding: 0.9rem;
   border-radius: 14px;
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
-  color: #6b645c;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text);
 }
 
 .tournament-error {

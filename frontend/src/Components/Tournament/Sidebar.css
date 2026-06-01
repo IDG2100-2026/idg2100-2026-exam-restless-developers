@@ -28,8 +28,8 @@
   display: grid;
   place-items: center;
 
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
 
   font-size: 4rem;
 }
@@ -48,10 +48,10 @@
 
   border-radius: 12px;
 
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
 
   font-size: 0.86rem;
 
-  color: #2c2a28;
+  color: var(--text-h);
 }

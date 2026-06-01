@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Header from "./Components/Header/Header.jsx";
@@ -23,11 +24,23 @@ import AdminComments from "./Pages/Admin/AdminComments.jsx";
 
 import CreateGame from "./Pages/Game/CreateGame.jsx";
 import GamePage from "./Pages/Game/GamePage.jsx";
+import { applyTheme } from "./utils/theme.js";
 
-function App() {
+function App({ initialTheme }) {
+  const [theme, setTheme] = useState(initialTheme);
+
+  useEffect(() => {
+    applyTheme(theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme((currentTheme) => (currentTheme === "light" ? "dark" : "light"));
+  }
+
   return (
     <BrowserRouter>
-      <Header />
+      <Header theme={theme} onToggleTheme={toggleTheme} />
 
       <main>
         <Routes>

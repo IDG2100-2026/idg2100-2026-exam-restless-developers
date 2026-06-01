@@ -8,7 +8,7 @@
 
 .round-indicator {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .pairings-list {
@@ -19,8 +19,8 @@
 .pairing-card {
   padding: 0.85rem;
   border-radius: 12px;
-  background: #f7f4ee;
-  border: 1px solid #e5ddd1;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
 }
 
 .pairing-players {
@@ -32,5 +32,5 @@
 
 .pairing-status {
   font-size: 0.85rem;
-  color: #5f5a52;
+  color: var(--text);
 }
