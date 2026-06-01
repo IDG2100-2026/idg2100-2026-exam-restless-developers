@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import MainLayout from "./Components/Layouts/MainLayout.jsx";
-
-
 import Homepage from "./Pages/Homepage/Homepage.jsx";
 import AboutUs from "./Pages/About/AboutUs.jsx";
 import AboutSpanishDice from "./Pages/About/AboutSpanishDice.jsx";
@@ -41,11 +39,8 @@ function App({ initialTheme }) {
 
   return (
     <BrowserRouter>
-      <Header />
-
-      <main>
-        <Routes>
-        <Route element={ <MainLayout />}>
+      <Routes>
+        <Route element={<MainLayout theme={theme} onToggleTheme={toggleTheme} />}>
           <Route path="/" element={<Homepage />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/about-spanish-dice" element={<AboutSpanishDice />} />
@@ -63,7 +58,7 @@ function App({ initialTheme }) {
           <Route path="*" element={<NotFound />} />
         </Route>
 
-        <Route element={<AdminLayout/>}>  
+        <Route element={<AdminLayout />}>
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/comments" element={<AdminComments />} />
@@ -71,7 +66,7 @@ function App({ initialTheme }) {
           <Route path="/admin/tournaments/:id/edit" element={<CreateTournament />} />
         </Route>
 
-        </Routes>
+      </Routes>
     </BrowserRouter>
   );
 }
