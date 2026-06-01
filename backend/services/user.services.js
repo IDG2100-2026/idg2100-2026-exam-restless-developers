@@ -14,9 +14,13 @@ function buildUserQuery(uid) {
   return { username: uid };
 }
 
+
+
 export async function getAllUsers() {
   return User.find().select("-pwd");
 }
+
+
 
 export async function getAUser(uid) {
   if (!uid) {
@@ -35,6 +39,8 @@ export async function getAUser(uid) {
   return User.findOne({ username: uid }).select("-pwd");
 }
 
+
+
 export async function createUser(usrObj) {
   const newUser = new User({
     uid: Math.floor(Math.random() * 1000000),
@@ -51,6 +57,8 @@ export async function createUser(usrObj) {
     email: newUser.email,
   };
 }
+
+
 
 export async function authenticateUser(username, password) {
   if (!username || !password) {
@@ -70,14 +78,20 @@ export async function authenticateUser(username, password) {
   return user.toObject();
 }
 
+
+
 export async function checkuserExists(uid) {
   return getAUser(uid);
 }
+
+
 
 export async function checkUsernameExists(username) {
   if (!username) throw new Error("Username is required");
   return User.findOne({ username });
 }
+
+
 
 export async function updateUser(uid, updatedData) {
   const query = buildUserQuery(uid);
@@ -111,6 +125,10 @@ export async function updateUser(uid, updatedData) {
     user.role = updatedData.role;
   }
 
+  if (typeof updatedData.isBanned !== "undefined") {
+  user.isBanned = updatedData.isBanned;
+}
+
   const savedUser = await user.save();
   const userObj = savedUser.toObject();
   delete userObj.pwd;
@@ -118,13 +136,13 @@ export async function updateUser(uid, updatedData) {
   return userObj;
 }
 
+
+
 export async function deleteUser(uid) {
   const query = buildUserQuery(uid);
   const deletedUser = await User.findOneAndDelete(query);
   return Boolean(deletedUser);
 }
-
-
 
 
 export default {

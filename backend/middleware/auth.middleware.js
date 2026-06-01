@@ -38,6 +38,12 @@ export async function requireAuth(req, res, next) {
       });
     }
 
+    if (user.isBanned) {
+        return res.status(403).json({
+            message: "This account has been banned",
+        });
+    }
+
     req.user = user;
     next();
   } catch (error) {

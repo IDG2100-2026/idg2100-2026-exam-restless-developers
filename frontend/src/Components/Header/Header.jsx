@@ -3,7 +3,7 @@ import { useState } from "react";
 import DropDown from "./DropDown.jsx";
 import "./Header.css";
 
-function Header() {
+function Header({ theme, onToggleTheme }) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -48,6 +48,10 @@ function Header() {
         </nav>
 
         <div className="header-actions">
+            <button className="header-button theme-toggle" onClick={onToggleTheme}>
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
+
           <div className="settings-container">
             <button
               className="header-button"

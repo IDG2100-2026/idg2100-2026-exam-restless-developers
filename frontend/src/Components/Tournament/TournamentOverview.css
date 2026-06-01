@@ -3,8 +3,8 @@
   max-width: 380px;
   padding: 1rem;
   border-radius: 8px;
-  background: #fffbe0; /* slightly off-white, student paper */
-  border: 2px dashed #b38b00; /* hand-drawn feel */
+  background: #fffbe0;
+  border: 2px dashed #b38b00;
   box-shadow: none;
   font-family: "Comic Sans MS", "Brush Script MT", cursive, system-ui, -apple-system, "Segoe UI", Roboto;
   text-align: left;

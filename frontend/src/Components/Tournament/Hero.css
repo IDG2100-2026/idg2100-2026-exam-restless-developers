@@ -10,26 +10,26 @@
   border-radius: 20px;
 
   background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.7), transparent 35%),
-    linear-gradient(135deg, #f7f4ee, #eee7dc);
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.35), transparent 35%),
+    linear-gradient(135deg, var(--surface-alt), var(--surface));
 
-  border: 1px solid #ddd6c8;
+  border: 1px solid var(--border);
 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.035);
+  box-shadow: 0 8px 20px var(--shadow-soft);
 }
 
 .single-tournament-hero h1 {
   margin: 0.65rem 0 0.45rem;
   font-size: 1.8rem;
   line-height: 1.1;
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 .single-tournament-hero p {
   margin: 0;
   max-width: 680px;
   line-height: 1.55;
-  color: #5f5a52;
+  color: var(--text);
 }
 
 .status-badge {
@@ -51,18 +51,18 @@
 }
 
 .status-badge.upcoming {
-  background: #e7efe7;
-  color: #4c6252;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .status-badge.ongoing {
-  background: #dfeee5;
-  color: #3f5d4c;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .status-badge.finished {
-  background: #ece8e1;
-  color: #6b645c;
+  background: var(--surface-hover);
+  color: var(--text-muted);
 }
 
 .hero-actions {
@@ -78,14 +78,14 @@
 
   border-radius: 13px;
 
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--surface-alt);
 
-  border: 1px solid #ddd6c8;
+  border: 1px solid var(--border);
 
   font-size: 0.86rem;
   font-weight: 800;
 
-  color: #5f5a52;
+  color: var(--text);
 
   text-align: center;
 }
@@ -95,9 +95,9 @@
 
   border-radius: 13px;
 
-  background: #fffdf9;
+  background: var(--surface-alt);
 
-  border: 1px solid #ddd6c8;
+  border: 1px solid var(--border);
 
   text-align: center;
 }
@@ -113,7 +113,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 
-  color: #6b5d4d;
+  color: var(--text-muted);
 }
 
 .countdown-box strong {
@@ -122,7 +122,7 @@
   font-size: 1.05rem;
   line-height: 1.2;
 
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 .join-message {
@@ -132,11 +132,11 @@
 
   border-radius: 12px;
 
-  background: #f7f4ee;
+  background: var(--surface-alt);
 
-  border: 1px solid #ddd6c8;
+  border: 1px solid var(--border);
 
   font-size: 0.84rem;
 
-  color: #5f5a52;
+  color: var(--text);
 }

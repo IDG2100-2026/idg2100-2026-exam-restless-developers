@@ -174,194 +174,214 @@ function CreateTournament() {
       {error && <p className="form-error">{error}</p>}
 
       <form className="create-tournament-form" onSubmit={handleSubmit}>
-        <label>
-          Tournament title
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            minLength="3"
-            maxLength="80"
-            pattern="[A-Za-zÆØÅæøå0-9\s\-_:!?.]+"
-            title="Only letters, numbers, spaces, and - _ : ! ? . are allowed."
-            required
-          />
-        </label>
+        <section className="form-section">
+          <h2>Tournament Information</h2>
 
-        <label>
-          Description
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            minLength="10"
-            maxLength="2000"
-            required
-          />
-        </label>
+          <label>
+            Tournament title
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              minLength="3"
+              maxLength="80"
+              pattern="[A-Za-zÆØÅæøå0-9\s\-_:!?.]+"
+              title="Only letters, numbers, spaces, and - _ : ! ? . are allowed."
+              required
+            />
+          </label>
 
-        <label>
-          Start date
-          <input
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleChange}
-            min={isEditMode ? undefined : today}
-            required
-          />
-        </label>
+          <label>
+            Description
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              minLength="10"
+              maxLength="2000"
+              required
+            />
+          </label>
 
-        <label>
-          Straights allowed
-          <input
-            type="checkbox"
-            name="straightsAllowed"
-            checked={formData.straightsAllowed}
-            onChange={handleChange}
-          />
-        </label>
+          <label>
+            Start date
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              min={isEditMode ? undefined : today}
+              required
+            />
+          </label>
+        </section>
 
-        <label>
-          Game rounds
-          <select name="rounds" value={formData.rounds} onChange={handleChange}>
-            <option value="3">3 rounds</option>
-            <option value="5">5 rounds</option>
-            <option value="7">7 rounds</option>
-          </select>
-        </label>
+        <section className="form-section">
+          <h2>Game Settings</h2>
 
-        <label>
-          Time control
-          <select
-            name="timeControl"
-            value={formData.timeControl}
-            onChange={handleChange}
-          >
-            <option value="10">10 seconds</option>
-            <option value="30">30 seconds</option>
-            <option value="90">90 seconds</option>
-          </select>
-        </label>
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              name="straightsAllowed"
+              checked={formData.straightsAllowed}
+              onChange={handleChange}
+            />
+            Straights allowed
+          </label>
 
-        <label>
-          Players per game
-          <select
-            name="maxPlayersPerGame"
-            value={formData.maxPlayersPerGame}
-            onChange={handleChange}
-          >
-            <option value="2">2 players</option>
-            <option value="3">3 players</option>
-            <option value="5">5 players</option>
-          </select>
-        </label>
+          <label>
+            Game rounds
+            <select name="rounds" value={formData.rounds} onChange={handleChange}>
+              <option value="3">3 rounds</option>
+              <option value="5">5 rounds</option>
+              <option value="7">7 rounds</option>
+            </select>
+          </label>
 
-        <label>
-          Tournament rounds
-          <input
-            type="number"
-            name="tournamentRounds"
-            value={formData.tournamentRounds}
-            onChange={handleChange}
-            min="1"
-            max="10"
-            required
-          />
-        </label>
+          <label>
+            Time control
+            <select
+              name="timeControl"
+              value={formData.timeControl}
+              onChange={handleChange}
+            >
+              <option value="10">10 seconds</option>
+              <option value="30">30 seconds</option>
+              <option value="90">90 seconds</option>
+            </select>
+          </label>
 
-        <label>
-          Buy-in
-          <select name="buyIn" value={formData.buyIn} onChange={handleChange}>
-            <option value="1">1 point</option>
-            <option value="10">10 points</option>
-            <option value="50">50 points</option>
-          </select>
-        </label>
+          <label>
+            Players per game
+            <select
+              name="maxPlayersPerGame"
+              value={formData.maxPlayersPerGame}
+              onChange={handleChange}
+            >
+              <option value="2">2 players</option>
+              <option value="3">3 players</option>
+              <option value="5">5 players</option>
+            </select>
+          </label>
+        </section>
 
-        <label>
-          Max players
-          <input
-            type="number"
-            name="maxPlayers"
-            value={formData.maxPlayers}
-            onChange={handleChange}
-            min="2"
-            max="64"
-            required
-          />
-        </label>
+        <section className="form-section">
+          <h2>Tournament Settings</h2>
 
-        <label>
-          Rules
-          <textarea
-            name="rules"
-            value={formData.rules}
-            onChange={handleChange}
-            minLength="10"
-            maxLength="1500"
-            required
-          />
-        </label>
+          <label>
+            Tournament rounds
+            <input
+              type="number"
+              name="tournamentRounds"
+              value={formData.tournamentRounds}
+              onChange={handleChange}
+              min="1"
+              max="10"
+              required
+            />
+          </label>
 
-        <label>
-          Minimum Elo
-          <input
-            type="number"
-            name="minElo"
-            value={formData.minElo}
-            onChange={handleChange}
-            min="0"
-            max="3000"
-          />
-        </label>
+          <label>
+            Buy-in
+            <select name="buyIn" value={formData.buyIn} onChange={handleChange}>
+              <option value="1">1 point</option>
+              <option value="10">10 points</option>
+              <option value="50">50 points</option>
+            </select>
+          </label>
 
-        <label>
-          Maximum Elo
-          <input
-            type="number"
-            name="maxElo"
-            value={formData.maxElo}
-            onChange={handleChange}
-            min="0"
-            max="3000"
-          />
-        </label>
+          <label>
+            Max players
+            <input
+              type="number"
+              name="maxPlayers"
+              value={formData.maxPlayers}
+              onChange={handleChange}
+              min="2"
+              max="64"
+              required
+            />
+          </label>
 
-        <label>
-          Trophy title
-          <input
-            type="text"
-            name="trophyTitle"
-            value={formData.trophyTitle}
-            onChange={handleChange}
-            maxLength="80"
-            pattern="[A-Za-zÆØÅæøå0-9\s\-_:!?.]+"
-            title="Only letters, numbers, spaces, and - _ : ! ? . are allowed."
-          />
-        </label>
+          <label>
+            Rules
+            <textarea
+              name="rules"
+              value={formData.rules}
+              onChange={handleChange}
+              minLength="10"
+              maxLength="1500"
+              required
+            />
+          </label>
+        </section>
 
-        <label>
-          Trophy description
-          <textarea
-            name="trophyDescription"
-            value={formData.trophyDescription}
-            onChange={handleChange}
-            maxLength="500"
-          />
-        </label>
+        <section className="form-section">
+          <h2>Elo Restrictions</h2>
 
-        <label>
-          Trophy image URL
-          <input
-            type="url"
-            name="trophyImageUrl"
-            value={formData.trophyImageUrl}
-            onChange={handleChange}
-            maxLength="500"
-          />
-        </label>
+          <label>
+            Minimum Elo
+            <input
+              type="number"
+              name="minElo"
+              value={formData.minElo}
+              onChange={handleChange}
+              min="0"
+              max="3000"
+            />
+          </label>
+
+          <label>
+            Maximum Elo
+            <input
+              type="number"
+              name="maxElo"
+              value={formData.maxElo}
+              onChange={handleChange}
+              min="0"
+              max="3000"
+            />
+          </label>
+        </section>
+
+        <section className="form-section">
+          <h2>Trophy Information</h2>
+
+          <label>
+            Trophy title
+            <input
+              type="text"
+              name="trophyTitle"
+              value={formData.trophyTitle}
+              onChange={handleChange}
+              maxLength="80"
+              pattern="[A-Za-zÆØÅæøå0-9\s\-_:!?.]+"
+              title="Only letters, numbers, spaces, and - _ : ! ? . are allowed."
+            />
+          </label>
+
+          <label>
+            Trophy description
+            <textarea
+              name="trophyDescription"
+              value={formData.trophyDescription}
+              onChange={handleChange}
+              maxLength="500"
+            />
+          </label>
+
+          <label>
+            Trophy image URL
+            <input
+              type="url"
+              name="trophyImageUrl"
+              value={formData.trophyImageUrl}
+              onChange={handleChange}
+              maxLength="500"
+            />
+          </label>
+        </section>
 
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting

@@ -1,5 +1,9 @@
 import User from "../models/user.js";
 import Match from "../models/match.js";
+import SecurityIncident from "../models/securityIncident.js";
+
+
+
 
 export async function getAdminDashboard(req, res) {
   try {
@@ -33,6 +37,19 @@ export async function getAdminDashboard(req, res) {
       return total + match.players.length;
     }, 0);
 
+    const ipChangeIncidents = await SecurityIncident.find({
+        type: "ip_change",
+    })
+        .sort({ createdAt: -1 })
+        .limit(10)
+
+        const rateLimitIncidents = await SecurityIncident.find({
+        type: "rate_limit",
+    })
+        .sort({ createdAt: -1 })
+        .limit(10);
+
+
     res.status(200).json({
       users: {
         totalUsers,
@@ -45,8 +62,8 @@ export async function getAdminDashboard(req, res) {
         availableGames,
       },
       security: {
-        rateLimitIncidents: [],
-        ipChangeIncidents: [],
+        rateLimitIncidents,
+        ipChangeIncidents,
       },
     });
   } catch (error) {

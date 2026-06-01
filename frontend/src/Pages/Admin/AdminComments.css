@@ -51,6 +51,7 @@
   border-bottom: 1px solid #e4ddd1;
   text-align: left;
   color: #5f5a52;
+  vertical-align: top;
 }
 
 .admin-table th {
@@ -121,34 +122,36 @@
     font-weight: 800;
     color: #2c2a28;
     text-align: left;
+    flex-shrink: 0;
   }
 
   .admin-table td:nth-child(1)::before {
-    content: "Username";
+    content: "Author";
   }
 
   .admin-table td:nth-child(2)::before {
-    content: "Email";
+    content: "Tournament";
   }
 
   .admin-table td:nth-child(3)::before {
-    content: "Role";
+    content: "Comment";
   }
 
   .admin-table td:nth-child(4)::before {
-    content: "Elo";
-  }
-
-  .admin-table td:nth-child(5)::before {
-    content: "Total games";
-  }
-
-  .admin-table td:nth-child(6)::before {
     content: "Actions";
+  }
+
+  .admin-table td:nth-child(3) {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .admin-table td:nth-child(3)::before {
+    margin-bottom: 0.25rem;
   }
 
   .admin-action-button {
     width: auto;
   }
 }
-
