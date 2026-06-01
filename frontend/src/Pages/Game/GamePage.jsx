@@ -2,7 +2,7 @@
 // Contains code from marte kaland's oblig3 (formatVariant, polling pattern, joinedRef, player card layout)
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { io as socketIO } from "socket.io-client";
 import "../../WebComponents/GameBoard.js";
 import "./GamePage.css";
@@ -39,41 +39,32 @@ function getHandName(dice, straightsAllowed) {
 
 function HiddenDie({ held }) {
   return (
-    <div style={{
-      width: "64px", height: "64px", borderRadius: "12px",
-      background: held ? "#f0c040" : "white",
-      border: `3px solid ${held ? "#c89a00" : "#333"}`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      transform: held ? "translateY(-4px)" : "none",
-      fontSize: "26px", fontWeight: "bold", fontFamily: "serif",
-      color: "#aaa", userSelect: "none",
-    }}>?</div>
+    <div className={`die die--hidden${held ? " die--held" : ""}`}>?</div>
   );
 }
 
 function RevealedDie({ value }) {
-  const colors = { 1: "#333", 2: "#cc0000", 3: "#333", 4: "#333", 5: "#cc0000", 6: "#cc0000" };
+  const isRed = [2, 5, 6].includes(value);
   return (
-    <div style={{
-      width: "64px", height: "64px", borderRadius: "12px",
-      background: "white", border: "3px solid #333",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: "26px", fontWeight: "bold", fontFamily: "serif",
-      color: colors[value] || "#333", userSelect: "none",
-    }}>{FACE[value] || "?"}</div>
+    <div className={`die die--revealed${isRed ? " die--red" : ""}`}>
+      {FACE[value] || "?"}
+    </div>
   );
 }
 
 function GamePage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const currentUserId = localStorage.getItem("currentUserId");
 
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [timeLeft, setTimeLeft] = useState(null);
   const joinedRef = useRef(false);
   const boardContainerRef = useRef(null);
   const boardElementRef = useRef(null);
+  const timerRef = useRef(null);
 
   async function fetchMatch() {
     try {
@@ -137,6 +128,7 @@ function GamePage() {
     if (loading || !boardContainerRef.current || boardElementRef.current) return;
 
     const board = document.createElement("game-board");
+    board.setAttribute("board-color", localStorage.getItem("boardColor") || "#facc15");
     boardElementRef.current = board;
     boardContainerRef.current.appendChild(board);
 
@@ -181,11 +173,72 @@ function GamePage() {
       (p) => String(p.userId?._id ?? p.userId) === String(currentUserId)
     );
 
+    board.setAttribute("board-color", localStorage.getItem("boardColor") || "#facc15");
     board.setAttribute("dice", JSON.stringify(myPlayer?.dice?.length ? myPlayer.dice : [1, 1, 1, 1, 1]));
     board.setAttribute("held", JSON.stringify(myPlayer?.held?.length ? myPlayer.held : [false, false, false, false, false]));
     board.setAttribute("rolls-left", String(myPlayer?.rollsLeft ?? 3));
     board.setAttribute("my-turn", isMyTurn ? "true" : "false");
   }, [match]);
+
+
+  useEffect(() => {
+    if (match?.status !== "finished") return;
+    if (!match?.tournamentId) return;
+
+    const tournamentId =
+      typeof match.tournamentId === "object"
+        ? match.tournamentId._id
+        : match.tournamentId;
+
+    if (!tournamentId) return;
+
+    const timeout = setTimeout(() => {
+      navigate(`/tournaments/${tournamentId}`);
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [match?.status, match?.tournamentId, navigate]);
+
+  const currentTurnId = match ? String(match.currentTurn?._id ?? match.currentTurn ?? "") : "";
+
+  useEffect(() => {
+    if (!match || match.status !== "active" || match.bettingPhase || match.roundPending) {
+      setTimeLeft(null);
+      clearInterval(timerRef.current);
+      return;
+    }
+
+    setTimeLeft(match.variant.timeControl);
+    clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerRef.current);
+  }, [currentTurnId, match?.status, match?.bettingPhase, match?.roundPending]);
+
+  const [betAmount, setBetAmount] = useState(1);
+
+  async function handleBet(action) {
+    try {
+      const res = await fetch(`${API}/matches/${id}/bet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, action, amount: betAmount }),
+      });
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   async function handleStartNextRound() {
     try {
@@ -222,6 +275,10 @@ function GamePage() {
         <p>Round {match.currentRound ?? 1} of {match.variant.rounds}</p>
       )}
 
+      {match.status === "active" && !match.bettingPhase && !match.roundPending && timeLeft !== null && (
+        <p>Time left: {timeLeft}s</p>
+      )}
+
       <div>
         {playerSlots.map((player, i) => (
           <div key={i}>
@@ -253,7 +310,7 @@ function GamePage() {
                     <span> — {getHandName(opponent.dice, match.variant.straightsAllowed)}</span>
                   )}
                 </p>
-                <div style={{ display: "flex", gap: "8px", margin: "8px 0" }}>
+                <div className="dice-row">
                   {match.roundPending
                     ? opponent.dice.map((d, i) => <RevealedDie key={i} value={d} />)
                     : [0, 1, 2, 3, 4].map(i => <HiddenDie key={i} held={opponent.held?.[i] ?? false} />)
@@ -264,7 +321,72 @@ function GamePage() {
           })
       )}
 
-      <div ref={boardContainerRef} style={{ display: match.status === "active" && !match.roundPending ? "block" : "none" }} />
+      <div ref={boardContainerRef} className={match.status === "active" && !match.bettingPhase && !match.roundPending ? "" : "board-container--hidden"} />
+
+      {match.bettingPhase && (() => {
+        const bettingTurnId = String(match.bettingTurn?._id ?? match.bettingTurn ?? "");
+        const isMyBettingTurn = bettingTurnId === String(currentUserId);
+        const myPlayer = match.players.find(p => String(p.userId?._id ?? p.userId) === String(currentUserId));
+        const canCheck = isMyBettingTurn && (myPlayer?.currentBet ?? 0) >= match.currentHighBet;
+        const canCall = isMyBettingTurn && (myPlayer?.currentBet ?? 0) < match.currentHighBet;
+        const callAmount = Math.min(match.currentHighBet - (myPlayer?.currentBet ?? 0), myPlayer?.stack ?? 0);
+
+        return (
+          <div>
+            <h2>Betting</h2>
+            <p>Pot: {match.pot} points</p>
+
+            <div>
+              {match.players.map(p => {
+                const pId = String(p.userId?._id ?? p.userId);
+                const isTurn = pId === bettingTurnId;
+                return (
+                  <div key={pId}>
+                    <strong>{p.userId?.username}</strong>
+                    {p.hasFolded ? " — Folded" : ` — Stack: ${p.stack ?? 0}  Bet: ${p.currentBet ?? 0}`}
+                    {isTurn && !p.hasFolded && " ◀"}
+                  </div>
+                );
+              })}
+            </div>
+
+            {isMyBettingTurn && !myPlayer?.hasFolded && (
+              <div>
+                {canCheck && (
+                  <button onClick={() => handleBet("check")}>Check</button>
+                )}
+                {canCall && (
+                  <button onClick={() => handleBet("call")}>Call {callAmount}</button>
+                )}
+                <button onClick={() => handleBet("fold")}>Fold</button>
+                <div>
+                  <input
+                    type="number"
+                    min={1}
+                    max={myPlayer?.stack ?? 0}
+                    value={betAmount}
+                    onChange={e => setBetAmount(Number(e.target.value))}
+                  />
+                  <button
+                    onClick={() => handleBet("bet")}
+                    disabled={betAmount <= 0 || betAmount > (myPlayer?.stack ?? 0)}
+                  >
+                    {match.currentHighBet > 0 ? "Raise" : "Bet"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!isMyBettingTurn && (
+              <p>
+                Waiting for{" "}
+                {match.players.find(p => String(p.userId?._id ?? p.userId) === bettingTurnId)?.userId?.username ?? "opponent"}{" "}
+                to act...
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {match.roundPending && (
         <div>

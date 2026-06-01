@@ -27,6 +27,10 @@ const matchSchema = new Schema({
         held: { type: [Boolean], default: [] },
         rollsLeft: { type: Number, default: 3 },
         roundWins: { type: Number, default: 0 },
+        stack: { type: Number, default: 0 },
+        currentBet: { type: Number, default: 0 },
+        hasFolded: { type: Boolean, default: false },
+        hasActed: { type: Boolean, default: false },
       }
     ],
 
@@ -37,6 +41,10 @@ const matchSchema = new Schema({
     currentRound: { type: Number, default: 1 },
     roundPending: { type: Boolean, default: false },
     lastRoundWinnerId: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    bettingPhase: { type: Boolean, default: false },
+    pot: { type: Number, default: 0 },
+    currentHighBet: { type: Number, default: 0 },
+    bettingTurn: { type: Schema.Types.ObjectId, ref: "User", required: false },
 
     variant: {
         rounds: { type: Number, enum: [3, 5, 7], required: true },

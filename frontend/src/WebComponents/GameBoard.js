@@ -9,6 +9,7 @@ class GameBoard extends HTMLElement {
     this._held = [false, false, false, false, false];
     this._rollsLeft = 3;
     this._isMyTurn = false;
+    this._boardColor = "#facc15";
     this._onDieToggle = (e) => {
       const { index, held } = e.detail;
       this._held[index] = held;
@@ -27,7 +28,7 @@ class GameBoard extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["dice", "held", "rolls-left", "my-turn"];
+    return ["dice", "held", "rolls-left", "my-turn", "board-color"];
   }
 
   connectedCallback() {
@@ -45,6 +46,7 @@ class GameBoard extends HTMLElement {
     if (name === "held" && newVal) this._held = JSON.parse(newVal);
     if (name === "rolls-left") this._rollsLeft = Number(newVal);
     if (name === "my-turn") this._isMyTurn = newVal !== null && newVal !== "false";
+    if (name === "board-color" && newVal) this._boardColor = newVal;
     this.render();
   }
 
@@ -59,7 +61,7 @@ class GameBoard extends HTMLElement {
 
     this.innerHTML = `
       <style>
-        game-board { display: block; }
+        game-board { display: block; background: ${this._boardColor}; border-radius: 16px; padding: 24px; }
         .dice-row { display: flex; gap: 16px; justify-content: center; margin: 24px 0; }
         .roll-btn {
           display: block; margin: 0 auto; padding: 12px 32px;

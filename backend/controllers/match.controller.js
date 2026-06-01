@@ -7,6 +7,93 @@ function rollAllDice() {
   return Array.from({ length: 5 }, () => Math.ceil(Math.random() * 6));
 }
 
+
+const turnTimers = new Map();
+
+function clearTurnTimer(matchId) {
+  const key = String(matchId);
+  if (turnTimers.has(key)) {
+    clearTimeout(turnTimers.get(key));
+    turnTimers.delete(key);
+  }
+}
+
+function startTurnTimer(matchId, userId, timeControl, io) {
+  clearTurnTimer(matchId);
+  const id = setTimeout(
+    () => autoRollAndEndTurn(String(matchId), String(userId), io),
+    timeControl * 1000
+  );
+  turnTimers.set(String(matchId), id);
+}
+
+async function autoRollAndEndTurn(matchId, userId, io) {
+  try {
+    const match = await Match.findById(matchId);
+    if (!match || match.status !== "active") return;
+    if (match.currentTurn?.toString() !== userId) return;
+
+    const playerIndex = match.players.findIndex(
+      (p) => p.userId?.toString() === userId
+    );
+    if (playerIndex === -1) return;
+
+    if (match.players[playerIndex].rollsLeft === 3) {
+      match.players[playerIndex].dice = rollAllDice();
+    }
+    match.players[playerIndex].rollsLeft = 0;
+
+    await doEndTurn(match, userId, io);
+  } catch (err) {
+    console.error("Turn timer error:", err);
+  }
+}
+
+export function startMatch(match) {
+  match.status = "active";
+  match.currentTurn = match.players[0].userId;
+  match.players[0].dice = rollAllDice();
+  match.players[0].rollsLeft = 2;
+  for (const p of match.players) p.stack = match.buyIn;
+  match.markModified("players");
+
+  return match;
+}
+
+function shuffleArray(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function createPairings(players, maxPlayersPerGame) {
+  const shuffledPlayers = shuffleArray(players);
+  const pairings = [];
+
+  for (let i = 0; i < shuffledPlayers.length; i += maxPlayersPerGame) {
+    pairings.push({
+      players: shuffledPlayers.slice(i, i + maxPlayersPerGame),
+      winner: null,
+      pointsAwarded: 0,
+      game: null,
+    });
+  }
+
+  return pairings;
+}
+
+function enterBettingPhase(match) {
+  match.bettingPhase = true;
+  match.currentTurn = null;
+  match.pot = 0;
+  match.currentHighBet = 0;
+  for (const p of match.players) {
+    p.currentBet = 0;
+    p.hasFolded = false;
+    p.hasActed = false;
+  }
+  match.bettingTurn = match.players[0].userId;
+  match.markModified("players");
+}
+
 function evaluateHand(dice, straightsAllowed) {
   const counts = {};
   for (const d of dice) counts[d] = (counts[d] || 0) + 1;
@@ -105,9 +192,9 @@ export async function joinMatch(req, res) {
     if (match.players.length >= match.maxPlayers) {
       match.status = "active";
       match.currentTurn = match.players[0].userId;
-      // Auto-roll first player's dice to start the game
       match.players[0].dice = rollAllDice();
       match.players[0].rollsLeft = 2;
+      for (const p of match.players) p.stack = match.buyIn;
     }
 
     match.markModified("players");
@@ -115,10 +202,106 @@ export async function joinMatch(req, res) {
     await match.populate("players.userId", "username elo");
 
     req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
+
+    if (match.status === "active") {
+      startTurnTimer(match._id, match.players[0].userId, match.variant.timeControl, req.app.get("io"));
+    }
+
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+}
+
+async function doEndTurn(match, userId, io) {
+  const currentIndex = match.players.findIndex(
+    (p) => p.userId?.toString() === userId
+  );
+  if (currentIndex === -1) return;
+
+  const nextIndex = (currentIndex + 1) % match.players.length;
+
+  if (nextIndex === 0) {
+    const hands = match.players.map((p) =>
+      evaluateHand(
+        p.dice.length === 5 ? [...p.dice] : [1, 1, 1, 1, 1],
+        match.variant.straightsAllowed
+      )
+    );
+
+    let bestIndex = 0;
+    for (let i = 1; i < hands.length; i++) {
+      if (compareHands(hands[i], hands[bestIndex]) > 0) {
+        bestIndex = i;
+      }
+    }
+
+    const isTie = hands.some(
+      (h, i) => i !== bestIndex && compareHands(h, hands[bestIndex]) === 0
+    );
+
+    if (!isTie) {
+      match.players[bestIndex].roundWins = (match.players[bestIndex].roundWins || 0) + 1;
+    }
+
+    const winsNeeded = Math.ceil(match.variant.rounds / 2);
+    const matchWinner = match.players.find((p) => (p.roundWins || 0) >= winsNeeded);
+
+    if (matchWinner) {
+      match.status = "finished";
+      match.winner = matchWinner.userId;
+      clearTurnTimer(match._id);
+
+      await updateTournamentAfterMatchFinished(match, matchWinner.userId);
+
+      const matchLoser = match.players.find(
+        (p) => p.userId?.toString() !== matchWinner.userId?.toString()
+      );
+      if (matchLoser) match.loser = matchLoser.userId;
+      match.currentTurn = null;
+
+      if (!match.isAnonymousMatch && match.winner && match.loser) {
+        const [winnerUser, loserUser] = await Promise.all([
+          User.findById(match.winner),
+          User.findById(match.loser),
+        ]);
+
+        if (winnerUser && loserUser) {
+          const K = 32;
+          const expected = 1 / (1 + Math.pow(10, (loserUser.elo - winnerUser.elo) / 400));
+          const winnerDelta = Math.round(K * (1 - expected));
+          const loserDelta = -winnerDelta;
+
+          winnerUser.points = (winnerUser.points || 0) + (matchWinner.stack || 0);
+          loserUser.points = (loserUser.points || 0) + (matchLoser.stack || 0);
+          winnerUser.elo = Math.min(MAX_ELO_RATING, winnerUser.elo + winnerDelta);
+          winnerUser.wins += 1;
+          winnerUser.totalGames += 1;
+          loserUser.elo = Math.max(MIN_ELO_RATING, loserUser.elo + loserDelta);
+          loserUser.losses += 1;
+          loserUser.totalGames += 1;
+
+          await Promise.all([winnerUser.save(), loserUser.save()]);
+          match.eloChange = { winnerDelta, loserDelta };
+        }
+      }
+    } else {
+      match.lastRoundWinnerId = isTie ? null : match.players[bestIndex].userId;
+      enterBettingPhase(match);
+      clearTurnTimer(match._id);
+    }
+  } else {
+    match.currentTurn = match.players[nextIndex].userId;
+    match.players[nextIndex].dice = rollAllDice();
+    match.players[nextIndex].rollsLeft = 2;
+    match.players[nextIndex].held = [false, false, false, false, false];
+    startTurnTimer(match._id, match.players[nextIndex].userId, match.variant.timeControl, io);
+  }
+
+  match.markModified("players");
+  await match.save();
+  await match.populate("players.userId", "username elo");
+  io.to(`match:${match._id}`).emit("match:update", match);
 }
 
 export async function endTurn(req, res) {
@@ -137,74 +320,10 @@ export async function endTurn(req, res) {
       return res.status(400).json({ message: "You still have rolls left" });
     }
 
-    const nextIndex = (currentIndex + 1) % match.players.length;
+    clearTurnTimer(match._id);
+    const io = req.app.get("io");
+    await doEndTurn(match, userId, io);
 
-    if (nextIndex === 0) {
-      // All players have gone — resolve the round
-      const hands = match.players.map((p) => evaluateHand(
-        p.dice.length === 5 ? [...p.dice] : [1, 1, 1, 1, 1],
-        match.variant.straightsAllowed
-      ));
-
-      let bestIndex = 0;
-      for (let i = 1; i < hands.length; i++) {
-        if (compareHands(hands[i], hands[bestIndex]) > 0) bestIndex = i;
-      }
-      const isTie = hands.some((h, i) => i !== bestIndex && compareHands(h, hands[bestIndex]) === 0);
-
-      if (!isTie) {
-        match.players[bestIndex].roundWins = (match.players[bestIndex].roundWins || 0) + 1;
-      }
-
-      const winsNeeded = Math.ceil(match.variant.rounds / 2);
-      const matchWinner = match.players.find((p) => (p.roundWins || 0) >= winsNeeded);
-
-      if (matchWinner) {
-        match.status = "finished";
-        match.winner = matchWinner.userId;
-        const matchLoser = match.players.find((p) => p.userId?.toString() !== matchWinner.userId?.toString());
-        if (matchLoser) match.loser = matchLoser.userId;
-        match.currentTurn = null;
-
-        if (!match.isAnonymousMatch && match.winner && match.loser) {
-          const [winnerUser, loserUser] = await Promise.all([
-            User.findById(match.winner),
-            User.findById(match.loser),
-          ]);
-          if (winnerUser && loserUser) {
-            const K = 32;
-            const expected = 1 / (1 + Math.pow(10, (loserUser.elo - winnerUser.elo) / 400));
-            const winnerDelta = Math.round(K * (1 - expected));
-            const loserDelta = -winnerDelta;
-            winnerUser.elo = Math.min(MAX_ELO_RATING, winnerUser.elo + winnerDelta);
-            winnerUser.wins += 1;
-            winnerUser.totalGames += 1;
-            loserUser.elo = Math.max(MIN_ELO_RATING, loserUser.elo + loserDelta);
-            loserUser.losses += 1;
-            loserUser.totalGames += 1;
-            await Promise.all([winnerUser.save(), loserUser.save()]);
-            match.eloChange = { winnerDelta, loserDelta };
-          }
-        }
-      } else {
-        // Round over but match continues — wait for "Start Next Round"
-        match.roundPending = true;
-        match.currentTurn = null;
-        match.lastRoundWinnerId = isTie ? null : match.players[bestIndex].userId;
-      }
-    } else {
-      // Pass turn to next player with auto-roll
-      match.currentTurn = match.players[nextIndex].userId;
-      match.players[nextIndex].dice = rollAllDice();
-      match.players[nextIndex].rollsLeft = 2;
-      match.players[nextIndex].held = [false, false, false, false, false];
-    }
-
-    match.markModified("players");
-    await match.save();
-    await match.populate("players.userId", "username elo");
-
-    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -236,6 +355,100 @@ export async function startNextRound(req, res) {
     // Auto-roll first player
     match.players[0].dice = rollAllDice();
     match.players[0].rollsLeft = 2;
+
+    match.markModified("players");
+    await match.save();
+    await match.populate("players.userId", "username elo");
+
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
+
+    startTurnTimer(match._id, match.players[0].userId, match.variant.timeControl, req.app.get("io"));
+
+    res.json(match);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+export async function placeBet(req, res) {
+  const { userId, action, amount } = req.body;
+
+  try {
+    const match = await Match.findById(req.params.id);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+    if (!match.bettingPhase) return res.status(400).json({ message: "Not in betting phase" });
+    if (match.bettingTurn?.toString() !== userId) return res.status(403).json({ message: "Not your betting turn" });
+
+    const playerIndex = match.players.findIndex((p) => p.userId?.toString() === userId);
+    if (playerIndex === -1) return res.status(403).json({ message: "Not in this match" });
+
+    const p = match.players[playerIndex];
+
+    if (action === "fold") {
+      p.hasFolded = true;
+      p.hasActed = true;
+    } else if (action === "check") {
+      if ((p.currentBet || 0) < match.currentHighBet) {
+        return res.status(400).json({ message: "Cannot check — there is a bet to call" });
+      }
+      p.hasActed = true;
+    } else if (action === "call") {
+      const toCall = match.currentHighBet - (p.currentBet || 0);
+      const actualCall = Math.min(toCall, p.stack || 0);
+      p.stack = (p.stack || 0) - actualCall;
+      p.currentBet = (p.currentBet || 0) + actualCall;
+      match.pot = (match.pot || 0) + actualCall;
+      p.hasActed = true;
+    } else if (action === "bet") {
+      const betAmount = Number(amount);
+      if (!betAmount || betAmount <= 0) return res.status(400).json({ message: "Invalid bet amount" });
+      const newTotal = (p.currentBet || 0) + betAmount;
+      if (newTotal <= match.currentHighBet) {
+        return res.status(400).json({ message: "Bet must exceed the current high bet" });
+      }
+      if (betAmount > (p.stack || 0)) return res.status(400).json({ message: "Not enough chips" });
+      p.stack = (p.stack || 0) - betAmount;
+      p.currentBet = newTotal;
+      match.pot = (match.pot || 0) + betAmount;
+      match.currentHighBet = newTotal;
+      p.hasActed = true;
+      // reset other active players so they must act again
+      for (let i = 0; i < match.players.length; i++) {
+        if (i !== playerIndex && !match.players[i].hasFolded) {
+          match.players[i].hasActed = false;
+        }
+      }
+    } else {
+      return res.status(400).json({ message: "Unknown action" });
+    }
+
+    const activePlayers = match.players.filter((p) => !p.hasFolded);
+    const bettingDone =
+      activePlayers.length === 1 ||
+      activePlayers.every((p) => p.hasActed && (p.currentBet || 0) === match.currentHighBet);
+
+    if (bettingDone) {
+      const potWinnerId =
+        activePlayers.length === 1
+          ? activePlayers[0].userId?.toString()
+          : match.lastRoundWinnerId?.toString();
+
+      const potWinner = match.players.find((p) => p.userId?.toString() === potWinnerId);
+      if (potWinner) potWinner.stack = (potWinner.stack || 0) + match.pot;
+
+      match.bettingPhase = false;
+      match.pot = 0;
+      match.currentHighBet = 0;
+      match.bettingTurn = null;
+      match.roundPending = true;
+    } else {
+      const currentIdx = match.players.findIndex((p) => p.userId?.toString() === userId);
+      let nextIdx = (currentIdx + 1) % match.players.length;
+      while (match.players[nextIdx].hasFolded) {
+        nextIdx = (nextIdx + 1) % match.players.length;
+      }
+      match.bettingTurn = match.players[nextIdx].userId;
+    }
 
     match.markModified("players");
     await match.save();
