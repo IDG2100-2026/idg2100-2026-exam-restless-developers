@@ -1,1 +1,44 @@
+.die {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: bold;
+  font-family: serif;
+  user-select: none;
+}
 
+.die--hidden {
+  background: white;
+  border: 3px solid #333;
+  color: #aaa;
+}
+
+.die--hidden.die--held {
+  background: #f0c040;
+  border-color: #c89a00;
+  transform: translateY(-4px);
+}
+
+.die--revealed {
+  background: white;
+  border: 3px solid #333;
+  color: #333;
+}
+
+.die--revealed.die--red {
+  color: #cc0000;
+}
+
+.dice-row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.board-container--hidden {
+  display: none;
+}
