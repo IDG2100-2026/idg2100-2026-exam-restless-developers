@@ -7,22 +7,11 @@ function AdminComments() {
   const [error, setError] = useState("");
   const [deletingCommentId, setDeletingCommentId] = useState(null);
 
-  function authHeaders() {
-    const token = localStorage.getItem("token");
-
-    return {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-    };
-    }
-
-
   useEffect(() => {
     async function fetchComments() {
       try {
-        const response = await fetch("http://localhost:6767/api/v1/comments", {
-            headers: authHeaders(),
-        }
+        const response = await fetch(
+          "http://localhost:6767/api/v1/comments"
         );
 
         const data = await response.json();
@@ -57,8 +46,10 @@ function AdminComments() {
         `http://localhost:6767/api/v1/comments/${commentId}`,
         {
           method: "DELETE",
-          headers: authHeaders(),
-          }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
       const data = await response.json();

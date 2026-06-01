@@ -1,6 +1,12 @@
 import Tournament from "../models/tournament.js";
 import Match from "../models/match.js";
 import { startMatch } from "./match.controller.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import AppError from "../utils/AppError.js";
+import {
+    MIN_PLAYERS_TO_START_TOURNAMENT,
+    TOURNAMENT_ROUND_DELAY_MS,
+} from "../constants/tournament.constants.js";
 
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
@@ -33,52 +39,41 @@ async function getPopulatedTournament(id) {
     .populate("rounds.pairings.game");
 }
 
-export async function getAllTournaments(req, res) {
-  try {
-    const tournaments = await Tournament.find()
-      .sort({ startDate: 1 })
-      .populate("players", "username elo")
-      .populate("author", "username")
-      .populate("winner", "username");
+export const getAllTournaments = asyncHandler(async (req, res) => {
+  const tournaments = await Tournament.find()
+    .sort({ startDate: 1 })
+    .populate("players", "username elo")
+    .populate("author", "username")
+    .populate("winner", "username");
 
-    res.status(200).json(tournaments);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch tournaments" });
-  }
-}
+  res.status(200).json(tournaments);
+});
 
-export async function getTournamentById(req, res) {
-  try {
+export const getTournamentById = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const tournament = await getPopulatedTournament(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+      throw new AppError("Tournament not found", 404);
     }
 
     res.status(200).json(tournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to fetch tournament" });
-  }
-}
+  });
 
-export async function joinTournament(req, res) {
-  try {
+
+
+export const joinTournament = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+        throw new AppError("Tournament not found", 404);
     }
 
     if (tournament.status !== "upcoming") {
-      return res.status(400).json({
-        message: "You can only join upcoming tournaments",
-      });
+        throw new AppError("You can only join upcoming tournaments",400);
     }
 
     const alreadyJoined = tournament.players.some(
@@ -86,13 +81,12 @@ export async function joinTournament(req, res) {
     );
 
     if (alreadyJoined) {
-      return res.status(400).json({
-        message: "You have already joined this tournament",
-      });
+        throw new AppError(
+            "You have already joined this tournament", 400);
     }
 
     if (tournament.players.length >= tournament.maxPlayers) {
-      return res.status(400).json({ message: "Tournament is full" });
+        throw new AppError("Tournament is full", 400);
     }
 
     tournament.players.push(req.user._id);
@@ -100,21 +94,19 @@ export async function joinTournament(req, res) {
 
     const updatedTournament = await getPopulatedTournament(id);
     res.status(200).json(updatedTournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to join tournament" });
-  }
-}
+});
 
-export async function leaveTournament(req, res) {
-  try {
+
+
+
+export const leaveTournament = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+        throw new AppError("Tournament not found", 404);
     }
 
     const alreadyJoined = tournament.players.some(
@@ -122,9 +114,7 @@ export async function leaveTournament(req, res) {
     );
 
     if (!alreadyJoined) {
-      return res.status(400).json({
-        message: "You have not joined this tournament",
-      });
+        throw new AppError("You have not joined this tournament", 400);
     }
 
     tournament.players = tournament.players.filter(
@@ -141,14 +131,11 @@ export async function leaveTournament(req, res) {
 
     const updatedTournament = await getPopulatedTournament(id);
     res.status(200).json(updatedTournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to leave tournament" });
-  }
-}
+});
 
-export async function createTournament(req, res) {
-  try {
+
+
+export const createTournament = asyncHandler(async (req, res) => {
     const {
       title,
       description,
@@ -187,43 +174,36 @@ export async function createTournament(req, res) {
 
     const populatedTournament = await getPopulatedTournament(tournament._id);
     res.status(201).json(populatedTournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to create tournament" });
-  }
-}
+});
 
-export async function updateTournament(req, res) {
-  try {
+
+
+
+export const updateTournament = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
     const tournament = await Tournament.findById(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+        throw new AppError("Tournament not found", 404);
     }
 
     if (updates.status === "ongoing") {
-      if (tournament.status !== "upcoming") {
-        return res.status(400).json({
-          message: "Only upcoming tournaments can be started",
-        });
-      }
+        if (tournament.status !== "upcoming") {
+            throw new AppError("Only upcoming tournaments can be started", 400);
+        }
 
-      // TODO before delivery: change this back to < 2
-      if (tournament.players.length < 2) {
-        return res.status(400).json({
-          message: "At least 2 players are required to start a tournament",
-        });
-      }
+    if (tournament.players.length < MIN_PLAYERS_TO_START_TOURNAMENT) {
+        throw new AppError("At least 2 players are required to start a tournament", 400);
+    }   
 
       tournament.status = "ongoing";
       tournament.startDate = new Date();
       tournament.currentRound = 1;
 
       // TODO before delivery: change this back to 1000 * 60 * 10
-      tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
+      tournament.nextRoundStart = new Date(Date.now() + TOURNAMENT_ROUND_DELAY_MS);
 
       tournament.standings = tournament.players.map((playerId) => ({
         player: playerId,
@@ -277,41 +257,35 @@ export async function updateTournament(req, res) {
     .emit("tournament:update", updatedTournament);
 
     res.status(200).json(updatedTournament);
-    } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to update tournament" });
-    }
-}
+});
 
-export async function deleteTournament(req, res) {
-  try {
-    const { id } = req.params;
-    const tournament = await Tournament.findByIdAndDelete(id);
 
-    if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
-    }
 
-    res.status(200).json({ message: "Tournament deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to delete tournament" });
+export const deleteTournament = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const tournament = await Tournament.findByIdAndDelete(id);
+
+  if (!tournament) {
+    throw new AppError("Tournament not found", 404);
   }
-}
 
-export async function recordRoundResult(req, res) {
-  try {
+  res.status(200).json({ message: "Tournament deleted successfully" });
+});
+
+
+
+export const recordRoundResult = asyncHandler(async (req, res) => {
     const { id, roundNumber } = req.params;
     const { pairingId, winnerId } = req.body;
 
     const tournament = await Tournament.findById(id);
 
     if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+        throw new AppError("Tournament not found", 404);
     }
 
     if (tournament.status !== "ongoing") {
-      return res.status(400).json({ message: "Tournament is not ongoing" });
+        throw new AppError("Tournament is not ongoing", 400);
     }
 
     const round = tournament.rounds.find(
@@ -319,17 +293,17 @@ export async function recordRoundResult(req, res) {
     );
 
     if (!round) {
-      return res.status(404).json({ message: "Round not found" });
+        throw new AppError("Round not found", 404);
     }
 
     const pairing = round.pairings.id(pairingId);
 
     if (!pairing) {
-      return res.status(404).json({ message: "Pairing not found" });
+        throw new AppError("Pairing not found", 404);
     }
 
     if (pairing.winner) {
-      return res.status(400).json({ message: "Result already recorded" });
+        throw new AppError("Result already recorded", 400);
     }
 
     pairing.winner = winnerId;
@@ -377,7 +351,7 @@ export async function recordRoundResult(req, res) {
         });
 
         // TODO before delivery: change this back to 1000 * 60 * 10
-        tournament.nextRoundStart = new Date(Date.now() + 1000 * 30);
+        tournament.nextRoundStart = new Date(Date.now() + TOURNAMENT_ROUND_DELAY_MS);
       } else {
         tournament.status = "finished";
         tournament.nextRoundStart = null;
@@ -396,44 +370,37 @@ export async function recordRoundResult(req, res) {
 
     const updatedTournament = await getPopulatedTournament(id);
     res.status(200).json(updatedTournament);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to record round result" });
-  }
-}
+});
 
 
-export async function createTournamentMatch(req, res) {
-  try {
+export const createTournamentMatch = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id.toString();
 
     const tournament = await Tournament.findById(id);
 
-    if (!tournament) {
-      return res.status(404).json({ message: "Tournament not found" });
+   if (!tournament) {
+        throw new AppError("Tournament not found", 404);
     }
 
     if (tournament.status !== "ongoing") {
-      return res.status(400).json({ message: "Tournament is not ongoing" });
+        throw new AppError("Tournament is not ongoing", 400);
     }
 
     const round = tournament.rounds.find(
       (round) => round.roundNumber === tournament.currentRound
     );
 
-    if (!round) {
-      return res.status(404).json({ message: "Current round not found" });
-    }
+   if (!round) {
+        throw new AppError("Current round not found", 404);
+    } 
 
     const pairing = round.pairings.find((pairing) =>
       pairing.players.some((playerId) => playerId.toString() === userId)
     );
 
     if (!pairing) {
-      return res.status(403).json({
-        message: "You are not part of a pairing in this round",
-      });
+        throw new AppError("You are not part of a pairing in this round", 403);
     }
 
     if (pairing.game) {
@@ -500,10 +467,4 @@ export async function createTournamentMatch(req, res) {
     return res.status(201).json({
       matchId: match._id,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Failed to create tournament match",
-    });
-  }
-}
+});

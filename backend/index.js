@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import errorHandler from "./middleware/errorHandler.js";
 
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -53,6 +54,8 @@ app.get("/", (req, res) => {
     message: "Backend is running",
   });
 });
+
+app.use(errorHandler);
 
 async function startServer() {
   try {

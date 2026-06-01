@@ -7,22 +7,10 @@ function AdminUsers() {
   const [error, setError] = useState("");
   const [updatingUserId, setUpdatingUserId] = useState(null);
 
-  function authHeaders() {
-    const token = localStorage.getItem("token");
-
-    return {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-    };
-    }
-
-
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const response = await fetch("http://localhost:6767/api/v1/users", {
-            headers: authHeaders(),
-        });
+        const response = await fetch("http://localhost:6767/api/v1/users");
         const data = await response.json();
 
         if (!response.ok) {
@@ -50,7 +38,9 @@ function AdminUsers() {
         `http://localhost:6767/api/v1/users/${userIdentifier}`,
         {
           method: "PUT",
-          headers: authHeaders(),
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             role: nextRole,
           }),

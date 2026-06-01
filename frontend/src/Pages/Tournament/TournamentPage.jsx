@@ -1,4 +1,18 @@
 
+import { 
+  getTournament,
+  joinTournament, 
+  leaveTournament,
+  updateTournamentStatus,
+  deleteTournament,
+} from "../../api/tournamentApi";
+
+import {
+  getComments,
+  createComment,
+} from "../../api/commentApi";
+
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -32,16 +46,8 @@ function TournamentPage() {
   useEffect(() => {
     async function fetchTournament() {
       try {
-        const response = await fetch(
-          `http://localhost:6767/api/v1/tournaments/${id}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Could not fetch tournament");
-        }
-
-        const data = await response.json();
-        setTournament(data);
+        const data = await getTournament(id);
+          setTournament(data);
       } catch (error) {
         setError(error.message);
       }
@@ -52,40 +58,26 @@ function TournamentPage() {
 
 
   useEffect(() => {
-  if (!tournament || tournament.status !== "ongoing") return;
+    if (!tournament || tournament.status !== "ongoing") return;
 
-  const intervalId = setInterval(async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`
-      );
+    const intervalId = setInterval(async () => {
+      try {
+        const data = await getTournament(id);
+        setTournament(data);
+      } catch {
+        // ignore
+      }
+    }, 1000);
 
-      if (!response.ok) return;
-
-      const data = await response.json();
-      setTournament(data);
-    } catch {
-      // ignore
-    }
-  }, 1000);
-
-  return () => clearInterval(intervalId);
-}, [id, tournament?.status]);
+    return () => clearInterval(intervalId);
+  }, [id, tournament?.status]);
 
 
 
   useEffect(() => {
     async function fetchComments() {
       try {
-        const response = await fetch(
-          `http://localhost:6767/api/v1/comments/${id}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Could not fetch comments");
-        }
-
-        const data = await response.json();
+        const data = await getComments(id);
         setComments(data);
       } catch (error) {
         console.error(error);
@@ -94,6 +86,8 @@ function TournamentPage() {
 
     fetchComments();
   }, [id]);
+
+
 
   useEffect(() => {
     socket.on("new-tournament-comment", ({ tournamentId, comment }) => {
@@ -119,6 +113,9 @@ function TournamentPage() {
     };
   }, [id]);
 
+
+
+
   useEffect(() => {
     socket.emit("join:tournament", id);
 
@@ -131,6 +128,9 @@ function TournamentPage() {
       socket.off("tournament:update");
     };
   }, [id]);
+
+
+
 
   function getCurrentUserId() {
     return localStorage.getItem("currentUserId");
@@ -245,6 +245,9 @@ function TournamentPage() {
 }
 
 
+
+
+
   useEffect(() => {
     if (!tournament) return;
 
@@ -294,6 +297,9 @@ function TournamentPage() {
       );
     }
 
+
+
+
     updateCountdown();
     const intervalId = setInterval(updateCountdown, 1000);
 
@@ -310,6 +316,9 @@ function TournamentPage() {
     });
   }
 
+
+
+
   async function handleJoinTournament() {
     try {
       setActionMessage("");
@@ -322,27 +331,7 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}/players`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not join tournament");
-      }
+      const data = await joinTournament(id, token);
 
       setTournament(data);
       setActionMessage("You joined the tournament!");
@@ -352,6 +341,9 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
+
 
   async function handleLeaveTournament() {
     try {
@@ -365,27 +357,7 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}/players`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not leave tournament");
-      }
+      const data = await leaveTournament(id, token);
 
       setTournament(data);
       setActionMessage("You left the tournament.");
@@ -395,6 +367,10 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
+
+
 
   async function handleStartTournament() {
     try {
@@ -408,30 +384,11 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            status: "ongoing",
-          }),
-        }
+      const data = await updateTournamentStatus(
+        id,
+        token,
+        "ongoing"
       );
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not start tournament");
-      }
 
       setTournament(data);
       setActionMessage("Tournament started.");
@@ -442,9 +399,14 @@ function TournamentPage() {
     }
   }
 
+
+
+
   function handleEditTournament() {
     navigate(`/admin/tournaments/${id}/edit`);
   }
+
+
 
   async function handleCancelTournament() {
     try {
@@ -458,39 +420,22 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            status: "cancelled",
-          }),
-        }
-      );
+    const data = await updateTournamentStatus(
+      id,
+      token,
+      "cancelled"
+    );
 
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not cancel tournament");
-      }
-
-      setTournament(data);
-      setActionMessage("Tournament cancelled.");
+    setTournament(data);
+    setActionMessage("Tournament cancelled.");
     } catch (error) {
       setActionMessage(error.message);
     } finally {
       setIsSubmitting(false);
     }
   }
+
+
 
   async function handleDeleteTournament() {
     try {
@@ -504,25 +449,7 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Could not delete tournament");
-      }
+      await deleteTournament(id, token);
 
       navigate("/tournaments");
     } catch (error) {
@@ -531,6 +458,8 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
 
   async function handleSubmitComment(event) {
     event.preventDefault();
@@ -550,31 +479,15 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/comments/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            content: commentInput,
-          }),
-        }
-      );
-
-      await response.json();
-
-      if (!response.ok) {
-        throw new Error("Could not post comment");
-      }
+      await createComment(id, token, commentInput);
 
       setCommentInput("");
     } catch (error) {
       setActionMessage(error.message);
     }
   }
+
+
 
   function renderCountdownLabel() {
     if (tournament.status === "upcoming") return "Starts in";
@@ -586,6 +499,8 @@ function TournamentPage() {
     if (!isCurrentUserAdmin()) {
       return null;
     }
+
+
 
     return (
       <div className="inline-admin-actions">
@@ -632,6 +547,8 @@ function TournamentPage() {
     );
   }
 
+
+  
   function renderTournamentAction() {
     const currentUserJoined = isCurrentUserJoined();
 
