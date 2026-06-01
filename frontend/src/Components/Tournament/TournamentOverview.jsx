@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./TournamentOverview.css";
 
 function TournamentOverview() {
   const [tournaments, setTournaments] = useState([]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const API = "http://localhost:6767/api/v1";
 
   useEffect(() => {
     async function fetchTournaments() {
       try {
-        const response = await fetch("http://localhost:6767/api/v1/tournaments");
+        const response = await fetch(
+          "http://localhost:6767/api/v1/tournaments",
+        );
 
         if (!response.ok) {
           throw new Error("Could not fetch tournaments");
@@ -30,14 +34,15 @@ function TournamentOverview() {
     fetchTournaments();
   }, []);
 
-  function formatDate(date) {
-    return new Date(date).toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(function () {
+      setNow(Date.now());
+    }, 1000);
+    return function () {
+      clearInterval(t);
+    };
+  }, []);
 
   return (
     <section className="tournament-overview">
@@ -54,31 +59,91 @@ function TournamentOverview() {
 
       {error && <p className="tournament-overview-error">{error}</p>}
 
-      {tournaments.length === 0 ? (
-        <p className="empty-tournaments">No upcoming tournaments yet.</p>
-      ) : (
-        <div className="tournament-overview-list">
-          {tournaments.map((tournament) => (
-            <Link
-              to={`/tournaments/${tournament._id}`}
-              className="tournament-overview-item"
-              key={tournament._id}
-            >
-              <div className="tournament-overview-main">
-                <h3>{tournament.title}</h3>
-                <p>{formatDate(tournament.startDate)}</p>
-              </div>
+      {(() => {
+        let listContent;
+        if (tournaments.length === 0) {
+          listContent = (
+            <p className="empty-tournaments">No upcoming tournaments yet.</p>
+          );
+        } else {
+          listContent = (
+            <div className="tournament-overview-list">
+              {tournaments.map((tournament) => {
+                let dateStr = "";
+                if (tournament.startDate) {
+                  dateStr = new Date(tournament.startDate).toLocaleString();
+                }
 
-              <div className="overview-tournament-meta">
-                <strong>
-                  {tournament.players?.length || 0}/{tournament.maxPlayers}
-                </strong>
-                <span>players</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
+                let varStr = "—";
+                if (tournament.variant) {
+                  varStr = "Best of " + (tournament.variant.rounds || "?");
+                  if (tournament.variant.timeControl) {
+                    varStr =
+                      varStr + " · " + tournament.variant.timeControl + "s";
+                  }
+                }
+
+                let diff = NaN;
+                if (tournament.startDate) {
+                  diff = new Date(tournament.startDate).getTime() - now;
+                }
+
+                let cd = "";
+                if (!isNaN(diff)) {
+                  if (diff <= 0) {
+                    cd = "Started";
+                  } else {
+                    cd = Math.floor(diff / 1000 / 3600) + "h";
+                  }
+                }
+
+                return (
+                  <div
+                    className="tournament-overview-item"
+                    key={tournament._id}
+                  >
+                    <div className="tournament-overview-main">
+                      <Link to={`/tournaments/${tournament._id}`}>
+                        <h3>{tournament.title}</h3>
+                      </Link>
+                      <p className="to-date">{dateStr}</p>
+                      <p className="to-variant">{varStr}</p>
+                      {tournament.buyIn != null && (
+                        <p className="to-buyin">
+                          Buy-in: {tournament.buyIn} pts
+                        </p>
+                      )}
+                      <p className="to-countdown">{cd}</p>
+                    </div>
+
+                    <div className="overview-tournament-meta">
+                      <strong>
+                        {tournament.players?.length || 0}/
+                        {tournament.maxPlayers}
+                      </strong>
+                      <span>players</span>
+                    </div>
+
+                    <div className="tournament-actions">
+                      <Link
+                        to={`/tournaments/${tournament._id}`}
+                        className="btn-join"
+                      >
+                        Open
+                      </Link>
+                      <Link to={`/tournaments/${tournament._id}`}>
+                        Spectate
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        return listContent;
+      })()}
     </section>
   );
 }
