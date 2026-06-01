@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import Header from "../Header/Header.jsx";
+import AdminHeader from "../Header/AdminHeader.jsx";
 
 function AdminLayout() {
   return (
     <>
-      <Header />
+      <AdminHeader />
       <main>
         <Outlet />
       </main>

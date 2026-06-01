@@ -1,0 +1,51 @@
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 3rem;
+  border-bottom: 1px solid #e5e0d8;
+  background-color: #fffdf9;
+}
+
+.admin-header__logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #111;
+}
+
+.admin-header__nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.admin-header__link {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.admin-header__link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .admin-header__nav {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .admin-header__link {
+    width: 100%;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e0d8;
+  }
+}
