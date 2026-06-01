@@ -7,7 +7,9 @@ function CreateTournament() {
   const { id } = useParams();
 
   const isEditMode = Boolean(id);
-  const today = new Date().toISOString().split("T")[0];
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minStartDate = tomorrow.toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
     title: "",
@@ -93,6 +95,11 @@ function CreateTournament() {
 
     if (Number(formData.minElo) > Number(formData.maxElo)) {
       setError("Minimum Elo cannot be higher than maximum Elo.");
+      return;
+    }
+
+    if (!isEditMode && formData.startDate <= minStartDate) {
+      setError("Start date must be at least one day in the future.");
       return;
     }
 
@@ -208,7 +215,7 @@ function CreateTournament() {
             name="startDate"
             value={formData.startDate}
             onChange={handleChange}
-            min={isEditMode ? undefined : today}
+            min={isEditMode ? undefined : minStartDate}
             required
           />
         </label>

@@ -30,6 +30,13 @@ function TournamentOverview() {
     fetchTournaments();
   }, []);
 
+  // simple ticking clock for countdowns
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   function formatDate(date) {
     return new Date(date).toLocaleString("en-GB", {
       day: "2-digit",
@@ -37,6 +44,25 @@ function TournamentOverview() {
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  function formatVariant(variant) {
+    if (!variant) return "—";
+    const straights = variant.straightsAllowed ? "Straights" : "No straights";
+    return `Best of ${variant.rounds} · ${variant.timeControl}s · ${straights}`;
+  }
+
+  function formatCountdown(startDate) {
+    const diff = new Date(startDate).getTime() - now;
+    if (isNaN(diff)) return "";
+    if (diff <= 0) return "Started";
+    const sec = Math.floor(diff / 1000);
+    const days = Math.floor(sec / 86400);
+    const hours = Math.floor((sec % 86400) / 3600);
+    const minutes = Math.floor((sec % 3600) / 60);
+    const seconds = sec % 60;
+    if (days > 0) return `${days}d ${String(hours).padStart(2, "0")}h`;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   }
 
   return (
@@ -66,7 +92,12 @@ function TournamentOverview() {
             >
               <div className="tournament-overview-main">
                 <h3>{tournament.title}</h3>
-                <p>{formatDate(tournament.startDate)}</p>
+                <p className="to-date">{formatDate(tournament.startDate)}</p>
+                <p className="to-variant">{formatVariant(tournament.variant)}</p>
+                {tournament.buyIn != null && (
+                  <p className="to-buyin">Buy-in: {tournament.buyIn} pts</p>
+                )}
+                <p className="to-countdown">{formatCountdown(tournament.startDate)}</p>
               </div>
 
               <div className="overview-tournament-meta">
