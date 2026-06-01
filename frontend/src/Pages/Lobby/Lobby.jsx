@@ -15,6 +15,9 @@ function Lobby() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filterStraights, setFilterStraights] = useState("all");
+  const [filterRounds, setFilterRounds] = useState("all");
+  const [filterTime, setFilterTime] = useState("all");
 
   useEffect(() => {
     async function fetchMatches() {
@@ -39,16 +42,54 @@ function Lobby() {
   if (loading) return <main><p>Loading lobby...</p></main>;
   if (error) return <main><p>{error}</p></main>;
 
+  const filtered = matches.filter((m) => {
+    if (filterStraights !== "all" && String(m.variant?.straightsAllowed) !== filterStraights) return false;
+    if (filterRounds !== "all" && String(m.variant?.rounds) !== filterRounds) return false;
+    if (filterTime !== "all" && String(m.variant?.timeControl) !== filterTime) return false;
+    return true;
+  });
+
   return (
     <main>
       <h1>Lobby</h1>
       <Link to="/create-game">Create new game</Link>
 
-      {matches.length === 0 ? (
+      <div>
+        <label>
+          Straights:{" "}
+          <select value={filterStraights} onChange={e => setFilterStraights(e.target.value)}>
+            <option value="all">All</option>
+            <option value="true">Allowed</option>
+            <option value="false">Not allowed</option>
+          </select>
+        </label>
+        {" "}
+        <label>
+          Rounds:{" "}
+          <select value={filterRounds} onChange={e => setFilterRounds(e.target.value)}>
+            <option value="all">All</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="7">7</option>
+          </select>
+        </label>
+        {" "}
+        <label>
+          Time:{" "}
+          <select value={filterTime} onChange={e => setFilterTime(e.target.value)}>
+            <option value="all">All</option>
+            <option value="10">10s</option>
+            <option value="30">30s</option>
+            <option value="90">90s</option>
+          </select>
+        </label>
+      </div>
+
+      {filtered.length === 0 ? (
         <p>No open games right now.</p>
       ) : (
         <ul>
-          {matches.map((match) => {
+          {filtered.map((match) => {
             const host = match.players[0]?.userId?.username ?? "Unknown";
             return (
               <li key={match._id}>

@@ -221,6 +221,38 @@ if (hasMoreRounds) {
 }
 }
 
+export async function leaveMatch(req, res) {
+  const { userId } = req.body;
+
+  try {
+    const match = await Match.findById(req.params.id);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+    if (match.status !== "waiting") return res.status(400).json({ message: "Can only leave before the game starts" });
+
+    const playerIndex = match.players.findIndex((p) => p.userId?.toString() === userId);
+    if (playerIndex === -1) return res.status(403).json({ message: "Not in this match" });
+
+    match.players.splice(playerIndex, 1);
+
+    if (userId) {
+      const user = await User.findById(userId);
+      if (user) {
+        user.points = (user.points || 0) + match.buyIn;
+        await user.save();
+      }
+    }
+
+    match.markModified("players");
+    await match.save();
+    await match.populate("players.userId", "username elo");
+
+    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
+    res.json(match);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export async function listMatches(req, res) {
   try {
     const filter = {};
@@ -391,36 +423,54 @@ async function doEndTurn(match, userId, io) {
 
       await updateTournamentAfterMatchFinished(match, matchWinner.userId);
 
-      const matchLoser = match.players.find(
-        (p) => p.userId?.toString() !== matchWinner.userId?.toString()
-      );
-      if (matchLoser) match.loser = matchLoser.userId;
       match.currentTurn = null;
 
-      if (!match.isAnonymousMatch && match.winner && match.loser) {
-        const [winnerUser, loserUser] = await Promise.all([
-          User.findById(match.winner),
-          User.findById(match.loser),
-        ]);
+      if (!match.isAnonymousMatch) {
+        const K = 32;
+        const userDocs = await Promise.all(
+          match.players.map((p) => User.findById(p.userId))
+        );
 
-        if (winnerUser && loserUser) {
-          const K = 32;
-          const expected = 1 / (1 + Math.pow(10, (loserUser.elo - winnerUser.elo) / 400));
-          const winnerDelta = Math.round(K * (1 - expected));
-          const loserDelta = -winnerDelta;
+        const eloDeltas = new Array(match.players.length).fill(0);
 
-          winnerUser.points = (winnerUser.points || 0) + (matchWinner.stack || 0);
-          loserUser.points = (loserUser.points || 0) + (matchLoser.stack || 0);
-          winnerUser.elo = Math.min(MAX_ELO_RATING, winnerUser.elo + winnerDelta);
-          winnerUser.wins += 1;
-          winnerUser.totalGames += 1;
-          loserUser.elo = Math.max(MIN_ELO_RATING, loserUser.elo + loserDelta);
-          loserUser.losses += 1;
-          loserUser.totalGames += 1;
+        for (let i = 0; i < match.players.length; i++) {
+          for (let j = i + 1; j < match.players.length; j++) {
+            const ui = userDocs[i];
+            const uj = userDocs[j];
+            if (!ui || !uj) continue;
 
-          await Promise.all([winnerUser.save(), loserUser.save()]);
-          match.eloChange = { winnerDelta, loserDelta };
+            const stackI = match.players[i].stack ?? 0;
+            const stackJ = match.players[j].stack ?? 0;
+            const scoreI = stackI > stackJ ? 1 : stackI < stackJ ? 0 : 0.5;
+            const scoreJ = 1 - scoreI;
+
+            const expectedI = 1 / (1 + Math.pow(10, (uj.elo - ui.elo) / 400));
+            const expectedJ = 1 - expectedI;
+
+            eloDeltas[i] += Math.round(K * (scoreI - expectedI));
+            eloDeltas[j] += Math.round(K * (scoreJ - expectedJ));
+          }
         }
+
+        const winnerIdx = match.players.findIndex((p) => p.userId?.toString() === matchWinner.userId?.toString());
+        const winnerDelta = eloDeltas[winnerIdx] ?? 0;
+        const loserDelta = match.players.length === 2 ? eloDeltas[winnerIdx === 0 ? 1 : 0] ?? 0 : null;
+
+        for (let i = 0; i < match.players.length; i++) {
+          const u = userDocs[i];
+          if (!u) continue;
+          u.points = (u.points || 0) + (match.players[i].stack || 0);
+          u.elo = Math.min(MAX_ELO_RATING, Math.max(MIN_ELO_RATING, u.elo + eloDeltas[i]));
+          u.totalGames += 1;
+          if (match.players[i].userId?.toString() === matchWinner.userId?.toString()) {
+            u.wins += 1;
+          } else {
+            u.losses += 1;
+          }
+          await u.save();
+        }
+
+        match.eloChange = { winnerDelta, loserDelta };
       }
     } else {
       match.lastRoundWinnerId = isTie ? null : match.players[bestIndex].userId;
@@ -686,88 +736,6 @@ export async function rollDice(req, res) {
 
     req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
 
-    res.json(match);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-}
-export async function placeBet(req, res) {
-  const { userId, action, amount } = req.body;
-
-  try {
-    const match = await Match.findById(req.params.id);
-    if (!match) return res.status(404).json({ message: "Match not found" });
-    if (!match.bettingPhase) return res.status(400).json({ message: "Not in betting phase" });
-    if (match.bettingTurn?.toString() !== userId) return res.status(403).json({ message: "Not your betting turn" });
-
-    const playerIndex = match.players.findIndex((p) => p.userId?.toString() === userId);
-    if (playerIndex === -1) return res.status(403).json({ message: "Not in this match" });
-
-    const player = match.players[playerIndex];
-
-    if (action === "fold") {
-      player.hasFolded = true;
-      player.hasActed = true;
-    } else if (action === "match") {
-      const toAdd = match.currentHighBet - player.currentBet;
-      if (toAdd > player.stack) return res.status(400).json({ message: "Not enough stack to match" });
-      player.stack -= toAdd;
-      player.currentBet = match.currentHighBet;
-      match.pot += toAdd;
-      player.hasActed = true;
-    } else if (action === "bet" || action === "raise") {
-      const betAmount = Number(amount);
-      if (!betAmount || betAmount <= match.currentHighBet) {
-        return res.status(400).json({ message: "Raise must be higher than current bet" });
-      }
-      const toAdd = betAmount - player.currentBet;
-      if (toAdd > player.stack) return res.status(400).json({ message: "Not enough stack" });
-      player.stack -= toAdd;
-      player.currentBet = betAmount;
-      match.pot += toAdd;
-      match.currentHighBet = betAmount;
-      player.hasActed = true;
-      for (let i = 0; i < match.players.length; i++) {
-        if (i !== playerIndex && !match.players[i].hasFolded) {
-          match.players[i].hasActed = false;
-        }
-      }
-    } else {
-      return res.status(400).json({ message: "Invalid action" });
-    }
-
-    const activePlayers = match.players.filter((p) => !p.hasFolded);
-    const bettingDone = activePlayers.every((p) => p.hasActed);
-
-    if (bettingDone) {
-      match.bettingPhase = false;
-      if (match.lastRoundWinnerId) {
-        const winnerIndex = match.players.findIndex(
-          (p) => p.userId?.toString() === match.lastRoundWinnerId?.toString()
-        );
-        if (winnerIndex !== -1) match.players[winnerIndex].stack += match.pot;
-      } else {
-        const share = Math.floor(match.pot / activePlayers.length);
-        for (const p of match.players) {
-          if (!p.hasFolded) p.stack += share;
-        }
-      }
-      match.pot = 0;
-      match.bettingTurn = null;
-      match.roundPending = true;
-    } else {
-      let nextIndex = (playerIndex + 1) % match.players.length;
-      while (match.players[nextIndex].hasFolded || match.players[nextIndex].hasActed) {
-        nextIndex = (nextIndex + 1) % match.players.length;
-      }
-      match.bettingTurn = match.players[nextIndex].userId;
-    }
-
-    match.markModified("players");
-    await match.save();
-    await match.populate("players.userId", "username elo");
-
-    req.app.get("io").to(`match:${match._id}`).emit("match:update", match);
     res.json(match);
   } catch (err) {
     res.status(500).json({ message: err.message });
