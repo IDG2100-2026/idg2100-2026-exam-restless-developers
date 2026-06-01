@@ -386,14 +386,14 @@ function Profile() {
                   newPassword: event.target.value,
                 }))
               }
-              placeholder="UI only for now"
+              placeholder="Leave blank to keep your current password"
             />
           </label>
 
           <button type="submit" className="profile-button">
             Save profile
           </button>
-          <p className="profile-note">Password changes are not connected to backend yet.</p>
+          <p className="profile-note">Password changes are sent to the backend when you save the profile.</p>
         </form>
 
         <div className="profile-info-column">
