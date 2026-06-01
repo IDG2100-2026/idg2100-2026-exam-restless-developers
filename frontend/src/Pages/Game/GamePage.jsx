@@ -77,6 +77,7 @@ function GamePage() {
   const navigate = useNavigate();
   const currentUserId = localStorage.getItem("currentUserId");
 
+
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -185,19 +186,22 @@ function GamePage() {
   };
 
   const handleEndTurn = async () => {
-    try {
-      const res = await fetch(`${API}/matches/${id}/end-turn`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ userId: currentUserId }),
-      });
 
-      const data = await res.json();
-      if (res.ok) setMatch(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  try {
+    const res = await fetch(`${API}/matches/${id}/end-turn`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: currentUserId }),
+    });
+
+    const data = await res.json();
+    if (res.ok) setMatch(data);
+    else setError(data.message || "Could not end turn");
+  } catch (err) {
+    console.error(err);
+    setError("Could not end turn");
+  }
+};
 
   boardContainerRef.current.addEventListener("board-roll", handleRoll);
   boardContainerRef.current.addEventListener("board-end-turn", handleEndTurn);
@@ -268,18 +272,25 @@ function GamePage() {
   }
 
   async function handleStartNextRound() {
-    try {
-      const res = await fetch(`${API}/matches/${id}/next-round`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ userId: currentUserId }),
-      });
-      const data = await res.json();
-      if (res.ok) setMatch(data);
-    } catch (err) {
-      console.error(err);
+  try {
+    const res = await fetch(`${API}/matches/${id}/next-round`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ userId: currentUserId }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setMatch(data);
+    } else {
+      setError(data.message);
     }
+  } catch (err) {
+    console.error(err);
+    setError("Could not start next round");
   }
+}
 
   if (loading) return <main><p>Loading match...</p></main>;
   if (error) return <main><p>{error}</p><Link to="/lobby">Back to lobby</Link></main>;
