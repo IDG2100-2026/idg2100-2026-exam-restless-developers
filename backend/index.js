@@ -5,6 +5,7 @@ import errorHandler from "./middleware/errorHandler.js";
 
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { apiLimiter } from "./middleware/rateLimit.middleware.js";
 
 import { connectDB } from "./config/db.config.js";
 import tournamentRoutes from "./routes/tournaments.routes.js";
@@ -13,6 +14,7 @@ import matchesRoutes from "./routes/matches.routes.js";
 import commentRoutes from "./routes/comments.routes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import platformRoutes from "./routes/platform.routes.js";
+
 
 dotenv.config();
 
@@ -41,6 +43,7 @@ io.on("connection", (socket) => {
 app.use(cors());
 app.set("trust proxy", 1);
 app.use(express.json());
+app.use(apiLimiter);
 
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/tournaments", tournamentRoutes);

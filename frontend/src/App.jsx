@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Header from "./Components/Header/Header.jsx";
-import Footer from "./Components/Footer/Footer.jsx";
+import MainLayout from "./Components/Layouts/MainLayout.jsx";
+
 
 import Homepage from "./Pages/Homepage/Homepage.jsx";
 import AboutUs from "./Pages/About/AboutUs.jsx";
@@ -24,6 +24,7 @@ import AdminComments from "./Pages/Admin/AdminComments.jsx";
 
 import CreateGame from "./Pages/Game/CreateGame.jsx";
 import GamePage from "./Pages/Game/GamePage.jsx";
+import AdminLayout from "./Components/Layouts/AdminLayout.jsx";
 import { applyTheme } from "./utils/theme.js";
 
 function App({ initialTheme }) {
@@ -40,16 +41,14 @@ function App({ initialTheme }) {
 
   return (
     <BrowserRouter>
-      <Header theme={theme} onToggleTheme={toggleTheme} />
+      <Header />
 
       <main>
         <Routes>
+        <Route element={ <MainLayout />}>
           <Route path="/" element={<Homepage />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/about-spanish-dice" element={<AboutSpanishDice />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/comments" element={<AdminComments />} />
           <Route path="/lobby" element={<Lobby />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -57,17 +56,22 @@ function App({ initialTheme }) {
           <Route path="/terms" element={<Terms />} />
           <Route path="/tournaments" element={<TournamentList />} />
           <Route path="/tournaments/:id" element={<TournamentPage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/admin/tournaments/create" element={<CreateTournament />} />
+          <Route path="/profile" element={<Profile />} />   
           <Route path="/create-game" element={<CreateGame />} />
           <Route path="/game/:id" element={<GamePage />} />
-          <Route path="/admin/tournaments/:id/edit" element={<CreateTournament />} />
           <Route path="/401" element={<Unauthorized />} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
+        </Route>
 
-      <Footer />
+        <Route element={<AdminLayout/>}>  
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/comments" element={<AdminComments />} />
+          <Route path="/admin/tournaments/create" element={<CreateTournament />} />
+          <Route path="/admin/tournaments/:id/edit" element={<CreateTournament />} />
+        </Route>
+
+        </Routes>
     </BrowserRouter>
   );
 }

@@ -5,7 +5,7 @@ const securityIncidentSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["ip_change"],
+      enum: ["ip_change", "rate_limit"],
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
