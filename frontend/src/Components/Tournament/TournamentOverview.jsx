@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./TournamentOverview.css";
 
 function TournamentOverview() {
   const [tournaments, setTournaments] = useState([]);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const API = "http://localhost:6767/api/v1";
 
   useEffect(() => {
     async function fetchTournaments() {
@@ -87,11 +85,13 @@ function TournamentOverview() {
       ) : (
         <div className="tournament-overview-list">
           {tournaments.map((tournament) => (
-            <div className="tournament-overview-item" key={tournament._id}>
+            <Link
+              to={`/tournaments/${tournament._id}`}
+              className="tournament-overview-item"
+              key={tournament._id}
+            >
               <div className="tournament-overview-main">
-                <Link to={`/tournaments/${tournament._id}`}>
-                  <h3>{tournament.title}</h3>
-                </Link>
+                <h3>{tournament.title}</h3>
                 <p className="to-date">{formatDate(tournament.startDate)}</p>
                 <p className="to-variant">{formatVariant(tournament.variant)}</p>
                 {tournament.buyIn != null && (
@@ -106,40 +106,7 @@ function TournamentOverview() {
                 </strong>
                 <span>players</span>
               </div>
-
-              <div className="tournament-actions">
-                <button
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const currentUserId = localStorage.getItem("currentUserId");
-                    if (!currentUserId) {
-                      navigate("/login");
-                      return;
-                    }
-
-                    try {
-                      const res = await fetch(`${API}/tournaments/${tournament._id}/join`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId: currentUserId }),
-                      });
-
-                      const json = await res.json();
-                      if (!res.ok) throw new Error(json.message || "Could not join tournament");
-
-                      navigate(`/tournaments/${tournament._id}`);
-                    } catch (err) {
-                      setError(err.message || "Could not join tournament");
-                    }
-                  }}
-                >
-                  Join
-                </button>
-
-                <Link to={`/tournaments/${tournament._id}`}>Spectate</Link>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
