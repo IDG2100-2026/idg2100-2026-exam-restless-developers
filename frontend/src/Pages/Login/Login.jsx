@@ -90,10 +90,6 @@ function Login() {
           No account yet? <Link to="/register">Register here</Link>.
         </p>
 
-        <p>
-          <Link to="/forgot-password">Forgot password?</Link>
-        </p>
-
         {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
     </main>

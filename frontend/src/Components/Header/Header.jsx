@@ -12,6 +12,7 @@ function Header() {
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   function handleLogout() {
+    localStorage.removeItem("token");
     localStorage.removeItem("currentUsername");
     localStorage.removeItem("currentUserId");
     localStorage.removeItem("isAdmin");
@@ -61,9 +62,6 @@ function Header() {
           {currentUsername ? (
             <>
               <span className="header-greeting">Hi, {currentUsername}</span>
-              <Link to="/profile" className="header-button" onClick={closeMenu}>
-                Profile
-              </Link>
               <button className="header-button logout" onClick={handleLogout}>
                 Log out
               </button>

@@ -9,6 +9,14 @@ import "./GamePage.css";
 
 const API = "http://localhost:6767/api/v1";
 
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 // Die values 1-6 → Spanish poker dice faces
 const FACE = { 1: "7", 2: "8", 3: "J", 4: "Q", 5: "K", 6: "A" };
 
@@ -99,14 +107,19 @@ function GamePage() {
       if (loaded.status === "waiting" && !isOwner && hasRoom && currentUserId && !joinedRef.current) {
         joinedRef.current = true;
         try {
-          await fetch(`${API}/matches/${id}/join`, {
+          const joinRes = await fetch(`${API}/matches/${id}/join`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authHeaders(),
             body: JSON.stringify({ userId: currentUserId }),
           });
+          if (!joinRes.ok) {
+            const joinData = await joinRes.json();
+            setError(joinData.message || "Could not join match");
+            return;
+          }
           await fetchMatch();
-        } catch {
-          // game may already be full
+        } catch (err) {
+          console.error(err);
         }
       }
     }
@@ -123,44 +136,74 @@ function GamePage() {
     return () => socket.disconnect();
   }, [id]);
 
+
+
+  useEffect(() => {
+  const intervalId = setInterval(() => {
+    fetchMatch();
+  }, 1000);
+
+  return () => clearInterval(intervalId);
+}, [id]);
+
+
   // Mount the game-board web component once the loading screen is gone
   useEffect(() => {
-    if (loading || !boardContainerRef.current || boardElementRef.current) return;
+  if (loading || !boardContainerRef.current) return;
 
-    const board = document.createElement("game-board");
-    board.setAttribute("board-color", localStorage.getItem("boardColor") || "#facc15");
-    boardElementRef.current = board;
-    boardContainerRef.current.appendChild(board);
+  boardContainerRef.current.innerHTML = "";
 
-    boardContainerRef.current.addEventListener("board-roll", async (e) => {
-      const { held } = e.detail;
-      try {
-        const res = await fetch(`${API}/matches/${id}/roll`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId, held }),
-        });
-        const data = await res.json();
-        if (res.ok) setMatch(data);
-      } catch {
-        // ignore network errors
-      }
-    });
+  const board = document.createElement("game-board");
+  board.setAttribute("board-color", localStorage.getItem("boardColor") || "#facc15");
+  boardElementRef.current = board;
+  boardContainerRef.current.appendChild(board);
 
-    boardContainerRef.current.addEventListener("board-end-turn", async () => {
-      try {
-        const res = await fetch(`${API}/matches/${id}/end-turn`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUserId }),
-        });
-        const data = await res.json();
-        if (res.ok) setMatch(data);
-      } catch {
-        // ignore network errors
-      }
-    });
-  }, [loading]);
+  const handleRoll = async (e) => {
+    const { held } = e.detail;
+
+    try {
+      const res = await fetch(`${API}/matches/${id}/roll`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: currentUserId, held }),
+      });
+
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEndTurn = async () => {
+    try {
+      const res = await fetch(`${API}/matches/${id}/end-turn`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ userId: currentUserId }),
+      });
+
+      const data = await res.json();
+      if (res.ok) setMatch(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  boardContainerRef.current.addEventListener("board-roll", handleRoll);
+  boardContainerRef.current.addEventListener("board-end-turn", handleEndTurn);
+
+  return () => {
+    if (boardContainerRef.current) {
+      boardContainerRef.current.removeEventListener("board-roll", handleRoll);
+      boardContainerRef.current.removeEventListener("board-end-turn", handleEndTurn);
+      boardContainerRef.current.innerHTML = "";
+    }
+
+    boardElementRef.current = null;
+  };
+}, [loading, id, currentUserId]);
+
 
   // Push updated match state into the web component
   useEffect(() => {
@@ -199,6 +242,7 @@ function GamePage() {
     return () => clearTimeout(timeout);
   }, [match?.status, match?.tournamentId, navigate]);
 
+
   const currentTurnId = match ? String(match.currentTurn?._id ?? match.currentTurn ?? "") : "";
 
   useEffect(() => {
@@ -230,7 +274,7 @@ function GamePage() {
     try {
       const res = await fetch(`${API}/matches/${id}/bet`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ userId: currentUserId, action, amount: betAmount }),
       });
       const data = await res.json();
@@ -244,13 +288,13 @@ function GamePage() {
     try {
       const res = await fetch(`${API}/matches/${id}/next-round`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ userId: currentUserId }),
       });
       const data = await res.json();
       if (res.ok) setMatch(data);
-    } catch {
-      // ignore network errors
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -271,7 +315,7 @@ function GamePage() {
       <p>{formatVariant(match.variant)}</p>
       <p>Buy-in: {match.buyIn} points</p>
 
-      {(match.status === "active" || match.roundPending) && (
+      {(match.status === "active" || match.bettingPhase || match.roundPending) && (
         <p>Round {match.currentRound ?? 1} of {match.variant.rounds}</p>
       )}
 
@@ -293,12 +337,12 @@ function GamePage() {
         <p>Waiting for players ({match.players.length}/{match.maxPlayers})</p>
       )}
 
-      {(match.status === "active" || match.roundPending) && (
+      {(match.status === "active" || match.bettingPhase || match.roundPending) && (
         match.players
           .filter(p => String(p.userId?._id ?? p.userId) !== String(currentUserId))
           .map(opponent => {
             const oppId = String(opponent.userId?._id ?? opponent.userId);
-            const isTheirTurn = !match.roundPending &&
+            const isTheirTurn = !match.roundPending && !match.bettingPhase &&
               String(match.currentTurn?._id ?? match.currentTurn) === oppId;
             return (
               <div key={oppId}>

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import errorHandler from "./middleware/errorHandler.js";
 
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -30,6 +31,10 @@ io.on("connection", (socket) => {
   socket.on("join:match", (matchId) => {
     socket.join(`match:${matchId}`);
   });
+
+  socket.on("join:tournament", (tournamentId) => {
+    socket.join(`tournament:${tournamentId}`);
+  });
 });
 
 app.use(cors());
@@ -49,6 +54,8 @@ app.get("/", (req, res) => {
     message: "Backend is running",
   });
 });
+
+app.use(errorHandler);
 
 async function startServer() {
   try {

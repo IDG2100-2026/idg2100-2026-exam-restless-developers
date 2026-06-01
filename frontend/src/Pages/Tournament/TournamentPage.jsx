@@ -1,3 +1,18 @@
+
+import { 
+  getTournament,
+  joinTournament, 
+  leaveTournament,
+  updateTournamentStatus,
+  deleteTournament,
+} from "../../api/tournamentApi";
+
+import {
+  getComments,
+  createComment,
+} from "../../api/commentApi";
+
+
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -17,7 +32,8 @@ const socket = io("http://localhost:6767");
 function TournamentPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  
+  
   const [tournament, setTournament] = useState(null);
   const [error, setError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
@@ -25,20 +41,13 @@ function TournamentPage() {
   const [timeLeft, setTimeLeft] = useState("");
   const [comments, setComments] = useState([]);
   const [commentInput, setCommentInput] = useState("");
+  const [hasRedirectedToGame, setHasRedirectedToGame] = useState(false);
 
   useEffect(() => {
     async function fetchTournament() {
       try {
-        const response = await fetch(
-          `http://localhost:6767/api/v1/tournaments/${id}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Could not fetch tournament");
-        }
-
-        const data = await response.json();
-        setTournament(data);
+        const data = await getTournament(id);
+          setTournament(data);
       } catch (error) {
         setError(error.message);
       }
@@ -47,18 +56,28 @@ function TournamentPage() {
     fetchTournament();
   }, [id]);
 
+
+  useEffect(() => {
+    if (!tournament || tournament.status !== "ongoing") return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const data = await getTournament(id);
+        setTournament(data);
+      } catch {
+        // ignore
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [id, tournament?.status]);
+
+
+
   useEffect(() => {
     async function fetchComments() {
       try {
-        const response = await fetch(
-          `http://localhost:6767/api/v1/comments/${id}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Could not fetch comments");
-        }
-
-        const data = await response.json();
+        const data = await getComments(id);
         setComments(data);
       } catch (error) {
         console.error(error);
@@ -67,6 +86,8 @@ function TournamentPage() {
 
     fetchComments();
   }, [id]);
+
+
 
   useEffect(() => {
     socket.on("new-tournament-comment", ({ tournamentId, comment }) => {
@@ -92,64 +113,24 @@ function TournamentPage() {
     };
   }, [id]);
 
+
+
+
   useEffect(() => {
-    if (!tournament) return;
+    socket.emit("join:tournament", id);
 
-    function updateCountdown() {
-      const now = new Date();
-      let targetDate = null;
-
-      if (tournament.status === "upcoming") {
-        targetDate = tournament.startDate;
-      }
-
-      if (tournament.status === "ongoing" && tournament.nextRoundStart) {
-        targetDate = tournament.nextRoundStart;
-      }
-
-      if (!targetDate) {
-        setTimeLeft("No timer available");
-        return;
-      }
-
-      const difference = new Date(targetDate) - now;
-
-      if (difference <= 0) {
-        setTimeLeft(
-          tournament.status === "ongoing"
-            ? "Round starting now"
-            : "Tournament has started"
-        );
-        return;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / (1000 * 60)) % 60);
-      const seconds = Math.floor((difference / 1000) % 60);
-
-      setTimeLeft(
-        days > 0
-          ? `${days}d ${hours}h ${minutes}m`
-          : `${hours}h ${minutes}m ${seconds}s`
-      );
-    }
-
-    updateCountdown();
-    const intervalId = setInterval(updateCountdown, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [tournament]);
-
-  function formatDate(date) {
-    return new Date(date).toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    socket.on("tournament:update", (updatedTournament) => {
+      setTournament(updatedTournament);
+      setHasRedirectedToGame(false);
     });
-  }
+
+    return () => {
+      socket.off("tournament:update");
+    };
+  }, [id]);
+
+
+
 
   function getCurrentUserId() {
     return localStorage.getItem("currentUserId");
@@ -190,6 +171,154 @@ function TournamentPage() {
     });
   }
 
+
+
+  async function goToTournamentGame() {
+  try {
+    if (hasRedirectedToGame) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/401";
+      return;
+    }
+
+    const currentUserId = getCurrentUserId();
+
+    const currentRound = tournament.rounds.find(
+      (round) => round.roundNumber === tournament.currentRound
+    );
+
+    const myPairing = currentRound?.pairings.find((pairing) =>
+      pairing.players.some((player) =>
+        String(player._id ?? player) === String(currentUserId)
+      )
+    );
+
+    if (!myPairing) {
+      setActionMessage("Could not find your pairing.");
+      return;
+    }
+
+    if (myPairing.game) {
+      const matchId =
+        typeof myPairing.game === "object" ? myPairing.game._id : myPairing.game;
+
+      setHasRedirectedToGame(true);
+      navigate(`/game/${matchId}`);
+      return;
+    }
+
+    const firstPlayerId = String(myPairing.players[0]?._id ?? myPairing.players[0]);
+
+    if (String(currentUserId) !== firstPlayerId) {
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:6767/api/v1/tournaments/${id}/matches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.status === 401) {
+      window.location.href = "/401";
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(data.message || "Could not enter tournament game");
+    }
+
+    setHasRedirectedToGame(true);
+    navigate(`/game/${data.matchId}`);
+  } catch (error) {
+    setActionMessage(error.message);
+  }
+}
+
+
+
+
+
+  useEffect(() => {
+    if (!tournament) return;
+
+    function updateCountdown() {
+      const now = new Date();
+      let targetDate = null;
+
+      if (tournament.status === "upcoming") {
+        targetDate = tournament.startDate;
+      }
+
+      if (tournament.status === "ongoing" && tournament.nextRoundStart) {
+        targetDate = tournament.nextRoundStart;
+      }
+
+      if (!targetDate) {
+        setTimeLeft("No timer available");
+        return;
+      }
+
+      const difference = new Date(targetDate) - now;
+
+      if (difference <= 0) {
+         if (tournament.status === "ongoing" && isCurrentUserJoined()) {
+           setTimeLeft("Round starting now");
+           goToTournamentGame();
+           return;
+         }
+
+        setTimeLeft(
+          tournament.status === "ongoing"
+            ? "Round starting now"
+            : "Tournament has started"
+        );
+        return;
+      }
+
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / (1000 * 60)) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+
+      setTimeLeft(
+        days > 0
+          ? `${days}d ${hours}h ${minutes}m`
+          : `${hours}h ${minutes}m ${seconds}s`
+      );
+    }
+
+
+
+
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [tournament, hasRedirectedToGame]);
+
+  function formatDate(date) {
+    return new Date(date).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+
+
+
   async function handleJoinTournament() {
     try {
       setActionMessage("");
@@ -202,27 +331,7 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}/players`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not join tournament");
-      }
+      const data = await joinTournament(id, token);
 
       setTournament(data);
       setActionMessage("You joined the tournament!");
@@ -232,6 +341,9 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
+
 
   async function handleLeaveTournament() {
     try {
@@ -245,27 +357,7 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}/players`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not leave tournament");
-      }
+      const data = await leaveTournament(id, token);
 
       setTournament(data);
       setActionMessage("You left the tournament.");
@@ -275,6 +367,10 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
+
+
 
   async function handleStartTournament() {
     try {
@@ -288,30 +384,11 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            status: "ongoing",
-          }),
-        }
+      const data = await updateTournamentStatus(
+        id,
+        token,
+        "ongoing"
       );
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not start tournament");
-      }
 
       setTournament(data);
       setActionMessage("Tournament started.");
@@ -322,9 +399,14 @@ function TournamentPage() {
     }
   }
 
+
+
+
   function handleEditTournament() {
     navigate(`/admin/tournaments/${id}/edit`);
   }
+
+
 
   async function handleCancelTournament() {
     try {
@@ -338,39 +420,22 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            status: "cancelled",
-          }),
-        }
-      );
+    const data = await updateTournamentStatus(
+      id,
+      token,
+      "cancelled"
+    );
 
-      const data = await response.json();
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || "Could not cancel tournament");
-      }
-
-      setTournament(data);
-      setActionMessage("Tournament cancelled.");
+    setTournament(data);
+    setActionMessage("Tournament cancelled.");
     } catch (error) {
       setActionMessage(error.message);
     } finally {
       setIsSubmitting(false);
     }
   }
+
+
 
   async function handleDeleteTournament() {
     try {
@@ -384,25 +449,7 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/tournaments/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 401) {
-        window.location.href = "/401";
-        return;
-      }
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Could not delete tournament");
-      }
+      await deleteTournament(id, token);
 
       navigate("/tournaments");
     } catch (error) {
@@ -411,6 +458,8 @@ function TournamentPage() {
       setIsSubmitting(false);
     }
   }
+
+
 
   async function handleSubmitComment(event) {
     event.preventDefault();
@@ -430,31 +479,15 @@ function TournamentPage() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:6767/api/v1/comments/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            content: commentInput,
-          }),
-        }
-      );
-
-      await response.json();
-
-      if (!response.ok) {
-        throw new Error("Could not post comment");
-      }
+      await createComment(id, token, commentInput);
 
       setCommentInput("");
     } catch (error) {
       setActionMessage(error.message);
     }
   }
+
+
 
   function renderCountdownLabel() {
     if (tournament.status === "upcoming") return "Starts in";
@@ -466,6 +499,8 @@ function TournamentPage() {
     if (!isCurrentUserAdmin()) {
       return null;
     }
+
+
 
     return (
       <div className="inline-admin-actions">
@@ -512,6 +547,8 @@ function TournamentPage() {
     );
   }
 
+
+  
   function renderTournamentAction() {
     const currentUserJoined = isCurrentUserJoined();
 
@@ -574,6 +611,7 @@ function TournamentPage() {
   }
 
   const latestRound = tournament.rounds?.[tournament.rounds.length - 1];
+  
 
   const sortedStandings = [...(tournament.standings || [])].sort(
     (a, b) => b.points - a.points
