@@ -1,0 +1,181 @@
+.login-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  color: var(--text-h);
+  box-sizing: border-box;
+}
+
+.login-card {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0.75rem 0;
+}
+
+.login-copy {
+  text-align: left;
+}
+
+.login-copy h1 {
+  margin: 0 0 0.5rem;
+  font-size: 38px;
+}
+
+.login-copy .lead {
+  max-width: 560px;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.eyebrow {
+  margin-bottom: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.login-form {
+  display: grid;
+  gap: 0.8rem;
+
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+
+  padding: 1rem;
+  border-radius: 14px;
+
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+
+  text-align: left;
+}
+
+.login-form label {
+  display: grid;
+  gap: 0.25rem;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.login-form input {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+  color: var(--text-h);
+  font-size: 0.9rem;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.login-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.login-buttons button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.login-buttons button:hover {
+  transform: translateY(-1px);
+}
+
+.login-buttons button[type="submit"] {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.guest-button {
+  background: var(--surface);
+  border: 1px solid var(--border) !important;
+  color: var(--text-h);
+}
+
+.login-links {
+  display: grid;
+  gap: 0.2rem;
+  padding-top: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.login-links p {
+  color: var(--text);
+}
+
+.login-links a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-links a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .login-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .login-form {
+    max-width: 100%;
+  }
+
+  .login-copy h1 {
+    font-size: 32px;
+    line-height: 1.1;
+  }
+
+  .login-buttons {
+    flex-direction: column;
+  }
+
+  .login-buttons button {
+    width: 100%;
+  }
+}
