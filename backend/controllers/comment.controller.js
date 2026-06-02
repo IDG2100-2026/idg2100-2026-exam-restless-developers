@@ -39,6 +39,10 @@ export async function createComment(req, res) {
       });
     }
 
+    if (content.trim().length > 300) {
+      return res.status(400).json({ message: "Comment cannot exceed 300 characters" });
+    }
+
     const comment = await Comment.create({
       tournament: tournamentId,
       author: req.user._id,
@@ -98,6 +102,10 @@ export async function createMatchComment(req, res) {
     const { content } = req.body;
     if (!content?.trim()) {
       return res.status(400).json({ message: "Comment content is required" });
+    }
+
+    if (content.trim().length > 300) {
+      return res.status(400).json({ message: "Comment cannot exceed 300 characters" });
     }
 
     const comment = await Comment.create({

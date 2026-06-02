@@ -1,4 +1,5 @@
 // Worked on by: marte kaland
+// Contains code from Joakim's oblig3 (filter logic structure for rounds/straights/time, select controls with "all" option)
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -7,7 +8,7 @@ import "./Lobby.css";
 const API = "http://localhost:6767/api/v1";
 
 function formatVariant(variant) {
-  if (!variant) return "—";
+  if (!variant) return "-";
   const straights = variant.straightsAllowed ? "Straights" : "No straights";
   return `Best of ${variant.rounds} · ${variant.timeControl}s · ${straights}`;
 }
@@ -95,7 +96,7 @@ function Lobby() {
             return (
               <li key={match._id} className="lobby-item">
                 <span className="lobby-item-info">
-                  <strong>{host}</strong>'s game — {formatVariant(match.variant)} — Buy-in: {match.buyIn} — {match.players.length}/{match.maxPlayers} players
+                  <strong>{host}</strong>'s game - {formatVariant(match.variant)} - Buy-in: {match.buyIn} - {match.players.length}/{match.maxPlayers} players
                 </span>
                 <Link to={`/game/${match._id}`} className="lobby-join-btn">Join</Link>
               </li>

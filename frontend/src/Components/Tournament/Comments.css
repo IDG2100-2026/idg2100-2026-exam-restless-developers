@@ -41,4 +41,34 @@
   margin: 0;
   color: #4b5563;
   line-height: 1.5;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.comment-text--clamped {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.comment-read-more {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.comment-char-count {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.comment-char-count--warn {
+  color: #ef4444;
 }
