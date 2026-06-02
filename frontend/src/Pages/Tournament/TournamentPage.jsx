@@ -58,23 +58,6 @@ function TournamentPage() {
 
 
   useEffect(() => {
-    if (!tournament || tournament.status !== "ongoing") return;
-
-    const intervalId = setInterval(async () => {
-      try {
-        const data = await getTournament(id);
-        setTournament(data);
-      } catch {
-        // ignore
-      }
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [id, tournament?.status]);
-
-
-
-  useEffect(() => {
     async function fetchComments() {
       try {
         const data = await getComments(id);
