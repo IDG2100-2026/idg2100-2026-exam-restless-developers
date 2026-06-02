@@ -1,3 +1,92 @@
+.game-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.game-page h1 {
+  color: var(--text-h);
+  margin-bottom: 0.25rem;
+}
+
+.game-page > p {
+  color: var(--text-muted);
+  margin: 0.25rem 0;
+}
+
+.game-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.game-section h2 {
+  color: var(--text-h);
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.player-list li {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.game-btn {
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+}
+
+.game-btn:hover {
+  background: var(--accent-strong);
+}
+
+.game-btn--danger {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
+}
+
+.game-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bet-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.bet-controls input[type="number"] {
+  width: 70px;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  text-align: center;
+}
+
 .die {
   width: 64px;
   height: 64px;

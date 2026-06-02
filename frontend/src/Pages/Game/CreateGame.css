@@ -1,0 +1,71 @@
+.create-game {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.create-game h1 {
+  color: var(--text-h);
+  margin-bottom: 1.5rem;
+}
+
+.create-game form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.create-game fieldset {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+}
+
+.create-game legend {
+  font-weight: 600;
+  color: var(--text-h);
+  padding: 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.create-game fieldset label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 1.25rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.create-game-error {
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+.create-game-submit {
+  padding: 0.7rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.create-game-submit:hover {
+  background: var(--accent-strong);
+}
+
+.create-game-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -16,6 +16,7 @@ function DropDown() {
 
   useEffect(() => {
     localStorage.setItem("boardColor", boardColor);
+    window.dispatchEvent(new Event("boardColorChanged"));
   }, [boardColor]);
 
   useEffect(() => {
