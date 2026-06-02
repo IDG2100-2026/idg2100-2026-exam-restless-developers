@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import "./Lobby.css";
 
 const API = "http://localhost:6767/api/v1";
 
@@ -50,22 +51,23 @@ function Lobby() {
   });
 
   return (
-    <main>
-      <h1>Lobby</h1>
-      <Link to="/create-game">Create new game</Link>
+    <main className="lobby">
+      <div className="lobby-actions">
+        <h1>Lobby</h1>
+        <Link to="/create-game" className="lobby-join-btn">Create new game</Link>
+      </div>
 
-      <div>
+      <div className="lobby-filters">
         <label>
-          Straights:{" "}
+          Straights
           <select value={filterStraights} onChange={e => setFilterStraights(e.target.value)}>
             <option value="all">All</option>
             <option value="true">Allowed</option>
             <option value="false">Not allowed</option>
           </select>
         </label>
-        {" "}
         <label>
-          Rounds:{" "}
+          Rounds
           <select value={filterRounds} onChange={e => setFilterRounds(e.target.value)}>
             <option value="all">All</option>
             <option value="3">3</option>
@@ -73,9 +75,8 @@ function Lobby() {
             <option value="7">7</option>
           </select>
         </label>
-        {" "}
         <label>
-          Time:{" "}
+          Time
           <select value={filterTime} onChange={e => setFilterTime(e.target.value)}>
             <option value="all">All</option>
             <option value="10">10s</option>
@@ -86,17 +87,17 @@ function Lobby() {
       </div>
 
       {filtered.length === 0 ? (
-        <p>No open games right now.</p>
+        <p className="lobby-empty">No open games right now.</p>
       ) : (
-        <ul>
+        <ul className="lobby-list">
           {filtered.map((match) => {
             const host = match.players[0]?.userId?.username ?? "Unknown";
             return (
-              <li key={match._id}>
-                <strong>{host}</strong>'s game —{" "}
-                {formatVariant(match.variant)} — Buy-in: {match.buyIn} —{" "}
-                {match.players.length}/{match.maxPlayers} players{" "}
-                <Link to={`/game/${match._id}`}>Join</Link>
+              <li key={match._id} className="lobby-item">
+                <span className="lobby-item-info">
+                  <strong>{host}</strong>'s game — {formatVariant(match.variant)} — Buy-in: {match.buyIn} — {match.players.length}/{match.maxPlayers} players
+                </span>
+                <Link to={`/game/${match._id}`} className="lobby-join-btn">Join</Link>
               </li>
             );
           })}
