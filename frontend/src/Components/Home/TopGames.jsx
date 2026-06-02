@@ -37,10 +37,10 @@ function TopGames() {
           return;
         }
 
-        const r = await fetch("http://localhost:6767/api/v1/matches");
-        const recent = r.ok ? await r.json() : [];
+        const r = await fetch("http://localhost:6767/api/v1/matches?status=waiting");
+        const waiting = r.ok ? await r.json() : [];
 
-        const merged = dedupeById(active.concat(recent)).slice(0, limit);
+        const merged = dedupeById(active.concat(waiting)).slice(0, limit);
         setGames(merged);
       } catch (err) {
         console.log("TopGames error", err);
@@ -58,7 +58,7 @@ function TopGames() {
     <section className="top-games">
       <div className="top-games-header">
         <h3>Top games</h3>
-        <Link to="/matches" className="view-all-games">
+        <Link to="/lobby" className="view-all-games">
           View all
         </Link>
       </div>
@@ -69,14 +69,17 @@ function TopGames() {
         <p>No active top games yet.</p>
       ) : (
         <ul className="top-games-list">
-          {games.map((g) => (
-            <li key={g._id} className="top-games-item">
-              <Link to={`/matches/${g._id}`}>
-                <strong>{g.name || `Match ${g._id.slice(-4)}`}</strong>
-                <div className="meta">{g.players?.length || 0} players</div>
-              </Link>
-            </li>
-          ))}
+          {games.map((g) => {
+            const host = g.players?.[0]?.userId?.username ?? "Unknown";
+            return (
+              <li key={g._id} className="top-games-item">
+                <Link to={`/game/${g._id}`}>
+                  <strong>{host}'s game</strong>
+                  <div className="meta">{g.players?.length || 0}/{g.maxPlayers} players - {g.status}</div>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

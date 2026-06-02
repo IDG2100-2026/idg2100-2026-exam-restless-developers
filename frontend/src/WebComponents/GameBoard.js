@@ -58,11 +58,12 @@ class GameBoard extends HTMLElement {
     const canRoll = this._isMyTurn && this._rollsLeft > 0;
     const canEndTurn = this._isMyTurn && this._rollsLeft === 0;
     const diceDisabled = !this._isMyTurn;
+    const small = window.innerWidth <= 420;
 
     this.innerHTML = `
       <style>
-        game-board { display: block; background: ${this._boardColor}; border-radius: 16px; padding: 24px; }
-        .dice-row { display: flex; gap: 16px; justify-content: center; margin: 24px 0; }
+        game-board { display: block; background: ${this._boardColor}; border-radius: 16px; padding: ${small ? "12px" : "24px"}; }
+        .dice-row { display: flex; gap: ${small ? "5px" : "16px"}; justify-content: center; margin: ${small ? "12px" : "24px"} 0; }
         .roll-btn {
           display: block; margin: 0 auto; padding: 12px 32px;
           font-size: 1rem; border-radius: 8px; border: none;

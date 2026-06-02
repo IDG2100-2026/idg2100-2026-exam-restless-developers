@@ -58,10 +58,11 @@ class PokerDie extends HTMLElement {
     const held = this.hasAttribute("held");
     const disabled = this.hasAttribute("disabled");
     const face = FACES[value] || FACES[1];
+    const size = window.innerWidth <= 420 ? "48px" : "64px";
 
     const dieStyle = [
-      "width:64px",
-      "height:64px",
+      "width:" + size,
+      "height:" + size,
       "border-radius:12px",
       `background:${held ? "#f0c040" : "white"}`,
       `border:3px solid ${held ? "#c89a00" : "#333"}`,
@@ -73,7 +74,7 @@ class PokerDie extends HTMLElement {
       `transform:${held ? "translateY(-4px)" : "none"}`,
       `opacity:${disabled ? "0.5" : "1"}`,
       "user-select:none",
-      "font-size:26px",
+      "font-size:" + (window.innerWidth <= 420 ? "18px" : "26px"),
       "font-weight:bold",
       "font-family:serif",
     ].join(";");

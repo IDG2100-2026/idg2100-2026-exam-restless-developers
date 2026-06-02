@@ -1,5 +1,4 @@
 // Worked on by: marte kaland
-// Contains code from marte kaland's oblig3 (formatVariant, polling pattern, joinedRef, player card layout)
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -32,7 +31,7 @@ function playSound(frequency, duration = 0.1) {
 const FACE = { 1: "7", 2: "8", 3: "J", 4: "Q", 5: "K", 6: "A" };
 
 function formatVariant(variant) {
-  if (!variant) return "—";
+  if (!variant) return "-";
   const straights = variant.straightsAllowed ? "Straights" : "No straights";
   return `Best of ${variant.rounds} · ${variant.timeControl}s · ${straights}`;
 }
@@ -382,8 +381,8 @@ function GamePage() {
           {playerSlots.map((player, i) => (
             <li key={i}>
               <strong>{player?.userId?.username ?? (i === 0 ? "Host" : "Waiting…")}</strong>
-              {player?.userId?.elo && <span> — Elo: {player.userId.elo}</span>}
-              {player && <span> — Wins: {player.roundWins ?? 0}</span>}
+              {player?.userId?.elo && <span>, Elo: {player.userId.elo}</span>}
+              {player && <span>, Wins: {player.roundWins ?? 0}</span>}
             </li>
           ))}
         </ul>
@@ -420,10 +419,10 @@ function GamePage() {
               <div key={oppId}>
                 <p>
                   <strong>{opponent.userId?.username}</strong>
-                  {isTheirTurn ? " — taking their turn..." : ""}
-                  {" — Round wins: "}{opponent.roundWins ?? 0}
+                  {isTheirTurn ? " - taking their turn..." : ""}
+                  {", Round wins: "}{opponent.roundWins ?? 0}
                   {match.roundPending && (
-                    <span> — {getHandName(opponent.dice, match.variant.straightsAllowed)}</span>
+                    <span>: {getHandName(opponent.dice, match.variant.straightsAllowed)}</span>
                   )}
                 </p>
                 <div className="dice-row">
@@ -459,7 +458,7 @@ function GamePage() {
                 return (
                   <div key={pId}>
                     <strong>{p.userId?.username}</strong>
-                    {p.hasFolded ? " — Folded" : ` — Stack: ${p.stack ?? 0}  Bet: ${p.currentBet ?? 0}`}
+                    {p.hasFolded ? " - Folded" : `, Stack: ${p.stack ?? 0}, Bet: ${p.currentBet ?? 0}`}
                     {isTurn && !p.hasFolded && " ◀"}
                   </div>
                 );
@@ -525,7 +524,7 @@ function GamePage() {
           <p>
             {roundWinner
               ? `${roundWinner.userId.username} wins this round!`
-              : "Tie — no round winner."}
+              : "Tie - no round winner."}
           </p>
           <button className="game-btn" onClick={handleStartNextRound}>Start Next Round</button>
         </div>

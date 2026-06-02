@@ -5,7 +5,7 @@ import "./LobbyPreview.css";
 const API = "http://localhost:6767/api/v1";
 
 function formatVariant(variant) {
-  if (!variant) return "—";
+  if (!variant) return "-";
   const straights = variant.straightsAllowed ? "Straights" : "No straights";
   return `Best of ${variant.rounds} · ${variant.timeControl}s · ${straights}`;
 }
