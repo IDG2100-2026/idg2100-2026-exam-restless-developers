@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./PlatformActivity.css";
 
 const API = "http://localhost:6767/api/v1";
 

@@ -2,17 +2,18 @@
   max-width: 850px;
   margin: 0 auto;
   padding: 1.25rem 1.5rem;
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 .create-tournament-container h1 {
   margin: 0;
   font-size: 1.55rem;
+  color: var(--text-h);
 }
 
 .create-tournament-intro {
   margin: 0.35rem 0 1.25rem;
-  color: #6b645c;
+  color: var(--text);
   font-size: 0.9rem;
 }
 
@@ -25,15 +26,19 @@
 .form-section {
   padding: 0.9rem 1rem;
   border-radius: 14px;
-  background: #f7f4ee;
-  border: 1px solid #ddd6c8;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.025);
+}
+
+:root[data-theme="dark"] .form-section {
+  box-shadow: var(--shadow-soft);
 }
 
 .form-section h2 {
   margin: 0 0 0.7rem;
   font-size: 1rem;
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 .create-tournament-form label {
@@ -43,7 +48,7 @@
   margin-bottom: 0.55rem;
   font-size: 0.76rem;
   font-weight: 800;
-  color: #6b5d4d;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.035em;
 }
@@ -53,18 +58,23 @@
 .create-tournament-form select {
   padding: 0.52rem 0.7rem;
   border-radius: 10px;
-  border: 1px solid #ddd6c8;
-  background: #fffdf9;
-  color: #2c2a28;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
   font-size: 0.88rem;
+}
+
+.create-tournament-form input::placeholder,
+.create-tournament-form textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .create-tournament-form input:focus,
 .create-tournament-form textarea:focus,
 .create-tournament-form select:focus {
   outline: none;
-  border-color: #c9bead;
-  box-shadow: 0 0 0 3px rgba(107, 93, 77, 0.1);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .create-tournament-form textarea {
@@ -89,16 +99,20 @@
   border: none;
   border-radius: 999px;
   padding: 0.65rem 1.35rem;
-  background: #dfe7df;
-  color: #425448;
+  background: var(--success-bg);
+  color: var(--success-text);
   font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .create-tournament-form button:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #d2ded2;
+  background: var(--surface-hover);
 }
 
 .create-tournament-form button:disabled {
@@ -110,9 +124,9 @@
   margin-bottom: 0.85rem;
   padding: 0.75rem;
   border-radius: 12px;
-  background: #fff0f0;
-  border: 1px solid #f0caca;
-  color: #9f1239;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
   font-weight: 700;
 }
 

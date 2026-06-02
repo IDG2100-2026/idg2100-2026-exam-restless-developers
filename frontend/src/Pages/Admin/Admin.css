@@ -2,12 +2,12 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 1.25rem 2rem 3rem;
-  color: #2c2a28;
+  color: var(--text-h);
   text-align: left;
 }
 
 .admin-dashboard-page > p {
-  color: #5f5a52;
+  color: var(--text);
   line-height: 1.55;
   margin-bottom: 1.5rem;
 }
@@ -22,21 +22,25 @@
   min-width: 0;
   padding: 1rem;
   border-radius: 17px;
-  background: #fffdf9;
-  border: 1px solid #e4ddd1;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.025);
+}
+
+:root[data-theme="dark"] .admin-card {
+  box-shadow: var(--shadow-soft);
 }
 
 .admin-card h2 {
   margin: 0 0 0.75rem;
   font-size: 1rem;
-  color: #2c2a28;
+  color: var(--text-h);
 }
 
 .admin-card p {
   margin: 0.35rem 0;
   line-height: 1.55;
-  color: #5f5a52;
+  color: var(--text);
 }
 
 .admin-link-grid {
@@ -65,10 +69,12 @@
   margin: 2rem auto;
   padding: 1rem;
   border-radius: 14px;
-  background: #fffdf9;
-  border: 1px solid #e4ddd1;
-  color: #5f5a52;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text);
 }
+
+/* SECURITY INCIDENTS */
 
 .security-incident-list {
   display: grid;
@@ -83,17 +89,17 @@
   gap: 0.25rem;
   padding: 0.65rem;
   border-radius: 10px;
-  background: #fffdf9;
-  border: 1px solid #e4ddd1;
+  background: var(--surface);
+  border: 1px solid var(--card-border);
 }
 
 .security-incident-list strong {
-  color: #2c2a28;
+  color: var(--text-h);
   font-size: 0.9rem;
 }
 
 .security-incident-list span {
-  color: #5f5a52;
+  color: var(--text);
   font-size: 0.8rem;
   word-break: break-word;
 }

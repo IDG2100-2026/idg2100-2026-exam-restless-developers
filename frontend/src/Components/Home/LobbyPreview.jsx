@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import "./LobbyPreview.css";
 
 const API = "http://localhost:6767/api/v1";
 

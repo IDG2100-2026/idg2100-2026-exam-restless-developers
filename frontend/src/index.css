@@ -1,13 +1,18 @@
 :root,
 :root[data-theme="light"] {
-  --text: #5f6473;
-  --text-muted: #757b88;
-  --text-h: #1c2230;
+  --text: #6b645c;
+  --text-muted: #6b5d4d;
+  --text-h: #2c2a28;
   --bg: #f5f2ea;
-  --surface: rgba(255, 255, 255, 0.84);
-  --surface-alt: rgba(255, 255, 255, 0.95);
-  --surface-hover: rgba(247, 245, 239, 0.98);
-  --border: #ddd7cb;
+  --surface: #fffdf9;
+  --surface-alt: #f7f4ee;
+  --surface-hover: #f8f5ef;
+  --border: #ddd6c8;
+  --card-bg: #fffdf9;
+  --card-border: #e4ddd1;
+  --card-hover: #f8f5ef;
+  --stat-bg: #f3efe7;
+  --trophy-bg: #f4efe7;
   --code-bg: #f4efe4;
   --accent: #b45b16;
   --accent-strong: #d9822b;
@@ -50,6 +55,11 @@
   --surface-alt: rgba(30, 33, 44, 0.96);
   --surface-hover: rgba(39, 42, 54, 1);
   --border: #2e303a;
+  --card-bg: rgba(30, 33, 44, 0.96);
+  --card-border: #2e303a;
+  --card-hover: rgba(39, 42, 54, 1);
+  --stat-bg: rgba(39, 42, 54, 1);
+  --trophy-bg: rgba(39, 42, 54, 1);
   --code-bg: #1f2028;
   --accent: #f3a95f;
   --accent-strong: #ffbf78;
