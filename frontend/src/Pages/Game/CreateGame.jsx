@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import "./CreateGame.css";
 
 function CreateGame() {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ function CreateGame() {
   }
 
   return (
-    <main>
+    <main className="create-game">
       <h1>Create Game</h1>
 
       <form onSubmit={handleSubmit}>
@@ -133,15 +134,15 @@ function CreateGame() {
           ))}
         </fieldset>
 
-        {error && <p>{error}</p>}
+        {error && <p className="create-game-error">{error}</p>}
 
         {/* From Vilde's oblig3: show login button instead of disabled form */}
         {isLoggedIn ? (
-          <button type="submit" disabled={isSubmitting}>
+          <button type="submit" className="create-game-submit" disabled={isSubmitting}>
             {isSubmitting ? "Creating..." : "Create game"}
           </button>
         ) : (
-          <Link to="/login">Log in to create a game</Link>
+          <Link to="/login" className="create-game-submit">Log in to create a game</Link>
         )}
       </form>
     </main>

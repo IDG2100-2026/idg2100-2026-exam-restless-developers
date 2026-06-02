@@ -252,6 +252,15 @@ function GamePage() {
 }, [loading, id, currentUserId]);
 
 
+  useEffect(() => {
+    function handleColorChange() {
+      if (!boardElementRef.current) return;
+      boardElementRef.current.setAttribute("board-color", localStorage.getItem("boardColor") || "#facc15");
+    }
+    window.addEventListener("boardColorChanged", handleColorChange);
+    return () => window.removeEventListener("boardColorChanged", handleColorChange);
+  }, []);
+
   // Push updated match state into the web component
   useEffect(() => {
     const board = boardElementRef.current;
@@ -363,7 +372,7 @@ function GamePage() {
   );
 
   return (
-    <main>
+    <main className="game-page">
       <h1>Game</h1>
       <p>{formatVariant(match.variant)}</p>
       <p>Buy-in: {match.buyIn} points</p>
@@ -376,14 +385,17 @@ function GamePage() {
         <p>Time left: {timeLeft}s</p>
       )}
 
-      <div>
-        {playerSlots.map((player, i) => (
-          <div key={i}>
-            <span>{player?.userId?.username ?? (i === 0 ? "Host" : "Waiting…")}</span>
-            {player?.userId?.elo && <span> — Elo: {player.userId.elo}</span>}
-            {player && <span> — Wins: {player.roundWins ?? 0}</span>}
-          </div>
-        ))}
+      <div className="game-section">
+        <h2>Players</h2>
+        <ul className="player-list">
+          {playerSlots.map((player, i) => (
+            <li key={i}>
+              <strong>{player?.userId?.username ?? (i === 0 ? "Host" : "Waiting…")}</strong>
+              {player?.userId?.elo && <span> — Elo: {player.userId.elo}</span>}
+              {player && <span> — Wins: {player.roundWins ?? 0}</span>}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {match.status === "waiting" && (
@@ -445,7 +457,7 @@ function GamePage() {
         const callAmount = Math.min(match.currentHighBet - (myPlayer?.currentBet ?? 0), myPlayer?.stack ?? 0);
 
         return (
-          <div>
+          <div className="game-section">
             <h2>Betting</h2>
             <p>Pot: {match.pot} points</p>
 
@@ -466,14 +478,15 @@ function GamePage() {
             {isMyBettingTurn && !myPlayer?.hasFolded && (
               <div>
                 {canCheck && (
-                  <button onClick={() => handleBet("check")}>Check</button>
+                  <button className="game-btn" onClick={() => handleBet("check")}>Check</button>
                 )}
                 {canCall && (
-                  <button onClick={() => handleBet("call")}>Call {callAmount}</button>
+                  <button className="game-btn" onClick={() => handleBet("call")}>Call {callAmount}</button>
                 )}
-                <button onClick={() => handleBet("fold")}>Fold</button>
-                <div>
+                <button className="game-btn game-btn--danger" onClick={() => handleBet("fold")}>Fold</button>
+                <div className="bet-controls">
                   <button
+                    className="game-btn"
                     onClick={() => setBetAmount(a => Math.max(1, a - 1))}
                     disabled={betAmount <= 1}
                   >-</button>
@@ -489,10 +502,12 @@ function GamePage() {
                     }}
                   />
                   <button
+                    className="game-btn"
                     onClick={() => setBetAmount(a => Math.min(myPlayer?.stack ?? 0, a + 1))}
                     disabled={betAmount >= (myPlayer?.stack ?? 0)}
                   >+</button>
                   <button
+                    className="game-btn"
                     onClick={() => handleBet("bet")}
                     disabled={betAmount <= 0 || betAmount > (myPlayer?.stack ?? 0)}
                   >
@@ -514,22 +529,22 @@ function GamePage() {
       })()}
 
       {match.roundPending && (
-        <div>
+        <div className="game-section">
           <h2>Round {match.currentRound} results</h2>
           <p>
             {roundWinner
               ? `${roundWinner.userId.username} wins this round!`
               : "Tie — no round winner."}
           </p>
-          <button onClick={handleStartNextRound}>Start Next Round</button>
+          <button className="game-btn" onClick={handleStartNextRound}>Start Next Round</button>
         </div>
       )}
 
       {match.status === "finished" && (
-        <div>
-          <p>Game over!</p>
+        <div className="game-section">
+          <h2>Game over!</h2>
           {winner && <p>{winner.userId.username} wins the match!</p>}
-          <Link to="/lobby">Back to lobby</Link>
+          <Link to="/lobby" className="game-btn">Back to lobby</Link>
         </div>
       )}
 
