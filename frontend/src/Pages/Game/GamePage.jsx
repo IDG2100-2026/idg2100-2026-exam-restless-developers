@@ -179,15 +179,6 @@ function GamePage() {
 
 
 
-  useEffect(() => {
-  const intervalId = setInterval(() => {
-    fetchMatch();
-  }, 1000);
-
-  return () => clearInterval(intervalId);
-}, [id]);
-
-
   // Mount the game-board web component once the loading screen is gone
   useEffect(() => {
   if (loading || !boardContainerRef.current) return;
