@@ -8,30 +8,34 @@ import "./Homepage.css";
 function Homepage() {
   return (
     <main className="homepage">
-      <section className="homepage-hero">
-        <h1>Spanish Poker Dice</h1>
-        <p className="homepage-description">
-          Spanish Poker Dice is a friendly, fast online dice‑poker game for 2–5 players. Create or join matches, place bets and bluff, enter round‑based tournaments, or spectate live tables. Earn weekly points, climb the leaderboards, and chat with other players in real time.
-        </p>
+      <section className="homepage-grid">
+        <section className="homepage-about">
+          <span className="homepage-kicker">Welcome</span>
 
-        <div className="homepage-ctas">
-          <Link to="/create-game" className="homepage-cta">Create match</Link>
-          <Link to="/lobby" className="homepage-cta">Go to lobby</Link>
-          <Link to="/tournaments" className="homepage-cta">View tournaments</Link>
-        </div>
-      </section>
+          <h1>Spanish Poker Dice</h1>
 
-      <div className="homepage-widgets">
-        <div className="homepage-left">
-          <LobbyPreview />
+          <p>
+            Create matches, bluff opponents, join tournaments,
+            spectate games and climb the rankings.
+          </p>
+
+          <div className="homepage-links">
+            <Link to="/create-game">Create Match</Link>
+            <Link to="/lobby">Lobby</Link>
+            <Link to="/tournaments">Tournaments</Link>
+          </div>
+        </section>
+
+        <TopGames />
+
+        <TournamentOverview />
+
+        <LobbyPreview />
+
+        <div className="homepage-activity">
           <PlatformActivity />
         </div>
-
-        <div className="homepage-right">
-          <TopGames />
-          <TournamentOverview />
-        </div>
-      </div>
+      </section>
     </main>
   );
 }

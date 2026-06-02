@@ -1,0 +1,137 @@
+.homepage {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  color: var(--text-h);
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.homepage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 420px));
+  justify-content: center;
+  align-items: start;
+  column-gap: 2rem;
+  row-gap: 1rem;
+}
+
+.homepage-about {
+  max-width: 420px;
+  padding: 0.25rem 0;
+  box-sizing: border-box;
+}
+
+.homepage-kicker {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.homepage-about h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.15;
+  color: var(--text-h);
+}
+
+.homepage-about p {
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.homepage-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.homepage-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.homepage-links a:hover {
+  background: var(--surface-hover);
+}
+
+.homepage-activity {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+}
+
+.homepage-activity .platform-activity {
+  width: 100%;
+  max-width: 900px;
+}
+
+.homepage-grid > * {
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .homepage {
+    padding: .075rem;
+  }
+
+  .homepage-grid {
+    grid-template-columns: minmax(0, 1fr)
+  }
+
+  .homepage-about {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .homepage-activity {
+    grid-column: auto;
+  }
+
+  .homepage-activity .platform-activity {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .homepage {
+    padding: 0.75rem;
+  }
+
+  .homepage-about {
+    padding: 0.1rem 0;
+  }
+
+  .homepage-about h1 {
+    font-size: 1.3rem;
+  }
+
+  .homepage-about p {
+    font-size: 0.86rem;
+  }
+
+  .homepage-links {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .homepage-links a {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

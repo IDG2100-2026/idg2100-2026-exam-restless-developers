@@ -5,6 +5,7 @@ import "./Header.css";
 
 function Header({ theme, onToggleTheme }) {
   const navigate = useNavigate();
+
   const [showSettings, setShowSettings] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -16,48 +17,51 @@ function Header({ theme, onToggleTheme }) {
     localStorage.removeItem("currentUsername");
     localStorage.removeItem("currentUserId");
     localStorage.removeItem("isAdmin");
+
     setMenuOpen(false);
+    setShowSettings(false);
+
     navigate("/login");
   }
 
   function closeMenu() {
     setMenuOpen(false);
+    setShowSettings(false);
   }
 
   return (
     <header className="site-header">
       <Link to="/" className="header-logo" onClick={closeMenu}>
-        <div className="logo-placeholder">Logo</div>
         <span>Spanish Poker Dice</span>
       </Link>
 
-      <button
-        className="mobile-menu-button"
-        onClick={() => setMenuOpen((prev) => !prev)}
-      >
-        {menuOpen ? "Close" : "Menu"}
+      <button className="mobile-menu-button" onClick={() => setMenuOpen((prev) => !prev)}>
+        {menuOpen ? "✕ Close" : "☰ Menu"}
       </button>
 
       <div className={`header-menu ${menuOpen ? "open" : ""}`}>
         <nav className="header-nav">
           <Link to="/" onClick={closeMenu}>Home</Link>
+
           <Link to="/lobby" onClick={closeMenu}>Lobby</Link>
+
           <Link to="/tournaments" onClick={closeMenu}>Tournaments</Link>
+
           <Link to="/profile" onClick={closeMenu}>Profile</Link>
-          {isAdmin && <Link to="/admin" onClick={closeMenu}>Admin</Link>}
+
+          {isAdmin && (
+            <Link to="/admin" onClick={closeMenu}>Admin</Link>
+          )}
         </nav>
 
         <div className="header-actions">
-            <button className="header-button theme-toggle" onClick={onToggleTheme}>
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </button>
+          <button className="header-icon-button theme-toggle" onClick={onToggleTheme}>
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
 
           <div className="settings-container">
-            <button
-              className="header-button"
-              onClick={() => setShowSettings((prev) => !prev)}
-            >
-              Settings
+            <button className="header-icon-button" onClick={() => setShowSettings((prev) => !prev)}>
+               Settings
             </button>
 
             {showSettings && <DropDown />}
@@ -66,18 +70,14 @@ function Header({ theme, onToggleTheme }) {
           {currentUsername ? (
             <>
               <span className="header-greeting">Hi, {currentUsername}</span>
-              <button className="header-button logout" onClick={handleLogout}>
-                Log out
-              </button>
+
+              <button className="header-icon-button logout" onClick={handleLogout}>Log out</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="header-button" onClick={closeMenu}>
-                Login
-              </Link>
-              <Link to="/register" className="header-button primary" onClick={closeMenu}>
-                Register
-              </Link>
+              <Link to="/login" className="header-icon-button" onClick={closeMenu}>Login</Link>
+
+              <Link to="/register" className="header-icon-button primary" onClick={closeMenu}>Register</Link>
             </>
           )}
         </div>
