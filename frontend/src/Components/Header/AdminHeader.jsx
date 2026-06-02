@@ -5,7 +5,7 @@ function AdminHeader() {
   return (
     <header className="admin-header">
       <Link to="/" className="admin-header__logo">
-        Logo
+        Spanish Poker Dice
       </Link>
 
       <nav className="admin-header__nav">

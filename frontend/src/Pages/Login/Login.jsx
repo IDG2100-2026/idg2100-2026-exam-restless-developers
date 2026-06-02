@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import "./Login.css";
 
 const API_BASE = "http://localhost:6767/api/v1";
 
@@ -40,63 +41,72 @@ function Login() {
   }
 
   return (
-    <main>
+   <main className="login-page">
+  <section className="login-card">
+    <div className="login-copy">
+      <p className="eyebrow">Welcome back</p>
       <h1>Login</h1>
+      <p className="lead">
+        Log in with your username and password to access your profile and tournaments.
+      </p>
+    </div>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username
+    <form className="login-form" onSubmit={handleSubmit}>
+      <label>
+        Username
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          aria-label="username"
+        />
+      </label>
 
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            aria-label="username"
-          />
-        </label>
+      <label>
+        Password
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          aria-label="password"
+        />
+      </label>
 
-        <label>
-          Password
+      <div className="login-buttons">
+        <button type="submit">Log in</button>
 
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-label="password"
-          />
-        </label>
+        <button
+          type="button"
+          className="guest-button"
+          onClick={() => {
+            const guestId = "guest-" + Date.now();
 
-        <div>
-          <button type="submit">Log in</button>
+            localStorage.removeItem("token");
+            localStorage.setItem("isAdmin", "false");
 
-          <button
-            type="button"
-            onClick={() => {
-              const guestId = "guest-" + Date.now();
+            localStorage.setItem("currentUserId", guestId);
+            localStorage.setItem("currentUsername", "Guest");
 
-              localStorage.removeItem("token");
-              localStorage.setItem("isAdmin", "false");
+            navigate("/profile");
+          }}
+        >
+          Continue as Guest
+        </button>
+      </div>
 
-              localStorage.setItem("currentUserId", guestId);
-              localStorage.setItem("currentUsername", "Guest");
-
-              navigate("/profile");
-            }}
-          >
-            Continue as Guest
-          </button>
-        </div>
-
+      <div className="login-links">
         <p>
-          No account yet? <Link to="/register">Register here</Link>.
+          No account yet? <Link to="/register">Register here</Link>
         </p>
 
         <p>
           <Link to="/forgot-password">Forgot password?</Link>
         </p>
+      </div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </form>
-    </main>
+      {error && <p className="error-message">{error}</p>}
+    </form>
+  </section>
+</main>
   );
 }
 

@@ -7,6 +7,7 @@
 
 /* ---------------- TOP TOOLBAR ---------------- */
 
+
 .tournament-toolbar {
   display: flex;
   justify-content: space-between;
@@ -19,10 +20,7 @@
   border-radius: 18px;
   background: var(--surface-alt);
   border: 1px solid var(--border);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.035);
-}
 
-:root[data-theme="dark"] .tournament-toolbar {
   box-shadow: var(--shadow-soft);
 }
 
@@ -154,6 +152,7 @@
   gap: 0.55rem;
 }
 
+
 .tournament-card {
   display: grid;
   grid-template-columns: 92px minmax(220px, 1fr) 150px 82px 82px 82px minmax(180px, 260px);
@@ -168,16 +167,12 @@
   color: var(--text-h);
   text-decoration: none;
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.025);
+  box-shadow: var(--shadow-soft);
 
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease;
-}
-
-:root[data-theme="dark"] .tournament-card {
-  box-shadow: var(--shadow-soft);
 }
 
 .tournament-card:hover {
@@ -251,6 +246,32 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ---------------- ADDED AUTHOR + RULES ---------------- */
+
+.tournament-card-extra {
+  grid-column: 2 / 3;
+  min-width: 0;
+
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.tournament-card-extra span {
+  display: block;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tournament-card-extra strong {
+  color: var(--text-h);
+  font-weight: 800;
+}
+
+/* ---------------- DATE + STATS ---------------- */
 
 .tournament-card-date {
   font-size: 0.75rem;
@@ -441,6 +462,7 @@
   .tournament-card-stat {
     width: 100%;
     text-align: left;
+    box-sizing: border-box;
   }
 
   .tournament-card-stat {
@@ -453,6 +475,15 @@
     display: flex;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .tournament-card-extra {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .tournament-card-extra span {
+    white-space: normal;
   }
 }
 
@@ -467,5 +498,27 @@
 
   .section-title-row {
     flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 850px) {
+  .tournament-toolbar {
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .tournament-controls {
+    width: 100%;
+  }
+
+  .tournament-controls label {
+    width: 100%;
+  }
+
+  .tournament-controls input,
+  .tournament-controls select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 }

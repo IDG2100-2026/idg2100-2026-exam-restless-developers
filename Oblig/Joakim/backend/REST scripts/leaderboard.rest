@@ -1,6 +1,0 @@
-### Leaderboard: most wins
-GET http://localhost:6767/api/leaderboards/wins
-
-### Leaderboard: best winrate
-GET http://localhost:6767/api/leaderboards/winrate
-

@@ -1,1 +1,0 @@
-export const DEFAULT_ELO_RATING_NUMBER = 1000;

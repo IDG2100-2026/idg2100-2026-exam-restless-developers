@@ -1,21 +1,23 @@
-import mongoose from "mongoose";
-import User from "./models/user.js";
 
-await mongoose.connect("mongodb://localhost:27017/restless-developers");
+//Vilde used in early process of admin creation
+// import mongoose from "mongoose";
+// import User from "./models/user.js";
 
-const user = await User.findOne({
-  username: "vilde3",
-});
+// await mongoose.connect("mongodb://localhost:27017/restless-developers");
 
-if (!user) {
-  console.log("User not found");
-  process.exit();
-}
+// const user = await User.findOne({
+//   username: "vilde3",
+// });
 
-user.role = "admin";
+// if (!user) {
+//   console.log("User not found");
+//   process.exit();
+// }
 
-await user.save();
+// user.role = "admin";
 
-console.log("User is now admin");
+// await user.save();
 
-process.exit();
+// console.log("User is now admin");
+
+// process.exit();

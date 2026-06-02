@@ -45,7 +45,7 @@ function TournamentList() {
 
     return [...filteredTournaments].sort((a, b) => {
       if (sortBy === "title") {
-        return a.title.localeCompare(b.title);
+        return (a.title || "").localeCompare(b.title || "");
       }
 
       if (sortBy === "players") {
@@ -71,6 +71,10 @@ function TournamentList() {
   );
 
   function formatDate(date) {
+    if (!date) {
+      return "No date set";
+    }
+
     return new Date(date).toLocaleString("en-GB", {
       day: "2-digit",
       month: "short",
@@ -82,7 +86,7 @@ function TournamentList() {
 
   function shortenText(text, maxLength = 85) {
     if (!text) {
-      return "No description available.";
+      return "No information available.";
     }
 
     if (text.length <= maxLength) {
@@ -90,6 +94,18 @@ function TournamentList() {
     }
 
     return `${text.slice(0, maxLength)}...`;
+  }
+
+  function getAuthorName(author) {
+    if (!author) {
+      return "Unknown author";
+    }
+
+    if (typeof author === "string") {
+      return author;
+    }
+
+    return author.username || author.name || author.email || "Unknown author";
   }
 
   function renderTournamentCard(tournament) {
@@ -112,6 +128,17 @@ function TournamentList() {
         <div className="tournament-card-main">
           <h3>{tournament.title}</h3>
           <p>{shortenText(tournament.description)}</p>
+        </div>
+
+        <div className="tournament-card-extra">
+          <span>
+            <strong>Author:</strong> {getAuthorName(tournament.author)}
+          </span>
+
+          <span>
+            <strong>Rules:</strong>{" "}
+            {shortenText(tournament.rules || tournament.tournamentRules, 55)}
+          </span>
         </div>
 
         <div className="tournament-card-date">

@@ -1,2 +1,0 @@
-### Platform activity
-GET http://localhost:6767/api/platform
