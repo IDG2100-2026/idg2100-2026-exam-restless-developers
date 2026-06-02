@@ -5,3 +5,6 @@ Including the info on the starter code (whose repository and how used), notes on
 
 ## Vilde notes 
 Used Privacy Policy from my own project, but made small changes. 
+
+## Joakim Notes
+Used similar style from my project.

@@ -8,6 +8,8 @@ import AboutSpanishDice from "./Pages/About/AboutSpanishDice.jsx";
 import Admin from "./Pages/Admin/Admin.jsx";
 import Lobby from "./Pages/Lobby/Lobby.jsx";
 import Login from "./Pages/Login/Login.jsx";
+import ForgotPassword from "./Pages/Login/ForgotPassword.jsx";
+import ResetPassword from "./Pages/Login/ResetPassword.jsx";
 import Register from "./Pages/Registration/Register.jsx";
 import PrivacyPolicy from "./Pages/PrivacyPolicy/PrivacyPolicy.jsx";
 import Terms from "./Pages/Terms/Terms.jsx";
@@ -46,6 +48,8 @@ function App({ initialTheme }) {
           <Route path="/about-spanish-dice" element={<AboutSpanishDice />} />
           <Route path="/lobby" element={<Lobby />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/register" element={<Register />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
