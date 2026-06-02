@@ -40,10 +40,9 @@ function AdminUsers() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({
-            role: nextRole,
-          }),
+          body: JSON.stringify({ role: nextRole }),
         }
       );
 
@@ -68,45 +67,43 @@ function AdminUsers() {
   }
 
   async function handleBanToggle(user) {
-  const userIdentifier = user.uid || user._id;
+    const userIdentifier = user.uid || user._id;
 
-  setError("");
+    setError("");
     setUpdatingUserId(userIdentifier);
 
     try {
-        const response = await fetch(
+      const response = await fetch(
         `http://localhost:6767/api/v1/users/${userIdentifier}`,
         {
-            method: "PUT",
-            headers: {
+          method: "PUT",
+          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-            },
-            body: JSON.stringify({
-            isBanned: !user.isBanned,
-            }),
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ isBanned: !user.isBanned }),
         }
-        );
+      );
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
+      if (!response.ok) {
         throw new Error(data.message || data.error || "Could not update user");
-        }
+      }
 
-        setUsers((previousUsers) =>
+      setUsers((previousUsers) =>
         previousUsers.map((currentUser) =>
-            (currentUser.uid || currentUser._id) === userIdentifier
+          (currentUser.uid || currentUser._id) === userIdentifier
             ? data.user
             : currentUser
         )
-        );
+      );
     } catch (error) {
-        setError(error.message);
+      setError(error.message);
     } finally {
-        setUpdatingUserId(null);
+      setUpdatingUserId(null);
     }
-    }
+  }
 
   const filteredUsers = users.filter((user) => {
     const search = searchValue.toLowerCase();
@@ -119,13 +116,15 @@ function AdminUsers() {
   });
 
   return (
-    <main className="admin-dashboard-page">
+    <main className="admin-users-page">
       <h1>User Administration</h1>
 
-      <p>Search users and manage administrator permissions.</p>
+      <p className="admin-users-intro">
+        Search users and manage administrator permissions.
+      </p>
 
-      <section className="admin-card admin-search-section">
-        <label className="admin-search-label">
+      <section className="admin-users-card admin-users-search-section">
+        <label className="admin-users-search-label">
           Search users
           <input
             type="search"
@@ -136,16 +135,16 @@ function AdminUsers() {
         </label>
       </section>
 
-      {error && <p className="admin-page-error">{error}</p>}
+      {error && <p className="admin-users-error">{error}</p>}
 
-      <section className="admin-card">
+      <section className="admin-users-card">
         <h2>Users</h2>
 
         {filteredUsers.length === 0 ? (
-          <p>No users found.</p>
+          <p className="admin-users-empty">No users found.</p>
         ) : (
-          <div className="admin-table-wrapper">
-            <table className="admin-table">
+          <div className="admin-users-table-wrapper">
+            <table className="admin-users-table">
               <thead>
                 <tr>
                   <th>Username</th>
@@ -165,39 +164,40 @@ function AdminUsers() {
 
                   return (
                     <tr key={userIdentifier}>
-                      <td>{user.username}</td>
-                      <td>{user.email}</td>
+                      <td title={user.username}>{user.username}</td>
+                      <td title={user.email}>{user.email}</td>
                       <td>{user.role}</td>
                       <td>{user.isBanned ? "Banned" : "Active"}</td>
                       <td>{user.elo}</td>
                       <td>{user.totalGames}</td>
                       <td>
-                        <button
-                          className="admin-action-button"
-                          type="button"
-                          disabled={isUpdating}
-                          onClick={() => handleRoleToggle(user)}
-                        >
-                          {isUpdating
-                            ? "Saving..."
-                            : user.role === "admin"
-                              ? "Remove admin"
-                              : "Make admin"}
-                        </button>
+                        <div className="admin-users-actions">
+                          <button
+                            className="admin-users-action-button"
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() => handleRoleToggle(user)}
+                          >
+                            {isUpdating
+                              ? "Saving..."
+                              : user.role === "admin"
+                                ? "Remove admin"
+                                : "Make admin"}
+                          </button>
 
-                        <button
-                            className="admin-action-button"
+                          <button
+                            className="admin-users-action-button"
                             type="button"
                             disabled={isUpdating}
                             onClick={() => handleBanToggle(user)}
-                            >
+                          >
                             {isUpdating
-                                ? "Saving..."
-                                : user.isBanned
+                              ? "Saving..."
+                              : user.isBanned
                                 ? "Unban user"
                                 : "Ban user"}
-                        </button>
-
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

@@ -1,3 +1,27 @@
+.admin-comments-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem 3rem;
+  color: var(--text-h);
+  text-align: left;
+  overflow-x: hidden;
+}
+
+.admin-comments-page h1 {
+  margin: 0 0 1rem;
+  color: var(--text-h);
+  font-size: clamp(2.2rem, 8vw, 4.5rem);
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+}
+
+.admin-comments-intro {
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+  max-width: 680px;
+}
+
 .admin-search-section {
   margin-bottom: 1rem;
 }
@@ -5,7 +29,7 @@
 .admin-search-label {
   display: grid;
   gap: 0.45rem;
-  color: #5f5a52;
+  color: var(--text);
   font-weight: 700;
 }
 
@@ -13,51 +37,67 @@
   width: 100%;
   max-width: 520px;
   box-sizing: border-box;
-  border: 1px solid #e4ddd1;
+  border: 1px solid var(--card-border);
   border-radius: 13px;
   padding: 0.75rem 1rem;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.3;
-  color: #2c2a28;
-  background: #fffdf9;
+  color: var(--text-h);
+  background: var(--card-bg);
 }
 
 .admin-search-label input::placeholder {
-  color: #7c756d;
+  color: var(--text-muted);
   font-size: 0.95rem;
   font-weight: 500;
   opacity: 1;
 }
 
 .admin-search-label input:focus {
-  outline: 2px solid #d2ded2;
-  border-color: #d2ded2;
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .admin-table-wrapper {
   width: 100%;
+  overflow-x: auto;
 }
 
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
 }
 
 .admin-table th,
 .admin-table td {
   padding: 0.8rem 0.65rem;
-  border-bottom: 1px solid #e4ddd1;
+  border-bottom: 1px solid var(--card-border);
   text-align: left;
-  color: #5f5a52;
+  color: var(--text);
   vertical-align: top;
 }
 
 .admin-table th {
-  color: #2c2a28;
+  color: var(--text-h);
   font-size: 0.85rem;
   font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-table td:nth-child(1),
+.admin-table td:nth-child(2),
+.admin-table td:nth-child(3) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-table td:nth-child(4) {
+  white-space: nowrap;
 }
 
 .admin-action-button {
@@ -67,13 +107,18 @@
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  background: #ece8e1;
-  color: #5f5a52;
-  transition: 0.2s ease;
+  background: var(--surface-hover);
+  color: var(--text-h);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease;
+  white-space: nowrap;
 }
 
-.admin-action-button:hover {
-  background: #e1dbd2;
+.admin-action-button:hover:not(:disabled) {
+  background: var(--surface-alt);
+  transform: translateY(-1px);
 }
 
 .admin-action-button:disabled {
@@ -84,8 +129,28 @@
 /* MOBILE */
 
 @media (max-width: 700px) {
+  .admin-comments-page {
+    padding: 1rem;
+    overflow-x: hidden;
+  }
+
+  .admin-comments-page h1 {
+    font-size: clamp(2rem, 14vw, 3.5rem);
+    line-height: 0.95;
+    max-width: 100%;
+  }
+
+  .admin-comments-intro {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
   .admin-search-label input {
     max-width: 100%;
+  }
+
+  .admin-table-wrapper {
+    overflow-x: visible;
   }
 
   .admin-table,
@@ -103,26 +168,50 @@
   }
 
   .admin-table tr {
-    padding: 1rem 0;
-    border-bottom: 1px solid #e4ddd1;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    background: var(--card-bg);
+    overflow: hidden;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    width: 100% !important;
+    max-width: none;
+    min-width: 0;
   }
 
   .admin-table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.45rem 0;
-    border-bottom: none;
-    text-align: right;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--card-border);
+    text-align: left;
+    color: var(--text);
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .admin-table td:last-child {
+    display: block;
+    border-bottom: none;
+    padding-top: 0.75rem;
+    padding-bottom: 0;
+    white-space: normal;
   }
 
   .admin-table td::before {
     font-weight: 800;
-    color: #2c2a28;
-    text-align: left;
-    flex-shrink: 0;
+    color: var(--text-h);
   }
 
   .admin-table td:nth-child(1)::before {
@@ -139,19 +228,13 @@
 
   .admin-table td:nth-child(4)::before {
     content: "Actions";
-  }
-
-  .admin-table td:nth-child(3) {
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .admin-table td:nth-child(3)::before {
-    margin-bottom: 0.25rem;
+    display: block;
+    margin-bottom: 0.5rem;
   }
 
   .admin-action-button {
     width: auto;
+    margin-top: 0.45rem;
   }
 }
+
