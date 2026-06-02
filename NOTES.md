@@ -37,3 +37,20 @@ Used Privacy Policy and Terms & Conditions from my own project, but made small c
 
 ## Joakim Notes
 Used similar style from my project.
+
+## Marte notes
+Implementations:
+Match controller (create, join, leave, roll, bet, end turn, finish game, ELO updates)
+Game page with real-time updates via socket.io
+Lobby page with filters
+Create game page
+GameBoard and PokerDie web components
+Board color swatches in settings
+Comments on game pages
+Weekly points grant
+Sound effects via Web Audio API
+
+Some code is adapted from teammates' oblig3 submissions:
+- Filter logic in Lobby is adapted from Joakim's oblig3
+- Form structure in CreateGame is adapted from Joakim's oblig3
+- Login check pattern in CreateGame is from Vilde's oblig3
