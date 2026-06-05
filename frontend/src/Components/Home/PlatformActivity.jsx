@@ -14,7 +14,6 @@ export default function PlatformActivity() {
       setError("");
 
       try {
-        // try public platform endpoint first
         const p = await fetch(`${API}/platform`);
         if (p.ok) {
           const pj = await p.json();

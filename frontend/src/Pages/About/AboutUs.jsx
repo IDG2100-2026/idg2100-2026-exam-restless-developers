@@ -1,6 +1,3 @@
-// Made by: marte kaland
-// Contains code from Vilde's oblig3 (page structure and content)
-
 import "./AboutUs.css";
 
 function AboutUs() {

@@ -1,4 +1,3 @@
-// this was taken from [https://www.geeksforgeeks.org/dsa/elo-rating-algorithm/]
 function probability(r1, r2) {
   return 1 / (1 + Math.pow(10, (r1 - r2) / 400));
 }

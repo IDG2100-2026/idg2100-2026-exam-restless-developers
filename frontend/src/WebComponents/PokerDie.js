@@ -1,6 +1,3 @@
-// Worked on by: marte kaland
-
-// Die values 1-6 map to Spanish poker dice faces: 1=7, 2=8, 3=J, 4=Q, 5=K, 6=A
 const FACES = {
   1: { symbol: "7", color: "#333" },
   2: { symbol: "8", color: "#cc0000" },
