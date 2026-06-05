@@ -1,5 +1,3 @@
-// Worked on by: marte kaland
-
 import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { io as socketIO } from "socket.io-client";
@@ -27,8 +25,7 @@ function playSound(frequency, duration = 0.1) {
   osc.stop(ctx.currentTime + duration);
 }
 
-// Die values 1-6 → Spanish poker dice faces
-const FACE = { 1: "7", 2: "8", 3: "J", 4: "Q", 5: "K", 6: "A" };
+const FACE ={ 1: "7", 2: "8", 3: "J", 4: "Q", 5: "K", 6: "A" };
 
 function formatVariant(variant) {
   if (!variant) return "-";
@@ -178,7 +175,6 @@ function GamePage() {
 
 
 
-  // Mount the game-board web component once the loading screen is gone
   useEffect(() => {
   if (loading || !boardContainerRef.current) return;
 
@@ -251,7 +247,6 @@ function GamePage() {
     return () => window.removeEventListener("boardColorChanged", handleColorChange);
   }, []);
 
-  // Push updated match state into the web component
   useEffect(() => {
     const board = boardElementRef.current;
     if (!board || match?.status !== "active" || match?.roundPending) return;

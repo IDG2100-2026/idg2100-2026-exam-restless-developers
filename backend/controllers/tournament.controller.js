@@ -202,7 +202,6 @@ export const updateTournament = asyncHandler(async (req, res) => {
       tournament.startDate = new Date();
       tournament.currentRound = 1;
 
-      // TODO before delivery: change this back to 1000 * 60 * 10
       tournament.nextRoundStart = new Date(Date.now() + TOURNAMENT_ROUND_DELAY_MS);
 
       tournament.standings = tournament.players.map((playerId) => ({
@@ -350,7 +349,6 @@ export const recordRoundResult = asyncHandler(async (req, res) => {
           completedAt: null,
         });
 
-        // TODO before delivery: change this back to 1000 * 60 * 10
         tournament.nextRoundStart = new Date(Date.now() + TOURNAMENT_ROUND_DELAY_MS);
       } else {
         tournament.status = "finished";

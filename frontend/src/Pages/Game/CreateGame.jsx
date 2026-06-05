@@ -1,7 +1,3 @@
-// Made by: marte kaland
-// Contains code from Joakim's oblig3 (radio button form structure, handleSubmit pattern)
-// Contains code from Vilde's oblig3 (isLoggedIn check, login button instead of disabled form)
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./CreateGame.css";
@@ -9,7 +5,6 @@ import "./CreateGame.css";
 function CreateGame() {
   const navigate = useNavigate();
   const currentUserId = localStorage.getItem("currentUserId");
-  // From Vilde's oblig3
   const isLoggedIn = Boolean(currentUserId);
 
   const [rounds, setRounds] = useState(3);
@@ -136,7 +131,6 @@ function CreateGame() {
 
         {error && <p className="create-game-error">{error}</p>}
 
-        {/* From Vilde's oblig3: show login button instead of disabled form */}
         {isLoggedIn ? (
           <button type="submit" className="create-game-submit" disabled={isSubmitting}>
             {isSubmitting ? "Creating..." : "Create game"}

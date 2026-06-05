@@ -1,5 +1,3 @@
-// Worked on by: marte kaland
-
 import "./PokerDie.js";
 
 class GameBoard extends HTMLElement {

@@ -429,7 +429,6 @@ async function doEndTurn(match, userId, io) {
         const K = 32;
         const users = await Promise.all(match.players.map((p) => User.findById(p.userId)));
 
-        // Run ELO for each pair — winner of pair is whoever ended with more points
         for (let i = 0; i < match.players.length; i++) {
           for (let j = i + 1; j < match.players.length; j++) {
             if (!users[i] || !users[j]) continue;

@@ -1,6 +1,3 @@
-// Worked on by: marte kaland
-// Contains code from Joakim's oblig3 (filter logic structure for rounds/straights/time, select controls with "all" option)
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Lobby.css";
